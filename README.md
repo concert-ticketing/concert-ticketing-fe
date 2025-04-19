@@ -60,5 +60,5 @@ Next.js 앱을 배포하는 가장 쉬운 방법은 Next.js를 만든 [Vercel �
 
 ## 기타 참고자료
 
-[다양한 무료 아이콘 사이트](https://icon-sets.iconify.design/)
-[티켓링크, 벤치마킹 사이트](https://www.ticketlink.co.kr/global/en/home)
+- [다양한 무료 아이콘 사이트](https://icon-sets.iconify.design/)
+- [티켓링크, 벤치마킹 사이트](https://www.ticketlink.co.kr/global/en/home)
