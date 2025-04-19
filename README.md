@@ -57,3 +57,8 @@ Next.js에 대해 더 알아보려면 다음 자료를 참고하세요:
 Next.js 앱을 배포하는 가장 쉬운 방법은 Next.js를 만든 [Vercel 플랫폼](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)을 사용하는 것입니다.
 
 [Next.js 배포 문서](https://nextjs.org/docs/pages/building-your-application/deploying)에서 더 자세한 내용을 확인할 수 있습니다.
+
+## 기타 참고자료
+
+[다양한 무료 아이콘 사이트](https://icon-sets.iconify.design/)
+[티켓링크, 벤치마킹 사이트](https://www.ticketlink.co.kr/global/en/home)
