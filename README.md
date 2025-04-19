@@ -4,13 +4,13 @@
 
 ## 프로젝트 개요
 
-이 프로젝트는 콘서트 공연장의 티켓팅을 도와주는 웹 플랫폼으로, 다음과 같은 기술 스택을 사용합니다
+이 프로젝트는 콘서트 공연장의 티켓팅을 도와주는 웹 플랫폼으로, 사용자에 따라서 예매를 하거나 공연장 좌석 배치를 직접 편집할 수 있는 기능을 제공하며, 다음과 같은 기술 스택을 사용합니다
 
-- **Next.js** (Page Router) - 기본적으로 정적 사이트 생성(SSG)을 사용하며, 필요 시 `getServerSideProps`를 통해 서버 사이드 렌더링(SSR) 구현 가능
-- **TypeScript** - Javascript 기반의 type을 사용한 안전한 언어 사용
-- **Tailwind CSS** - 모던하고 반응형 디자인
+- **Next.js** (Page Router) - React의 프레임워크로, 기본적으로 정적 사이트 생성(SSG)을 사용하며, 필요 시 `getServerSideProps`를 통해 서버 사이드 렌더링(SSR) 구현 가능
+- **TypeScript** - Javascript 기반의 type을 사용한 안전한 언어
+- **Tailwind CSS** - 모던한 반응형 디자인
 
-## 시작하기
+## 개발 시작하기
 
 먼저, Yarn을 사용하여 의존성을 설치합니다:
 
@@ -22,7 +22,7 @@
 ```bash
   git pull origin main
 ```
-마지막으로 next.js 서버를 실행
+마지막으로 next.js 로컬 서버를 실행
 ```bash
   yarn dev
 ```
