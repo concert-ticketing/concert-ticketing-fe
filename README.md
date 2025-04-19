@@ -14,6 +14,19 @@
 
 먼저, Yarn을 사용하여 의존성을 설치합니다:
 
+```bash
+  yarn
+```
+
+그리고 `main` branch에서 pull을 받아오세요.
+```bash
+  git pull origin main
+```
+마지막으로 next.js 서버를 실행
+```bash
+  yarn dev
+```
+
 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인하세요.
 
 ## 페이지 수정
