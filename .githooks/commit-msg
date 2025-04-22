@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# 정규 표현식을 사용하여 커밋 메시지 형식 검사
+HEADER_REGEX='^(#[0-9]+ )?[a-zA-Z]+ : .+$'
+
+# 현재 커밋 메시지 파일 (.git/COMMIT_EDITMSG)에서 읽어와 검사
+COMMIT_MSG_FILE="$1"
+
+# 커밋 메시지 파일 내용을 읽어와서 변수에 저장
+commit_msg=$(cat "$COMMIT_MSG_FILE")
+
+# 헤더, 본문, 푸터 분리
+header=$(echo "$commit_msg" | head -n 1)
+body=$(echo "$commit_msg" | tail -n +2 | head -n -1)
+footer=$(echo "$commit_msg" | tail -n 1)
+
+# 헤더 검사
+echo "검사 중인 커밋 메시지 파일: $COMMIT_MSG_FILE"
+echo "읽은 커밋 메시지 헤더: $header"
+if ! echo "$header" | grep -qE "$HEADER_REGEX"; then
+    echo >&2 "커밋 메시지 형식이 올바르지 않습니다. 다음 형식으로 입력하세요: '[#번호] 명령구분 : 작업명'"
+    exit 1
+fi
+
+# 본문 검사 (필요에 따라 조건 추가 가능)
+echo "읽은 커밋 메시지 본문: $body"
+
+# 푸터 검사 (필요에 따라 조건 추가 가능)
+echo "읽은 커밋 메시지 푸터: $footer"
+
+exit 0
