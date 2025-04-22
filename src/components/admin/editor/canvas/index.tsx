@@ -27,7 +27,7 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
 
   const seatWidth = 60;
   const seatHeight = 60;
-  const gridSize = 10; // 격자 크기 (픽셀 단위)
+  const gridSize = 5; // 격자 크기 (픽셀 단위)
 
   // 이미지 로드
   useEffect(() => {
@@ -151,7 +151,6 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
       ctx.save();
       ctx.translate(seat.x + seat.width / 2, seat.y + seat.height / 2);
       ctx.rotate((seat.rotation * Math.PI) / 180);
-      ctx.scale(seat.scale, seat.scale);
       ctx.translate(-seat.width / 2, -seat.height / 2);
 
       // 좌석 그리기
@@ -311,7 +310,6 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
         y: snapped.y,
         width: seatWidth,
         height: seatHeight,
-        scale: 1,
         rotation: 0,
       };
 
@@ -353,8 +351,54 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
     // Ctrl 키가 눌린 상태라면 복사 모드 활성화
     if (e.ctrlKey) {
       setIsCopyMode(true);
+
+      // 클릭한 위치에 가장 가까운 좌석 찾기
+      const closestSeat = seats.reduce<{ seat: Seat | null; distance: number }>(
+        (closest, seat) => {
+          const distance = Math.sqrt(
+            Math.pow(seat.x - x, 2) + Math.pow(seat.y - y, 2)
+          );
+          return distance < closest.distance ? { seat, distance } : closest;
+        },
+        { seat: null, distance: Infinity }
+      ).seat;
+
+      if (closestSeat) {
+        // 복사할 좌석 생성 (모든 속성 복사)
+        const newSeat: Seat = {
+          ...closestSeat,
+          id: `S${seats.length + 1}`, // 새로운 ID 부여
+          x: x - closestSeat.width / 2, // 클릭 위치를 중심으로 배치
+          y: y - closestSeat.height / 2,
+        };
+
+        // 충돌 검사 및 위치 조정
+        const adjustedSeat = { ...newSeat };
+        let attempts = 0;
+        const maxAttempts = 10;
+        const offsetStep = 20;
+
+        while (isSeatOverlapping(adjustedSeat) && attempts < maxAttempts) {
+          adjustedSeat.x += offsetStep;
+          if (adjustedSeat.x > canvasRef.current!.width - adjustedSeat.width) {
+            adjustedSeat.x = gridSize;
+            adjustedSeat.y += offsetStep;
+          }
+          attempts++;
+        }
+
+        if (attempts < maxAttempts) {
+          setSeats((prev) => [...prev, adjustedSeat]);
+        } else {
+          alert(
+            "복사할 공간이 부족합니다. 좌석을 정리한 후 다시 시도해주세요."
+          );
+        }
+      }
+      return;
     }
 
+    // 기존 드래그 로직
     for (const seat of seats) {
       if (
         x >= seat.x &&
@@ -362,26 +406,7 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
         y >= seat.y &&
         y <= seat.y + seat.height
       ) {
-        if (isCopyMode) {
-          // 복사 모드: 새로운 좌석 생성
-          const newSeat: Seat = {
-            ...seat,
-            id: `S${seats.length + 1}`,
-            x: seat.x + 10, // 원본과 약간 떨어진 위치에 복사
-            y: seat.y + 10,
-          };
-
-          // 충돌 검사
-          if (!isSeatOverlapping(newSeat)) {
-            setSeats((prev) => [...prev, newSeat]);
-            setDraggingSeatId(newSeat.id);
-          } else {
-            alert("좌석이 겹칩니다. 다른 위치를 선택해 주세요.");
-          }
-        } else {
-          // 일반 모드: 기존 좌석 드래그
-          setDraggingSeatId(seat.id);
-        }
+        setDraggingSeatId(seat.id);
         setOffset({ x: x - seat.x, y: y - seat.y });
         return;
       }
@@ -503,11 +528,11 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
   return (
     <canvas
       ref={canvasRef}
-      width={800}
+      width={1200}
       height={600}
       style={{
         border: "1px solid #ccc",
-        cursor: isCopyMode ? "copy" : "pointer",
+        cursor: isCopyMode ? "copy" : draggingSeatId ? "grabbing" : "pointer",
       }}
       onClick={handleCanvasClick}
       onMouseDown={handleMouseDown}
