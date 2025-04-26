@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Seat } from "@/types/Seat";
 
-import SeatingCanvas from "@/components/admin/editor/SeatingCanvas";
+import Canvas from "@/components/admin/editor/canvas";
 import ControlPanel from "@/components/admin/editor/ControlPanel";
 import SeatingTable from "@/components/admin/editor/SeatingTable";
 
@@ -33,15 +33,15 @@ export default function SeatingEditor() {
   };
 
   return (
-    <div style={{ width: "100%", textAlign: "center" }}>
+    <div className="w-full text-center">
       <h1>좌석 배치 에디터</h1>
       <ControlPanel
         onClear={handleClearAll}
         onSave={handleSave}
         onLoad={handleOnLoad}
       />
-      <SeatingCanvas seats={seats} setSeats={setSeats} />
-      <SeatingTable seats={seats} />
+      <Canvas seats={seats} setSeats={setSeats} />
+      <SeatingTable seats={seats} setSeats={setSeats} />
     </div>
   );
 }

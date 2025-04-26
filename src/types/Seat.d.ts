@@ -4,6 +4,5 @@ export interface Seat {
   y: number;
   width: number;
   height: number;
-  scale: number;
   rotation: number;
 }
