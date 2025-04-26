@@ -8,7 +8,7 @@
 
 - **Next.js** (Page Router) - React의 프레임워크로, 기본적으로 정적 사이트 생성(SSG)을 사용하며, 필요 시 `getServerSideProps`를 통해 서버 사이드 렌더링(SSR) 구현 가능
 - **TypeScript** - Javascript 기반의 type을 사용한 안전한 언어
-- **Tailwind CSS** - 모던한 반응형 디자인
+- **Tailwind CSS** - 모던한 반응형 디자인 (사용 철회, css module 방식 도입)
 
 ## 개발 시작하기
 
