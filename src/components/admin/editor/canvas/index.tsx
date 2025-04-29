@@ -2,20 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Seat } from "@/types/Seat";
 import CanvasRender from "./CanvasRender";
 
-interface Props {
-  onSvgPathsChange: (paths: string[]) => void;
-}
-
 interface SeatingCanvasProps {
   seats: Seat[];
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
 }
 
-export default function SeatingCanvas({
-  seats,
-  setSeats,
-  onSvgPathsChange,
-}: SeatingCanvasProps & Props) {
+export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null); // 캔버스 DOM 요소 참조
   const [draggingSeatId, setDraggingSeatId] = useState<string | null>(null); // 현재 드래그 중인 좌석 ID
   const [offset, setOffset] = useState({ x: 0, y: 0 }); // 드래그 시작 위치와 좌석 위치 간의 오프셋
@@ -26,63 +18,10 @@ export default function SeatingCanvas({
   const [isCopyMode, setIsCopyMode] = useState(false); // Ctrl 키 누른 상태(복사 모드) 여부
   const [x, setX] = useState(0); // 마우스 현재 X 좌표
   const [y, setY] = useState(0); // 마우스 현재 Y 좌표
-  const [tempCopySeat, setTempCopySeat] = useState<Seat | null>(null); // 복사한 개체
+  const [tempCopySeat, setTempCopySeat] = useState<Seat | null>(null); // 복사한 개채
   const [history, setHistory] = useState<Seat[][]>([seats]); // 되돌리기 기능을 위한 히스토리
   const [historyIndex, setHistoryIndex] = useState(0); // 히스토리 카운트
   const [gridSize, setGridSize] = useState<number>(10); // 격자 크기
-  const [svgPaths, setSvgPaths] = useState<string[]>([]);
-
-  // Handle file upload
-  const handleFileUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("/api/uploadConvert", {
-        method: "POST",
-        body: formData,
-      });
-      const { svg } = await response.json();
-
-      // Parse SVG and extract paths
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(svg, "image/svg+xml");
-      const paths = Array.from(doc.querySelectorAll("path")).map(
-        (path) => path.getAttribute("d") || ""
-      );
-
-      setSvgPaths(paths);
-      onSvgPathsChange(paths); // Notify parent component
-    } catch (error) {
-      console.error("Failed to upload and convert image:", error);
-    }
-  };
-
-  // Draw SVG paths on canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw SVG paths
-    ctx.save();
-    ctx.translate(0, 0);
-    ctx.scale(1, 1);
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-
-    svgPaths.forEach((path) => {
-      const path2D = new Path2D(path);
-      ctx.stroke(path2D);
-    });
-
-    ctx.restore();
-  }, [svgPaths]);
 
   // 새로운 좌석 추가 핸들러
   const [isAddingMode, setIsAddingMode] = useState<boolean>(false);
@@ -116,11 +55,6 @@ export default function SeatingCanvas({
       setResizingSeatId(null);
     }
   };
-
-  // CanvasRender 컴포넌트의 onAddSeat prop을 통해 호출됨
-  // CanvasRender 내의 버튼 클릭시 활성화되어
-  // 마우스가 캔버스 위에서 + 커서로 변경되고
-  // 클릭 후 드래그하여 좌석 크기를 조정할 수 있음
 
   // 좌석을 격자에 맞춰 정렬
   const snapToGrid = (x: number, y: number): { x: number; y: number } => {
@@ -450,14 +384,6 @@ export default function SeatingCanvas({
           ))}
         </select>
       </div>
-      <input
-        type="file"
-        accept="image/png"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleFileUpload(file);
-        }}
-      />
       <canvas
         ref={canvasRef}
         width={1200}
@@ -486,7 +412,6 @@ export default function SeatingCanvas({
         gridSize={gridSize}
         tempCopySeat={tempCopySeat}
         onAddSeat={handleAddSeat}
-        svgPaths={svgPaths}
       />
     </div>
   );
