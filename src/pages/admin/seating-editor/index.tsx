@@ -8,6 +8,8 @@ import SeatingTable from "@/components/admin/editor/SeatingTable";
 
 export default function SeatingEditor() {
   const [seats, setSeats] = useState<Seat[]>([]);
+  const [, setSvgPaths] = useState<string[]>([]);
+
   const handleOnLoad = () => {
     const savedSeats = sessionStorage.getItem("seats");
     if (savedSeats) {
@@ -32,6 +34,11 @@ export default function SeatingEditor() {
     }
   };
 
+  // SVG Paths를 초기화하는 함수
+  const handleClearSvgPaths = () => {
+    setSvgPaths([]);
+  };
+
   return (
     <div className="w-full text-center">
       <h1>좌석 배치 에디터</h1>
@@ -39,8 +46,13 @@ export default function SeatingEditor() {
         onClear={handleClearAll}
         onSave={handleSave}
         onLoad={handleOnLoad}
+        onClearSvgPaths={handleClearSvgPaths}
       />
-      <Canvas seats={seats} setSeats={setSeats} />
+      <Canvas
+        seats={seats}
+        setSeats={setSeats}
+        onSvgPathsChange={setSvgPaths}
+      />
       <SeatingTable seats={seats} setSeats={setSeats} />
     </div>
   );

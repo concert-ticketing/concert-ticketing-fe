@@ -1,13 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { Seat } from "@/types/Seat";
-import CanvasRender from "./ConvasRender";
+import CanvasRender from "./CanvasRender";
+
+interface Props {
+  onSvgPathsChange: (paths: string[]) => void;
+}
 
 interface SeatingCanvasProps {
   seats: Seat[];
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
 }
 
-export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
+export default function SeatingCanvas({
+  seats,
+  setSeats,
+  onSvgPathsChange,
+}: SeatingCanvasProps & Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null); // 캔버스 DOM 요소 참조
   const [draggingSeatId, setDraggingSeatId] = useState<string | null>(null); // 현재 드래그 중인 좌석 ID
   const [offset, setOffset] = useState({ x: 0, y: 0 }); // 드래그 시작 위치와 좌석 위치 간의 오프셋
@@ -18,15 +26,103 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
   const [isCopyMode, setIsCopyMode] = useState(false); // Ctrl 키 누른 상태(복사 모드) 여부
   const [x, setX] = useState(0); // 마우스 현재 X 좌표
   const [y, setY] = useState(0); // 마우스 현재 Y 좌표
-  const [tempCopySeat, setTempCopySeat] = useState<Seat | null>(null);
-  const [history, setHistory] = useState<Seat[][]>([seats]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  const [tempCopySeat, setTempCopySeat] = useState<Seat | null>(null); // 복사한 개체
+  const [history, setHistory] = useState<Seat[][]>([seats]); // 되돌리기 기능을 위한 히스토리
+  const [historyIndex, setHistoryIndex] = useState(0); // 히스토리 카운트
+  const [gridSize, setGridSize] = useState<number>(10); // 격자 크기
+  const [svgPaths, setSvgPaths] = useState<string[]>([]);
 
-  const seatWidth = 60;
-  const seatHeight = 60;
-  const gridSize = 5; // 격자 크기
+  // Handle file upload
+  const handleFileUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  // 좌석을 격자에 맞춰 정렬하는 함수
+    try {
+      const response = await fetch("/api/uploadConvert", {
+        method: "POST",
+        body: formData,
+      });
+      const { svg } = await response.json();
+
+      // Parse SVG and extract paths
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svg, "image/svg+xml");
+      const paths = Array.from(doc.querySelectorAll("path")).map(
+        (path) => path.getAttribute("d") || ""
+      );
+
+      setSvgPaths(paths);
+      onSvgPathsChange(paths); // Notify parent component
+    } catch (error) {
+      console.error("Failed to upload and convert image:", error);
+    }
+  };
+
+  // Draw SVG paths on canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw SVG paths
+    ctx.save();
+    ctx.translate(0, 0);
+    ctx.scale(1, 1);
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+
+    svgPaths.forEach((path) => {
+      const path2D = new Path2D(path);
+      ctx.stroke(path2D);
+    });
+
+    ctx.restore();
+  }, [svgPaths]);
+
+  // 새로운 좌석 추가 핸들러
+  const [isAddingMode, setIsAddingMode] = useState<boolean>(false);
+  const [tempNewSeat, setTempNewSeat] = useState<Seat | null>(null);
+
+  const handleAddSeat = () => {
+    setIsAddingMode(true);
+
+    // 임시 좌석을 마우스 위치에 생성
+    const newSeatId = `S${seats.length + 1}`;
+    setTempNewSeat({
+      id: newSeatId,
+      x: x,
+      y: y,
+      width: 60, // 초기 크기는 작게 설정
+      height: 60,
+      rotation: 0,
+    });
+
+    // 리사이징 모드로 설정
+    setResizingSeatId(newSeatId);
+  };
+
+  // 좌석 추가 모드에서 마우스 클릭 처리
+  const handleAddModeClick = () => {
+    if (tempNewSeat && isAddingMode) {
+      // 좌석 추가
+      setSeats((prev) => [...prev, tempNewSeat]);
+      setTempNewSeat(null);
+      setIsAddingMode(false);
+      setResizingSeatId(null);
+    }
+  };
+
+  // CanvasRender 컴포넌트의 onAddSeat prop을 통해 호출됨
+  // CanvasRender 내의 버튼 클릭시 활성화되어
+  // 마우스가 캔버스 위에서 + 커서로 변경되고
+  // 클릭 후 드래그하여 좌석 크기를 조정할 수 있음
+
+  // 좌석을 격자에 맞춰 정렬
   const snapToGrid = (x: number, y: number): { x: number; y: number } => {
     return {
       x: Math.round(x / gridSize) * gridSize,
@@ -37,6 +133,11 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
   const handleCanvasClick = (e: React.MouseEvent) => {
     // tempCopySeat가 있을 때는 클릭 기능을 비활성화
     if (isCopyMode || tempCopySeat) return;
+
+    if (isAddingMode) {
+      handleAddModeClick();
+      return;
+    }
 
     if (isDragging || resizingSeatId || rotatingSeatId) {
       setIsDragging(false);
@@ -113,21 +214,6 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
         // 우하단: 크기 조정 모드
         setResizingSeatId(clickedSeat.id);
       }
-    } else if (!isCopyMode) {
-      // 복사 모드가 아닐 때만 새로운 좌석 생성
-      // 격자에 맞춰 정렬
-      const snapped = snapToGrid(x - seatWidth / 2, y - seatHeight / 2);
-      const newSeat: Seat = {
-        id: `S${seats.length + 1}`,
-        x: snapped.x,
-        y: snapped.y,
-        width: seatWidth,
-        height: seatHeight,
-        rotation: 0,
-      };
-
-      // 충돌 검사 로직 제거
-      setSeats((prev) => [...prev, newSeat]);
     }
   };
 
@@ -243,12 +329,20 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
       if (seat) {
         let newWidth = Math.max(20, mouseX - seat.x);
         let newHeight = Math.max(20, mouseY - seat.y);
+
         // Shift 키가 눌린 상태라면 가로와 세로 길이를 동일하게 조정
         if (e.shiftKey) {
           const maxSize = Math.max(newWidth, newHeight);
           newWidth = maxSize;
           newHeight = maxSize;
+
+          // Shift와 Alt 키를 동시에 누른 경우 격자 크기에 맞게 조정
+          if (e.altKey) {
+            newWidth = Math.round(newWidth / gridSize) * gridSize;
+            newHeight = Math.round(newHeight / gridSize) * gridSize;
+          }
         }
+
         setSeats((prev) =>
           prev.map((s) =>
             s.id === resizingSeatId
@@ -287,11 +381,7 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
         ...tempCopySeat,
         id: `S${seats.length + 1}`,
       };
-
-      // 충돌 검사 로직 제거
       setSeats((prev) => [...prev, newSeat]);
-
-      // 임시 복사본 초기화
       setTempCopySeat(null);
     }
 
@@ -344,38 +434,43 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [history, historyIndex, setSeats]);
 
-  // 새로운 좌석 추가 핸들러
-  const handleAddSeat = () => {
-    // 캔버스 중앙에 좌석 생성
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const centerX = canvas.width / 2 - seatWidth / 2;
-    const centerY = canvas.height / 2 - seatHeight / 2;
-
-    const snapped = snapToGrid(centerX, centerY);
-    const newSeat: Seat = {
-      id: `S${seats.length + 1}`,
-      x: snapped.x,
-      y: snapped.y,
-      width: seatWidth,
-      height: seatHeight,
-      rotation: 0,
-    };
-
-    // 좌석 추가
-    setSeats((prev) => [...prev, newSeat]);
-  };
-
   return (
     <div style={{ position: "relative" }}>
+      <div>
+        <label style={{ fontSize: "14px" }}>격자 크기</label>
+        <select
+          value={gridSize}
+          onChange={(e) => setGridSize(Number(e.target.value))}
+          style={{ margin: "10px" }}
+        >
+          {[5, 10, 15, 20, 25].map((n) => (
+            <option key={n} value={n}>
+              {n}px
+            </option>
+          ))}
+        </select>
+      </div>
+      <input
+        type="file"
+        accept="image/png"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFileUpload(file);
+        }}
+      />
       <canvas
         ref={canvasRef}
         width={1200}
         height={600}
         style={{
           border: "1px solid #ccc",
-          cursor: isCopyMode ? "copy" : draggingSeatId ? "grabbing" : "pointer",
+          cursor: isCopyMode
+            ? "copy"
+            : isAddingMode
+            ? "crosshair"
+            : draggingSeatId
+            ? "grabbing"
+            : "pointer",
         }}
         onClick={handleCanvasClick}
         onMouseDown={handleMouseDown}
@@ -391,6 +486,7 @@ export default function SeatingCanvas({ seats, setSeats }: SeatingCanvasProps) {
         gridSize={gridSize}
         tempCopySeat={tempCopySeat}
         onAddSeat={handleAddSeat}
+        svgPaths={svgPaths}
       />
     </div>
   );

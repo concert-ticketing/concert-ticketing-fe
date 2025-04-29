@@ -10,14 +10,22 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "@techstark/opencv-js": "^4.10.0-release.1",
+    "@types/formidable": "^3.4.5",
+    "axios": "^1.9.0",
+    "formidable": "^3.5.4",
     "next": "15.3.0",
+    "opencv.js": "^1.2.1",
+    "potrace": "^2.1.8",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sharp": "^0.34.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.4",
     "@types/node": "^20",
+    "@types/potrace": "^2.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",

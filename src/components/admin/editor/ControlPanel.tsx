@@ -4,12 +4,14 @@ interface ControlPanelProps {
   onClear: () => void;
   onSave: () => void;
   onLoad: () => void;
+  onClearSvgPaths: () => void;
 }
 
 export default function ControlPanel({
   onClear,
   onSave,
   onLoad,
+  onClearSvgPaths,
 }: ControlPanelProps) {
   return (
     <div className="mb-[10px] flex justify-center gap-[5px]">
@@ -51,6 +53,12 @@ export default function ControlPanel({
         onClick={onSave}
       >
         저장하기
+      </button>
+      <button
+        className="rounded bg-yellow-500 px-4 py-2 text-white"
+        onClick={onClearSvgPaths} // SVG Paths 초기화 버튼 추가
+      >
+        SVG 초기화
       </button>
     </div>
   );

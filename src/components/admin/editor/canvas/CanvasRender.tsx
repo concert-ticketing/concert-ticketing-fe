@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Seat } from "@/types/Seat";
 
-interface SeatCanvasRendererProps {
+interface CanvasRenderProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   seats: Seat[];
   tempCopySeat: Seat | null;
@@ -9,7 +9,8 @@ interface SeatCanvasRendererProps {
   x: number;
   y: number;
   gridSize: number;
-  onAddSeat: () => void; // 새로운 좌석 추가 핸들러
+  onAddSeat: () => void;
+  svgPaths: string[];
 }
 
 export default function CanvasRender({
@@ -20,8 +21,9 @@ export default function CanvasRender({
   x,
   y,
   gridSize,
-  onAddSeat, // 새로운 좌석 추가 핸들러
-}: SeatCanvasRendererProps) {
+  onAddSeat,
+  svgPaths,
+}: CanvasRenderProps) {
   // 이미지 상태
   const [iconsLoaded, setIconsLoaded] = useState(false);
   const [rotateIcon, setRotateIcon] = useState<HTMLImageElement | null>(null);
@@ -85,6 +87,20 @@ export default function CanvasRender({
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
+
+    // Draw SVG paths
+    ctx.save();
+    ctx.translate(0, 0);
+    ctx.scale(1, 1);
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+
+    svgPaths.forEach((path) => {
+      const path2D = new Path2D(path);
+      ctx.stroke(path2D);
+    });
+
+    ctx.restore();
 
     // 좌석 그리기
     seats.forEach((seat) => {
@@ -210,6 +226,7 @@ export default function CanvasRender({
     resizeIcon,
     renameIcon,
     gridSize,
+    svgPaths,
   ]);
 
   return (
