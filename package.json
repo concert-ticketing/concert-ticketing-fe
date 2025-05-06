@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "@types/fabric": "^5.3.10",
+    "fabric": "^6.6.4",
     "next": "15.3.0",
+    "potrace": "^2.1.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

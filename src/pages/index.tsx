@@ -4,6 +4,7 @@ export default function Home() {
   return (
     <>
       <Link href="/admin/seating-editor">좌석 선택</Link>
+      <Link href="/admin/fabric">fabric component</Link>
     </>
   );
 }
