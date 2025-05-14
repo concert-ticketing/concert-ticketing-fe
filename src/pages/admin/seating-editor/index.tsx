@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Seat } from "@/types/Seat";
 
 import Canvas from "@/components/admin/editor/canvas";
-import ControlPanel from "@/components/admin/editor/ControlPanel";
-import SeatingTable from "@/components/admin/editor/SeatingTable";
+import ControlPanel from "@/components/admin/editor/canvas/ControlPanel";
+import SeatingTable from "@/components/admin/editor/canvas/SeatingTable";
 
 export default function SeatingEditor() {
   const [seats, setSeats] = useState<Seat[]>([]);

@@ -9,10 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.4",
-    "@tensorflow-models/deeplab": "^0.2.2",
-    "@tensorflow/tfjs": "^4.22.0",
-    "@types/fabric": "^5.3.10",
     "fabric": "^6.6.4",
     "next": "15.3.0",
     "potrace": "^2.1.8",
@@ -21,7 +17,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4.1.4",
+    "@types/fabric": "^5.3.10",
     "@types/node": "^20",
     "@types/potrace": "^2.1.5",
     "@types/react": "^19",
@@ -29,8 +25,6 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.4",
     "typescript": "^5"
   }
 }

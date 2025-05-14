@@ -1,66 +1,130 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import { PNG2SVG } from "@/utils/pngToSvg";
 
-const SeatDetectorFabric = () => {
-  const canvasRef = useRef<fabric.Canvas | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+import styles from "./style.module.css";
 
-  const initializeCanvas = () => {
-    canvasRef.current = new fabric.Canvas("canvas", {
-      width: 800,
-      height: 600,
-    });
-  };
+import Toolbar from "./Toolbar";
+import Settings from "./Settings";
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImageFile(file);
-
-    if (file.type === "image/png") {
-      const svgElement = await PNG2SVG(file); // PNG를 SVG로 변환
-      console.log(svgElement);
-      const svgString = new XMLSerializer().serializeToString(svgElement);
-      fabric.loadSVGFromString(svgString, (objects, options) => {
-        const svg = fabric.util.groupSVGElements(
-          objects,
-          options
-        ) as fabric.Object;
-        canvasRef.current?.add(svg);
-      });
-    } else if (file.type === "image/svg+xml") {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const svgData = e.target?.result as string;
-        fabric.loadSVGFromString(svgData, (objects, options) => {
-          const svg = fabric.util.groupSVGElements(
-            objects,
-            options
-          ) as fabric.Object;
-          canvasRef.current?.add(svg);
-        });
-      };
-      reader.readAsText(file);
-    }
-  };
+export default function FabricEditor() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [canvas, setCanvas] = useState<
+    HTMLCanvasElement | fabric.Canvas | null
+  >(null);
+  const selectedToolRef = useRef<"rect" | "circle" | "text" | null>(null);
+  const [selectedTool, setSelectedTool] = useState<
+    "rect" | "circle" | "text" | null
+  >(null);
 
   useEffect(() => {
-    initializeCanvas();
+    if (!canvasRef.current) return;
+
+    const canvasElement = canvasRef.current as HTMLCanvasElement;
+
+    const initCanvas = new fabric.Canvas(canvasElement, {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+    initCanvas.backgroundColor = "#f1f1f1";
+    initCanvas.renderAll();
+
+    setCanvas(initCanvas);
+
+    const handleMouseDown = (opt: { pointer: { x: number; y: number } }) => {
+      const tool = selectedToolRef.current;
+
+      if (!tool || !opt) return;
+
+      const { x, y } = opt.pointer;
+
+      switch (tool) {
+        case "rect":
+          addRectangle(x, y);
+          break;
+        case "circle":
+          addCircle(x, y);
+          break;
+        case "text":
+          addText(x, y);
+          break;
+      }
+    };
+
+    initCanvas.on("mouse:down", handleMouseDown);
+
+    const handleResize = () => {
+      initCanvas.setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      initCanvas.off("mouse:down", handleMouseDown);
+      initCanvas.dispose();
+      canvasRef.current = null;
+    };
   }, []);
 
+  useEffect(() => {
+    // selectedTool을 ref에도 항상 최신화
+    selectedToolRef.current = selectedTool;
+  }, [selectedTool]);
+
+  const addRectangle = (x: number, y: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !(canvas instanceof fabric.Canvas)) return;
+
+    const rect = new fabric.Rect({
+      left: x,
+      top: y,
+      width: 60,
+      height: 60,
+      fill: "#4CAF50",
+      stroke: "#333",
+      strokeWidth: 0,
+      selectable: true,
+    });
+    canvas.add(rect);
+  };
+
+  const addCircle = (x: number, y: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !(canvas instanceof fabric.Canvas)) return;
+
+    const circle = new fabric.Circle({
+      left: x,
+      top: y,
+      radius: 30,
+      fill: "#2196F3",
+      stroke: "#333",
+      strokeWidth: 0,
+      selectable: true,
+    });
+    canvas.add(circle);
+  };
+
+  const addText = (x: number, y: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !(canvas instanceof fabric.Canvas)) return;
+
+    const text = new fabric.Text("텍스트 입력", {
+      left: x,
+      top: y,
+      fontSize: 20,
+      fill: "#000",
+      selectable: true,
+    });
+    canvas.add(text);
+  };
+
   return (
-    <div>
-      <input type="file" accept=".png,.svg" onChange={handleFileUpload} />
-      <canvas
-        id="canvas"
-        style={{ border: "1px solid", borderRadius: "5px", marginTop: "10px" }}
-      />
+    <div className={styles.canvas}>
+      <Toolbar setSelectedTool={setSelectedTool} />
+      <canvas ref={canvasRef} />
+      {canvas && <Settings canvas={canvas} />}
     </div>
   );
-};
-
-export default SeatDetectorFabric;
+}
