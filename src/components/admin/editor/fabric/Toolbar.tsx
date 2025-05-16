@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import styles from "./styles.module.css";
-import { circleIcon, squareIcon, textIcon } from "@public/icons";
+import { circleIcon, pointerIcon, squareIcon, textIcon } from "@public/icons";
 
 interface ToolbarProps {
   setSelectedTool: (tool: "rect" | "circle" | "text" | null) => void;
@@ -20,7 +20,7 @@ export default function Toolbar({ setSelectedTool }: ToolbarProps) {
         <Image src={textIcon} alt="text icon" />
       </button>
       <button onClick={() => setSelectedTool(null)}>
-        <Image src={textIcon} alt="pointer icon" />
+        <Image src={pointerIcon} alt="pointer icon" />
       </button>
     </div>
   );

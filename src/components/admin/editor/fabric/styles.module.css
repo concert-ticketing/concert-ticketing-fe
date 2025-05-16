@@ -1,5 +1,6 @@
 .canvas {
-  position: initial !important;
+  position: relative !important;
+  z-index: 1;
 }
 
 .toolbar {
@@ -13,7 +14,7 @@
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #000;
-  background-color: #b9deff;
+  background-color: #9dcffa;
   z-index: 2;
 }
 
@@ -26,61 +27,26 @@
   align-items: center;
   cursor: pointer;
   transition: 0.5s;
+  background: #537d8a;
 }
 
 .toolbar button:hover {
   background-color: #b9deff;
 }
 
-.textModal {
+.settings {
   position: fixed;
+  right: 10px;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-}
-
-.textModalBackdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
-.textInput {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 16px;
-}
-
-.textModalButtons {
-  display: flex;
-  justify-content: flex-end;
+  transform: translateY(-50%);
   gap: 8px;
-}
-
-.textModalButton {
-  padding: 8px 16px;
-  border: none;
+  display: flex;
+  flex-direction: column;
+  background-color: #9dcffa;
+  padding: 24px 8px;
   border-radius: 4px;
-  cursor: pointer;
-}
-
-.textModalButton.confirm {
-  background: #4caf50;
-  color: white;
-}
-
-.textModalButton.cancel {
-  background: #f44336;
-  color: white;
+  text-align: left;
+  &:empty {
+    padding: 0;
+  }
 }
