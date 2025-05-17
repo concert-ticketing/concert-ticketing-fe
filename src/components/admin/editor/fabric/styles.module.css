@@ -27,11 +27,16 @@
   align-items: center;
   cursor: pointer;
   transition: 0.5s;
-  background: #537d8a;
+  background-color: #537d8a;
 }
 
 .toolbar button:hover {
   background-color: #b9deff;
+}
+
+.active {
+  background-color: #2f32e4 !important;
+  border: 2px solid #000;
 }
 
 .settings {

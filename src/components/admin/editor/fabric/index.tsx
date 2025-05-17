@@ -133,17 +133,30 @@ export default function FabricEditor() {
         }
       };
 
+      const handleKeyDown = (event: KeyboardEvent) => {
+        const activeObject = canvas.getActiveObject();
+        if (
+          (event.key === "Delete" || event.key === "Backspace") &&
+          activeObject
+        ) {
+          canvas.remove(activeObject);
+          canvas.renderAll();
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
       canvas.on("mouse:down", handleMouseDown);
 
       return () => {
         canvas.off("mouse:down", handleMouseDown);
+        window.removeEventListener("keydown", handleKeyDown);
       };
     }
   }, [canvas, addRectangle, addCircle, addText]);
 
   return (
     <div className={styles.canvas}>
-      <Toolbar setSelectedTool={setSelectedTool} />
+      <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
       <canvas id="canvas" ref={canvasRef} />
       {canvas && !(canvas instanceof HTMLCanvasElement) && (
         <Settings canvas={canvas} />
