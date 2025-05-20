@@ -18,6 +18,7 @@ export default function FabricEditor() {
     selectedToolRef.current = selectedTool;
   }, [selectedTool]);
 
+  // 사각형 생성
   const addRectangle = useCallback(
     (x: number, y: number) => {
       if (canvas) {
@@ -26,9 +27,12 @@ export default function FabricEditor() {
           top: y,
           width: 60,
           height: 60,
-          fill: "#4CAF50",
-          stroke: "#333",
-          strokeWidth: 0,
+          fill: "#ffffff",
+          originX: "center",
+          originY: "center",
+          stroke: "#000000",
+          strokeWidth: 1,
+          strokeUniform: true,
           selectable: true,
         }) as fabric.Rect & { id: string };
         rect.id = `rect-${Date.now()}`;
@@ -40,6 +44,7 @@ export default function FabricEditor() {
     [canvas]
   );
 
+  // 원 생성
   const addCircle = useCallback(
     (x: number, y: number) => {
       if (canvas) {
@@ -47,9 +52,12 @@ export default function FabricEditor() {
           left: x,
           top: y,
           radius: 30,
-          fill: "#2196F3",
-          stroke: "#333",
-          strokeWidth: 0,
+          fill: "#ffffff",
+          originX: "center",
+          originY: "center",
+          stroke: "#000000",
+          strokeWidth: 1,
+          strokeUniform: true,
           selectable: true,
         }) as fabric.Circle & { id: string };
         circle.id = `circle-${Date.now()}`;
@@ -61,14 +69,15 @@ export default function FabricEditor() {
     [canvas]
   );
 
+  // 텍스트 생성
   const addText = useCallback(
     (x: number, y: number) => {
       if (canvas) {
-        const text = new fabric.Text("텍스트 입력", {
+        const text = new fabric.IText("텍스트 입력", {
           left: x,
           top: y,
           fontSize: 16,
-          fill: "#000",
+          fill: "#000000",
           selectable: true,
           editable: true,
           lockScalingX: true,
@@ -84,6 +93,7 @@ export default function FabricEditor() {
     [canvas]
   );
 
+  // 초기 캔버스 생성 및 리사이즈 핸들링
   useEffect(() => {
     if (canvasRef.current) {
       const initCanvas = new fabric.Canvas(canvasRef.current, {
@@ -112,9 +122,10 @@ export default function FabricEditor() {
     }
   }, []);
 
+  // 캔버스 도구 선택 및 이벤트 처리
   useEffect(() => {
     if (canvas) {
-      const handleMouseDown = (opt: any) => {
+      const handleMouseDown = (opt: fabric.TEvent) => {
         const pointer = canvas.getPointer(opt.e);
         if (!pointer) return;
 
@@ -133,14 +144,27 @@ export default function FabricEditor() {
         }
       };
 
+      // delete 키 누르면 객체 삭제
       const handleKeyDown = (event: KeyboardEvent) => {
-        const activeObject = canvas.getActiveObject();
-        if (
-          (event.key === "Delete" || event.key === "Backspace") &&
-          activeObject
-        ) {
-          canvas.remove(activeObject);
-          canvas.renderAll();
+        if (event.key === "Delete" && canvas) {
+          const activeObject = canvas.getActiveObject();
+
+          if (!activeObject) return;
+
+          if (activeObject.type === "activeSelection") {
+            // 다중 선택된 객체일 경우 모두 삭제
+            (activeObject as fabric.ActiveSelection)
+              .getObjects()
+              .forEach((obj) => {
+                canvas.remove(obj);
+              });
+          } else {
+            // 단일 객체 삭제
+            canvas.remove(activeObject);
+          }
+
+          canvas.discardActiveObject();
+          canvas.requestRenderAll();
         }
       };
 
@@ -157,7 +181,12 @@ export default function FabricEditor() {
   return (
     <div className={styles.canvas}>
       <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
-      <canvas id="canvas" ref={canvasRef} />
+      <canvas
+        id="canvas"
+        ref={canvasRef}
+        tabIndex={0}
+        onClick={() => canvasRef.current?.focus()}
+      />
       {canvas && !(canvas instanceof HTMLCanvasElement) && (
         <Settings canvas={canvas} />
       )}
