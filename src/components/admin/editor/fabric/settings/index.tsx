@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as fabric from "fabric";
-import styles from "./styles.module.css";
+import styles from "../canvas.module.css";
 import Image from "next/image";
 import { lockIcon, unlockIcon } from "@public/icons";
 
@@ -205,14 +205,14 @@ export default function Settings({ canvas }: SettingProps) {
         const group = selectedObject as fabric.Group;
         group._objects.forEach((obj) => {
           if (obj.type === "circle") {
-            obj.set({ radius: result });
+            obj.set({ radius: result / 2 });
           }
         });
         group.set({
           radius: result,
         });
       } else if (selectedObject.type === "circle") {
-        selectedObject.set({ radius: result });
+        selectedObject.set({ radius: result / 2 });
       }
       canvas.requestRenderAll();
     }

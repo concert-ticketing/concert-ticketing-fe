@@ -4,5 +4,14 @@ import squareIcon from "./square.svg";
 import textIcon from "./text.svg";
 import lockIcon from "./lock.svg";
 import unlockIcon from "./unlock.svg";
+import polygonIcon from "./polygon.svg";
 
-export { pointerIcon, circleIcon, squareIcon, textIcon, lockIcon, unlockIcon };
+export {
+  pointerIcon,
+  circleIcon,
+  squareIcon,
+  textIcon,
+  lockIcon,
+  unlockIcon,
+  polygonIcon,
+};

@@ -1,147 +1,28 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 
-import styles from "./styles.module.css";
+import styles from "./canvas.module.css";
 
-import Toolbar from "./Toolbar";
-import Settings from "./Settings";
+import Toolbar from "./settings/Toolbar";
+import Settings from "./settings";
+
+import { addRectangleFn } from "./settings/shapes/Rect";
+import { addCircleFn } from "./settings/shapes/Circle";
+import { addTextFn } from "./settings/shapes/Text";
 
 export default function FabricEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const selectedToolRef = useRef<"rect" | "circle" | "text" | "group" | null>(
-    null
-  );
+  const selectedToolRef = useRef<
+    "rect" | "circle" | "text" | "group" | "polygon" | null
+  >(null);
   const [selectedTool, setSelectedTool] = useState<
-    "rect" | "circle" | "text" | "group" | null
+    "rect" | "circle" | "text" | "group" | "polygon" | null
   >(null);
 
   useEffect(() => {
     selectedToolRef.current = selectedTool;
   }, [selectedTool]);
-
-  // 사각형 생성
-  const addRectangle = useCallback(
-    (x: number, y: number) => {
-      if (canvas) {
-        const rect = new fabric.Rect({
-          width: 60,
-          height: 60,
-          fill: "#ffffff",
-          strokeWidth: 1,
-          stroke: "#000000",
-          strokeUniform: true,
-          originX: "center",
-          originY: "center",
-        }) as fabric.Rect & { id: string };
-
-        const label = new fabric.IText("S1", {
-          fontSize: 16,
-          fill: "#000000",
-          originX: "center",
-          originY: "center",
-          editable: true,
-          selectable: true,
-          left: 0,
-          top: 0,
-        }) as fabric.FabricObject;
-
-        const group = new fabric.Group([rect, label], {
-          left: x,
-          top: y,
-          originX: "center",
-          originY: "center",
-          selectable: true,
-          stroke: "#000000",
-          strokeWidth: 1,
-          strokeUniform: true,
-          subTargetCheck: true,
-        }) as fabric.Group & { id: string };
-
-        group.id = `rect-${Date.now()}`;
-        canvas.add(group);
-        canvas.setActiveObject(group);
-        canvas.renderAll();
-        setSelectedTool(null);
-      }
-    },
-    [canvas]
-  );
-
-  // 원 생성
-  const addCircle = useCallback(
-    (x: number, y: number) => {
-      if (canvas) {
-        const circle = new fabric.Circle({
-          radius: 30,
-          fill: "#ffffff",
-          strokeWidth: 1,
-          stroke: "#000000",
-          strokeUniform: true, // strokeUniform 적용
-          originX: "center",
-          originY: "center",
-        }) as fabric.Circle & { id: string };
-
-        const label = new fabric.IText("S1", {
-          fontSize: 16,
-          fill: "#000000",
-          originX: "center",
-          originY: "center",
-          editable: true,
-          selectable: true,
-          left: 0,
-          top: 0,
-        }) as fabric.FabricObject;
-
-        const group = new fabric.Group([circle, label], {
-          left: x,
-          top: y,
-          originX: "center",
-          originY: "center",
-          selectable: true,
-          subTargetCheck: true,
-        }) as fabric.Group & { id: string };
-
-        // 그룹 내부의 객체에 strokeUniform 적용
-        group._objects.forEach((obj) => {
-          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
-            obj.set("strokeUniform", true);
-          }
-        });
-
-        group.id = `circle-${Date.now()}`;
-        canvas.add(group);
-        canvas.setActiveObject(group);
-        canvas.renderAll();
-        setSelectedTool(null);
-      }
-    },
-    [canvas]
-  );
-
-  // 텍스트 생성
-  const addText = useCallback(
-    (x: number, y: number) => {
-      if (canvas) {
-        const text = new fabric.IText("텍스트 입력", {
-          left: x,
-          top: y,
-          fontSize: 16,
-          fill: "#000000",
-          selectable: true,
-          editable: true,
-          lockScalingX: true,
-          lockScalingY: true,
-        }) as fabric.Text & { id: string };
-        text.id = `text-${Date.now()}`;
-        canvas.add(text);
-        canvas.setActiveObject(text);
-        canvas.renderAll();
-        setSelectedTool(null);
-      }
-    },
-    [canvas]
-  );
 
   // 초기 캔버스 생성 및 리사이즈 핸들링
   useEffect(() => {
@@ -183,13 +64,13 @@ export default function FabricEditor() {
 
         switch (selectedToolRef.current) {
           case "rect":
-            addRectangle(x, y);
+            addRectangleFn(canvas, x, y, setSelectedTool);
             break;
           case "circle":
-            addCircle(x, y);
+            addCircleFn(canvas, x, y, setSelectedTool);
             break;
           case "text":
-            addText(x, y);
+            addTextFn(canvas, x, y, "변수 string", setSelectedTool);
             break;
         }
       };
@@ -226,7 +107,7 @@ export default function FabricEditor() {
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [canvas, addRectangle, addCircle, addText]);
+  }, [canvas]);
 
   return (
     <div className={styles.canvas}>
