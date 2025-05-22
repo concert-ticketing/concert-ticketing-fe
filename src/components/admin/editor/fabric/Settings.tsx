@@ -53,14 +53,34 @@ export default function Settings({ canvas }: SettingProps) {
         }
         clearSettings();
       });
-      canvas.on("object:modified", (e) => handleObjectSelection(e.target));
+      canvas.on("object:modified", (e) => {
+        handleObjectSelection(e.target);
+        // 마우스로 편집된 도형의 크기 정보 업데이트
+        if (e.target) {
+          const obj = e.target;
+          if (obj.type === "rect" || obj.type === "group") {
+            setWidth(Math.round(obj.width * obj.scaleX));
+            setHeight(Math.round(obj.height * obj.scaleY));
+          } else if (obj.type === "circle") {
+            const circle = obj as fabric.Circle;
+            setDiameter(Math.round(circle.radius * 2 * obj.scaleX));
+          }
+        }
+      });
       canvas.on("object:scaling", (e) => handleObjectSelection(e.target));
-      canvas.on("object:moving", (e) => handleObjectSelection(e.target));
+
+      // 이동 중에는 크기 정보를 업데이트하지 않음
+      canvas.on("object:moving", (e) => {
+        handleObjectSelection(e.target, false);
+      });
       canvas.on("object:rotating", (e) => handleObjectSelection(e.target));
     }
   }, [canvas, selectedObject]);
 
-  const handleObjectSelection = (obj: fabric.Object | undefined) => {
+  const handleObjectSelection = (
+    obj: fabric.Object | undefined,
+    updateSize = true
+  ) => {
     if (!obj) return;
     setSelectedObject(obj);
 
@@ -86,7 +106,7 @@ export default function Settings({ canvas }: SettingProps) {
     setStrokeColor((obj.stroke as string) || "#000000");
 
     if (obj.type === "i-text") {
-      const textObj = obj as fabric.Text & { id: string };
+      const textObj = obj as fabric.IText & { id: string };
       setText((prev) => ({
         ...prev,
         [textObj.id]: {
@@ -97,17 +117,19 @@ export default function Settings({ canvas }: SettingProps) {
       setColor(obj.fill);
     }
 
-    if (obj.type === "rect") {
-      setWidth(Math.round(obj.width * obj.scaleX));
-      setHeight(Math.round(obj.height * obj.scaleY));
-      setColor(obj.fill);
-      setDiameter("");
-    } else if (obj.type === "circle") {
-      const circle = obj as fabric.Circle;
-      setDiameter(Math.round(circle.radius * 2 * obj.scaleX));
-      setColor(obj.fill);
-      setWidth("");
-      setHeight("");
+    if (updateSize) {
+      if (obj.type === "rect" || obj.type === "group") {
+        setWidth(Math.round(obj.width * obj.scaleX));
+        setHeight(Math.round(obj.height * obj.scaleY));
+        setColor(obj.fill);
+        setDiameter("");
+      } else if (obj.type === "circle") {
+        const circle = obj as fabric.Circle;
+        setDiameter(Math.round(circle.radius * 2 * obj.scaleX));
+        setColor(obj.fill);
+        setWidth("");
+        setHeight("");
+      }
     }
   };
 
@@ -128,36 +150,71 @@ export default function Settings({ canvas }: SettingProps) {
   // 객체 사각형 너비
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
-    const intValue = parseInt(value, 10);
-    setWidth(intValue);
+    const intValue = Math.max(1, parseInt(value, 10));
+    const result = !isNaN(intValue) && intValue >= 0 ? intValue : 1;
+    setWidth(result);
 
-    if (selectedObject && selectedObject.type === "rect" && intValue >= 0) {
-      selectedObject.set({ width: intValue / selectedObject.scaleX });
-      canvas.renderAll();
+    if (selectedObject) {
+      if (selectedObject.type === "group") {
+        const group = selectedObject as fabric.Group;
+        group._objects.forEach((obj) => {
+          if (obj.type === "rect") {
+            obj.set({ width: result });
+          }
+        });
+        group.set({ width: result });
+      } else if (selectedObject.type === "rect") {
+        selectedObject.set({ width: result });
+      }
+      canvas.requestRenderAll();
     }
   };
 
   // 객체 사각형 높이
   const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
-    const intValue = parseInt(value, 10);
-    setHeight(intValue);
+    const intValue = Math.max(1, parseInt(value, 10));
+    const result = !isNaN(intValue) && intValue >= 0 ? intValue : 1;
+    setHeight(result);
 
-    if (selectedObject && selectedObject.type === "rect" && intValue >= 0) {
-      selectedObject.set({ height: intValue / selectedObject.scaleY });
-      canvas.renderAll();
+    if (selectedObject) {
+      if (selectedObject.type === "group") {
+        const group = selectedObject as fabric.Group;
+        group._objects.forEach((obj) => {
+          if (obj.type === "rect") {
+            obj.set({ height: intValue });
+          }
+        });
+        group.set({ height: intValue });
+      } else if (selectedObject.type === "rect") {
+        selectedObject.set({ height: intValue });
+      }
+      canvas.requestRenderAll();
     }
   };
 
   // 객체 원 지름
   const handleDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
-    const intValue = parseInt(value, 10);
-    setDiameter(intValue);
+    const intValue = Math.max(1, parseInt(value, 10));
+    const result = !isNaN(intValue) && intValue >= 0 ? intValue : 1;
+    setDiameter(result);
 
-    if (selectedObject && selectedObject.type === "circle" && intValue >= 0) {
-      selectedObject.set({ radius: intValue / 2 / selectedObject.scaleX });
-      canvas.renderAll();
+    if (selectedObject) {
+      if (selectedObject.type === "group") {
+        const group = selectedObject as fabric.Group;
+        group._objects.forEach((obj) => {
+          if (obj.type === "circle") {
+            obj.set({ radius: result });
+          }
+        });
+        group.set({
+          radius: result,
+        });
+      } else if (selectedObject.type === "circle") {
+        selectedObject.set({ radius: result });
+      }
+      canvas.requestRenderAll();
     }
   };
 
@@ -171,10 +228,27 @@ export default function Settings({ canvas }: SettingProps) {
     if (activeObject.type === "activeSelection") {
       const selection = activeObject as fabric.ActiveSelection;
       selection.getObjects().forEach((obj) => {
-        obj.set("fill", value);
+        if (obj.type === "i-text") {
+          obj.set("fill", "#000000");
+        } else {
+          obj.set("fill", value);
+        }
+      });
+    } else if (activeObject.type === "group") {
+      const group = activeObject as fabric.Group;
+      group._objects.forEach((obj) => {
+        if (obj.type === "i-text") {
+          obj.set("fill", "#000000");
+        } else {
+          obj.set("fill", value);
+        }
       });
     } else {
-      activeObject.set("fill", value);
+      if (activeObject.type === "i-text") {
+        activeObject.set("fill", "#000000");
+      } else {
+        activeObject.set("fill", value);
+      }
     }
     canvas.requestRenderAll();
   };
@@ -194,7 +268,7 @@ export default function Settings({ canvas }: SettingProps) {
         },
       }));
       activeObject.set("i-text", value);
-      canvas.renderAll();
+      canvas.requestRenderAll();
     }
   };
 
@@ -214,7 +288,7 @@ export default function Settings({ canvas }: SettingProps) {
         },
       }));
       activeObject.set("fontSize", intValue);
-      canvas.renderAll();
+      canvas.requestRenderAll();
     }
   };
 
@@ -222,7 +296,7 @@ export default function Settings({ canvas }: SettingProps) {
   const handlePositionChange = (axis: "x" | "y", value: number) => {
     if (selectedObject) {
       selectedObject.set(axis === "x" ? "left" : "top", value);
-      canvas.renderAll();
+      canvas.requestRenderAll();
       setPosition((prev) => ({ ...prev, [axis]: value }));
     }
   };
@@ -236,7 +310,7 @@ export default function Settings({ canvas }: SettingProps) {
         originY: "center",
         angle: value,
       });
-      canvas.renderAll();
+      canvas.requestRenderAll();
       setAngle(value);
     }
   };
@@ -245,36 +319,51 @@ export default function Settings({ canvas }: SettingProps) {
   const handleOpacityChange = (value: number) => {
     if (selectedObject) {
       selectedObject.set("opacity", value);
-      canvas.renderAll();
+      canvas.requestRenderAll();
       setOpacity(value);
     }
   };
 
   // 객체 테두리 두께
   const handleStrokeWidthChange = (value: number | string) => {
-    const parsed = parseFloat(value as string);
+    const parsed = parseInt(value as string);
+    const strokeWidth = !isNaN(parsed) && parsed >= 0 ? parsed : 0;
 
-    if (isNaN(parsed)) {
-      // 빈 문자열 또는 숫자 아님 → 기본값으로 설정
-      setStrokeWidth(0);
-      selectedObject?.set("strokeWidth", 0);
-    } else if (parsed < 0) {
-      // 음수 방지
-      setStrokeWidth(0);
-      selectedObject?.set("strokeWidth", 0);
-    } else {
-      setStrokeWidth(parsed);
-      selectedObject?.set("strokeWidth", parsed);
+    setStrokeWidth(strokeWidth);
+
+    if (selectedObject) {
+      if (selectedObject.type === "group") {
+        const group = selectedObject as fabric.Group;
+        group._objects.forEach((obj) => {
+          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
+            obj.set("strokeWidth", strokeWidth);
+          }
+        });
+        group.set("strokeWidth", strokeWidth);
+      } else if (
+        selectedObject instanceof fabric.Rect ||
+        selectedObject instanceof fabric.Circle
+      ) {
+        selectedObject.set("strokeWidth", strokeWidth);
+      }
+      canvas?.requestRenderAll();
     }
-
-    canvas?.requestRenderAll();
   };
 
   // 객체 테두리 색상
   const handleStrokeColorChange = (value: string) => {
     if (selectedObject) {
-      selectedObject.set("stroke", value);
-      canvas.renderAll();
+      if (selectedObject.type === "group") {
+        const group = selectedObject as fabric.Group;
+        group._objects.forEach((obj) => {
+          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
+            obj.set("stroke", value);
+          }
+        });
+      } else {
+        selectedObject.set("stroke", value);
+      }
+      canvas.requestRenderAll();
       setStrokeColor(value);
     }
   };
@@ -284,14 +373,28 @@ export default function Settings({ canvas }: SettingProps) {
     if (selectedObject) {
       const lock = !isLocked;
 
-      selectedObject.set({
-        lockMovementX: lock,
-        lockMovementY: lock,
-        lockRotation: lock,
-        lockScalingX: selectedObject.type !== "i-text" ? lock : !lock,
-        lockScalingY: selectedObject.type !== "i-text" ? lock : !lock,
-        hasControls: !lock,
-      });
+      if (selectedObject.type === "group") {
+        const group = selectedObject as fabric.Group;
+        group._objects.forEach((obj) => {
+          if (obj.type === "i-text") {
+            obj.set("editable", !lock);
+          }
+          obj.set({
+            lockMovementX: lock,
+            lockMovementY: lock,
+            lockRotation: lock,
+            hasControls: !lock,
+          });
+        });
+      } else {
+        selectedObject.set({
+          lockMovementX: lock,
+          lockMovementY: lock,
+          lockRotation: lock,
+          editable: !lock,
+          hasControls: !lock,
+        });
+      }
 
       canvas.requestRenderAll();
       setIsLocked(lock);
@@ -308,6 +411,7 @@ export default function Settings({ canvas }: SettingProps) {
               <Image
                 src={isLocked ? lockIcon : unlockIcon}
                 alt={isLocked ? "lock" : "unlock"}
+                priority
               />
             </button>
           </div>
@@ -344,7 +448,7 @@ export default function Settings({ canvas }: SettingProps) {
 
           {/* 각도 (타원일 경우만 표시) */}
           {!(
-            selectedObject.type === "circle" &&
+            selectedObject?.type === "circle" &&
             selectedObject.scaleX === selectedObject.scaleY
           ) && (
             <>
@@ -381,9 +485,7 @@ export default function Settings({ canvas }: SettingProps) {
                 type="number"
                 value={strokeWidth}
                 onClick={(e) => e.currentTarget.select()}
-                onChange={(e) =>
-                  handleStrokeWidthChange(parseFloat(e.target.value))
-                }
+                onChange={(e) => handleStrokeWidthChange(e.target.value)}
                 disabled={isLocked}
               />
             </>
@@ -413,40 +515,46 @@ export default function Settings({ canvas }: SettingProps) {
           </div>
 
           {/* 도형별 고유 설정 */}
-          {selectedObject.type === "rect" && (
+          {selectedObject.type === "group" && (
             <>
-              <label>너비 (px)</label>
-              <input
-                type="number"
-                value={width}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={handleWidthChange}
-                disabled={isLocked}
-              />
-              <label>높이 (px)</label>
-              <input
-                type="number"
-                value={height}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={handleHeightChange}
-                disabled={isLocked}
-              />
+              {(selectedObject as fabric.Group)._objects.map((child, index) => (
+                <div className={styles.group} key={index}>
+                  {child.type === "rect" && (
+                    <>
+                      <label>너비 (px)</label>
+                      <input
+                        type="number"
+                        value={width}
+                        onClick={(e) => e.currentTarget.select()}
+                        onChange={handleWidthChange}
+                        disabled={isLocked}
+                      />
+                      <label>높이 (px)</label>
+                      <input
+                        type="number"
+                        value={height}
+                        onClick={(e) => e.currentTarget.select()}
+                        onChange={handleHeightChange}
+                        disabled={isLocked}
+                      />
+                    </>
+                  )}
+                  {child.type === "circle" && (
+                    <>
+                      <label>지름</label>
+                      <input
+                        type="number"
+                        value={diameter}
+                        onClick={(e) => e.currentTarget.select()}
+                        onChange={handleDiameterChange}
+                        disabled={isLocked}
+                      />
+                    </>
+                  )}
+                </div>
+              ))}
             </>
           )}
-
-          {selectedObject.type === "circle" && (
-            <>
-              <label>지름</label>
-              <input
-                type="number"
-                value={diameter}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={handleDiameterChange}
-                disabled={isLocked}
-              />
-            </>
-          )}
-
           {selectedObject.type === "i-text" && (
             <>
               <label>텍스트 내용</label>

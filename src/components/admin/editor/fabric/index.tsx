@@ -9,9 +9,11 @@ import Settings from "./Settings";
 export default function FabricEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const selectedToolRef = useRef<"rect" | "circle" | "text" | null>(null);
+  const selectedToolRef = useRef<"rect" | "circle" | "text" | "group" | null>(
+    null
+  );
   const [selectedTool, setSelectedTool] = useState<
-    "rect" | "circle" | "text" | null
+    "rect" | "circle" | "text" | "group" | null
   >(null);
 
   useEffect(() => {
@@ -23,20 +25,42 @@ export default function FabricEditor() {
     (x: number, y: number) => {
       if (canvas) {
         const rect = new fabric.Rect({
-          left: x,
-          top: y,
           width: 60,
           height: 60,
           fill: "#ffffff",
+          strokeWidth: 1,
+          stroke: "#000000",
+          strokeUniform: true,
           originX: "center",
           originY: "center",
+        }) as fabric.Rect & { id: string };
+
+        const label = new fabric.IText("S1", {
+          fontSize: 16,
+          fill: "#000000",
+          originX: "center",
+          originY: "center",
+          editable: true,
+          selectable: true,
+          left: 0,
+          top: 0,
+        }) as fabric.FabricObject;
+
+        const group = new fabric.Group([rect, label], {
+          left: x,
+          top: y,
+          originX: "center",
+          originY: "center",
+          selectable: true,
           stroke: "#000000",
           strokeWidth: 1,
           strokeUniform: true,
-          selectable: true,
-        }) as fabric.Rect & { id: string };
-        rect.id = `rect-${Date.now()}`;
-        canvas.add(rect);
+          subTargetCheck: true,
+        }) as fabric.Group & { id: string };
+
+        group.id = `rect-${Date.now()}`;
+        canvas.add(group);
+        canvas.setActiveObject(group);
         canvas.renderAll();
         setSelectedTool(null);
       }
@@ -49,19 +73,45 @@ export default function FabricEditor() {
     (x: number, y: number) => {
       if (canvas) {
         const circle = new fabric.Circle({
-          left: x,
-          top: y,
           radius: 30,
           fill: "#ffffff",
+          strokeWidth: 1,
+          stroke: "#000000",
+          strokeUniform: true, // strokeUniform 적용
           originX: "center",
           originY: "center",
-          stroke: "#000000",
-          strokeWidth: 1,
-          strokeUniform: true,
-          selectable: true,
         }) as fabric.Circle & { id: string };
-        circle.id = `circle-${Date.now()}`;
-        canvas.add(circle);
+
+        const label = new fabric.IText("S1", {
+          fontSize: 16,
+          fill: "#000000",
+          originX: "center",
+          originY: "center",
+          editable: true,
+          selectable: true,
+          left: 0,
+          top: 0,
+        }) as fabric.FabricObject;
+
+        const group = new fabric.Group([circle, label], {
+          left: x,
+          top: y,
+          originX: "center",
+          originY: "center",
+          selectable: true,
+          subTargetCheck: true,
+        }) as fabric.Group & { id: string };
+
+        // 그룹 내부의 객체에 strokeUniform 적용
+        group._objects.forEach((obj) => {
+          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
+            obj.set("strokeUniform", true);
+          }
+        });
+
+        group.id = `circle-${Date.now()}`;
+        canvas.add(group);
+        canvas.setActiveObject(group);
         canvas.renderAll();
         setSelectedTool(null);
       }

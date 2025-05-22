@@ -5,7 +5,7 @@ declare module "fabric" {
     id?: string;
     clone(callback?: (clone: Object) => void): Object;
   }
-  interface Text {
+  interface IText {
     id?: string;
   }
 }
