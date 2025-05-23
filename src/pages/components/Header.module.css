@@ -1,5 +1,6 @@
 .header {
   width: 100%;
+  min-width: 1400px;
   border-bottom: 1px solid #eee;
   background-color: #fff;
 }
@@ -8,6 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 800px;
   padding: 39px 20%;
 }
 
@@ -79,6 +81,7 @@
   display: flex;
   padding: 20px 20%;
   gap: 16px;
+  min-width: 800px;
   border-top: 1px solid #eee;
   background-color: #fff;
 }

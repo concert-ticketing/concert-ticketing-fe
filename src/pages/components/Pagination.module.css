@@ -1,0 +1,27 @@
+.pagination {
+  display: flex;
+  margin-top: 30px;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pageButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #000;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.pageArrowButton {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: #fff;
+}
+.pageButton.active {
+  background-color: black;
+  color: white;
+}

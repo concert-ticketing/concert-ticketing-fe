@@ -1,0 +1,163 @@
+.all {
+  min-width: 1400px;
+}
+.margin {
+  padding: 20px 20%;
+}
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.reservation {
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 22px 0px;
+  min-width: 720px;
+  overflow-x: hidden;
+}
+
+.reservationTitle {
+  border-bottom: 1px solid #ddd;
+  padding: 0px 22px;
+  padding-bottom: 22px;
+}
+
+.reservationContent {
+  margin: 0px 22px;
+}
+
+.reservationSearch {
+  padding: 20px;
+  margin-top: 30px;
+  font-size: 10px;
+  color: #888888;
+  background-color: #f8f8f8;
+}
+
+.highlight {
+  color: red;
+}
+
+.restReview {
+  font-size: 10px;
+  color: #888888;
+  line-height: 200%;
+}
+
+.reviewSearchBox {
+  display: flex;
+}
+
+.reservationSearchBox {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 5px;
+}
+.reservationDateSearchBox {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.reservationDateSearchBox input {
+  width: 100px;
+}
+.searchBoxTitle {
+  font-size: 10px;
+  color: #888888;
+}
+
+.reservationDateSearchBox input,
+.reservationSearchBox input {
+  height: 15px;
+}
+
+.reservationDateSearchBox button,
+.reservationSearchBox button {
+  border: none;
+  background-color: #d9d9d9;
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+.tickets {
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  background-color: #d8d8d8;
+  padding: 15px;
+}
+
+.ticketTitle {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.ticketInfos {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  justify-content: space-between;
+  background-color: #fff;
+}
+.ticketPosterline {
+  border-right: 1px dashed #ddd;
+  padding-right: 20px;
+}
+.ticketPoster {
+  width: 120px;
+  height: 160px;
+  background-color: #ddd;
+  text-align: center;
+  line-height: 160px;
+  color: #555;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px; /* 좌우 간격 */
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.infoRow span {
+  flex: 1;
+}
+
+.ticketbutton {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.ticketButton,
+.ticketCancelButton {
+  margin-top: 8px;
+  padding: 5px;
+  width: 80px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ticketButton {
+  background-color: #ccc;
+}
+
+.ticketCancelButton {
+  background-color: #eee;
+}

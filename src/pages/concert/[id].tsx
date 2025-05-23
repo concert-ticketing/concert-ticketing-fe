@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
-import styles from "@/styles/concert/ConcertDetail.module.css";
+import styles from "./ConcertDetail.module.css";
 import ConcertDetailTabs from "@/pages/concert/ConcertDetailTabs";
 
 export default function ConcertDetail() {

@@ -1,4 +1,7 @@
 .all {
+  width: 1400px;
+}
+.margin {
   padding: 20px 20%;
 }
 .container {
@@ -39,6 +42,7 @@
 
 .content {
   flex: 1;
+  min-width: 600px;
 }
 
 .title {

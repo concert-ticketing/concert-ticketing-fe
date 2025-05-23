@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import styles from "@/styles/mypage/Mypage.module.css";
-import Review from "@/pages/mypage/Review";
-import Ticketing from "@/pages/mypage/Ticketing";
+import React from "react";
+import styles from "./Mypage.module.css";
+import MypageNav from "@/pages/components/MypageNav";
 
 interface Reservation {
   date: string;
@@ -13,8 +12,6 @@ interface Reservation {
 }
 
 export default function Mypage() {
-const [activeTab, setActiveTab] = useState<"review" | "ticketing" | "default">("default");
-
   const reservationData: Reservation[] = [
     {
       date: "2025-05-01",
@@ -34,22 +31,26 @@ const [activeTab, setActiveTab] = useState<"review" | "ticketing" | "default">("
     },
   ];
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "review":
-        return <Review />;
-      case "ticketing":
-        return <Ticketing />;
-      default:
-        return (
-          <>
+  return (
+    <div className={styles.all}>
+      <div className={styles.margin}>
+        <div>
+          <h1 className={styles.title}>마이페이지</h1>
+        </div>
+        <div className={styles.container}>
+          <MypageNav /> {/* nav 분리된 컴포넌트 사용 */}
+          <section className={styles.content}>
+            {/* 공지사항 */}
             <div className={styles.noticeBox}>
               <div className={styles.tabs}>
                 <div className={styles.notice}>NOTICE</div>
-                <div className={styles.recentNotice}>최신 공지사항 or 이벤트</div>
+                <div className={styles.recentNotice}>
+                  최신 공지사항 or 이벤트
+                </div>
               </div>
             </div>
 
+            {/* 예매 내역 */}
             <div className={styles.historyBox}>
               <div className={styles.sectionHeader}>
                 <div className={styles.border}></div>
@@ -88,6 +89,7 @@ const [activeTab, setActiveTab] = useState<"review" | "ticketing" | "default">("
               </table>
             </div>
 
+            {/* 문의 내역 */}
             <div className={styles.inquiryBox}>
               <div className={styles.sectionHeader}>
                 <div className={styles.border}></div>
@@ -102,51 +104,8 @@ const [activeTab, setActiveTab] = useState<"review" | "ticketing" | "default">("
                 </div>
               </div>
             </div>
-          </>
-        );
-    }
-  };
-
-  return (
-    <div className={styles.all}>
-      <div>
-        <h1 className={styles.title}>마이페이지</h1>
-      </div>
-      <div className={styles.container}>
-        <aside className={styles.sidebar}>
-          <div className={styles.mypage}>
-            <p className={styles.welcome}>안녕하세요 최*우님</p>
-          </div>
-          <div className={styles.menu}>
-            <div>
-              <h3>예매관리</h3>
-              <p
-                className={activeTab === "ticketing" ? styles.active : ""}
-                onClick={() => setActiveTab("ticketing")}
-              >
-                예매확인 / 취소
-              </p>
-            </div>
-            <div>
-              <h3>활동관리</h3>
-              <p
-                className={activeTab === "review" ? styles.active : ""}
-                onClick={() => setActiveTab("review")}
-              >
-                후기관리
-              </p>
-              <p>알림</p>
-            </div>
-            <div>
-              <h3>회원정보관리</h3>
-              <p>내정보</p>
-              <p>1:1 문의 내역</p>
-              <p>회원탈퇴</p>
-            </div>
-          </div>
-        </aside>
-
-        <section className={styles.content}>{renderContent()}</section>
+          </section>
+        </div>
       </div>
     </div>
   );

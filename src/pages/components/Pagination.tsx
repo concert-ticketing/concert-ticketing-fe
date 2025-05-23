@@ -1,4 +1,4 @@
-import styles from "@/styles/concert/Concert.module.css";
+import styles from "./Pagination.module.css";
 
 type PaginationProps = {
   currentPage: number;
@@ -17,7 +17,7 @@ export default function Pagination({
     <div className={styles.pagination}>
       <button
         onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-        className={styles.pageButton}
+        className={styles.pageArrowButton}
       >
         &lt;
       </button>
@@ -36,7 +36,7 @@ export default function Pagination({
         onClick={() =>
           currentPage < totalPages && onPageChange(currentPage + 1)
         }
-        className={styles.pageButton}
+        className={styles.pageArrowButton}
       >
         &gt;
       </button>

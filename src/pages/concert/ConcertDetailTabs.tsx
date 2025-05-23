@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "@/styles/concert/ConcertDetail.module.css";
+import styles from "./ConcertDetail.module.css";
 import ConcertDetailSection from "@/pages/concert/ConcertDetailSection";
 import ReviewSection from "@/pages/concert/ReviewSection";
 import LocationInfoSection from "@/pages/concert/LocationInfoSection";

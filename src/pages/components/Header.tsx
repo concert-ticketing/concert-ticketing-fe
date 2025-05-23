@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import styles from "@/styles/components/Header.module.css";
+import styles from "./Header.module.css";
 
 export default function Header() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function Header() {
               <span>로그인</span>
             </div>
           </Link>
-          <Link href="#">
+          <Link href="/signup">
             <div className={styles.navItem}>
               <Image
                 src="/ico_header_signup.png"

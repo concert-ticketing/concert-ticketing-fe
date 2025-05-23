@@ -1,0 +1,182 @@
+.all {
+  min-width: 1400px;
+}
+.margin {
+  padding: 20px 20%;
+}
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.sidebar {
+  width: 180px;
+  font-size: 14px;
+}
+
+.mypage {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 20px;
+}
+.welcome {
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.menu {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-top: 10px;
+  padding: 20px;
+}
+.menu h3 {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.menu p {
+  margin: 5px 0;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.noticeBox {
+  border: 1px solid #aaa;
+  border-radius: 10px;
+  padding: 12px 30px;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 15px;
+}
+
+.border {
+  background-color: #000;
+  width: 3px;
+  height: 16px;
+  margin-right: 10px;
+}
+
+.review {
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 22px 0px;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box; /* ✅ 핵심 */
+}
+
+.reviewTitle {
+  border-bottom: 1px solid #ddd;
+  padding: 0px 22px;
+  padding-bottom: 22px;
+}
+
+.reviewContent {
+  margin: 0px 22px;
+}
+
+.reviewSearch {
+  padding: 20px;
+  margin-top: 30px;
+  font-size: 10px;
+  color: #888888;
+  background-color: #f8f8f8;
+}
+
+.highlight {
+  color: red;
+}
+
+.restReview {
+  font-size: 10px;
+  color: #888888;
+  line-height: 200%;
+}
+
+.restReview span {
+  display: block;
+}
+
+.reviewSearchBox {
+  display: flex;
+}
+
+.reviewSearchBox {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.searchBoxTitle {
+  font-size: 10px;
+  color: #888888;
+}
+
+.reviewSearchBox input {
+  height: 15px;
+}
+
+.reviewSearchBox button {
+  border: none;
+  background-color: #d9d9d9;
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+.reviewTableBox {
+  margin: 30px 22px;
+  overflow-x: auto;
+}
+.reviewTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.reviewTable thead {
+  width: 100%;
+  background-color: #f8f8f8;
+}
+
+.reviewTable thead tr th {
+  font-size: 12px;
+  padding: 5px;
+}
+
+.reviewTable tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+.reviewTable tbody td {
+  text-align: center;
+  padding: 5px 0px;
+  font-size: 14px;
+}
+
+.reviewTable th:nth-child(1),
+.reviewTable td:nth-child(1) {
+  width: 20%;
+}
+
+.reviewTable th:nth-child(2),
+.reviewTable td:nth-child(2) {
+  width: 60%; /* ✅ 후기내용 넓게 */
+}
+
+.reviewTable th:nth-child(3),
+.reviewTable td:nth-child(3) {
+  width: 20%;
+}

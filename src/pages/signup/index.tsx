@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import styles from "@/styles/signup/Signup.module.css";
+import styles from "./Signup.module.css";
 
 export default function SignupPage() {
   const router = useRouter();

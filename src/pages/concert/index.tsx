@@ -1,7 +1,8 @@
+// pages/concert/concert.tsx
 import { useState } from "react";
-import ConcertCard from "@/pages/concert/concert-list/index";
 import Pagination from "@/pages/components/Pagination";
-import styles from "@/styles/concert/Concert.module.css";
+import Link from "next/link";
+import styles from "./Concert.module.css";
 
 type Concert = {
   id: number;
@@ -14,7 +15,7 @@ const mockData: Concert[] = Array.from({ length: 20 }, (_, i) => ({
   id: i + 1,
   title: `title title title ${i + 1}`,
   singer: `singer ${i + 1}`,
-  date: `2025-05-${(30 - (i % 30)).toString().padStart(2, "0")}`, // 날짜 다양하게
+  date: `2025-05-${(30 - (i % 30)).toString().padStart(2, "0")}`,
 }));
 
 export default function ConcertPage() {
@@ -24,9 +25,9 @@ export default function ConcertPage() {
 
   const sortedData = [...mockData].sort((a, b) => {
     if (sortOption === "latest") {
-      return new Date(b.date).getTime() - new Date(a.date).getTime(); // 최신순
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     } else {
-      return a.id - b.id; // 인기순 (id 기준)
+      return a.id - b.id;
     }
   });
 
@@ -38,7 +39,7 @@ export default function ConcertPage() {
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortOption(e.target.value);
-    setCurrentPage(1); // 페이지 초기화
+    setCurrentPage(1);
   };
 
   return (
@@ -56,17 +57,20 @@ export default function ConcertPage() {
         </select>
       </div>
       <div className={styles.list}>
-        {currentData.map((concert) => {
-          return (
-            <ConcertCard
-              key={concert.id}
-              id={concert.id}
-              title={concert.title}
-              singer={concert.singer}
-              date={concert.date}
-            />
-          );
-        })}
+        {currentData.map((concert) => (
+          <Link
+            href={`/concert/${concert.id}`}
+            key={concert.id}
+            className={styles.card}
+          >
+            <div className={styles.image}>image</div>
+            <div className={styles.cardTitle}>{concert.title}</div>
+            <div className={styles.cardSinger}>{concert.singer}</div>
+            <div className={styles.cardDate}>
+              {concert.date} ~ {concert.date}
+            </div>
+          </Link>
+        ))}
       </div>
       <Pagination
         currentPage={currentPage}
