@@ -59,4 +59,24 @@ export const addRectangleFn = (
   canvas.setActiveObject(group);
   canvas.renderAll();
   setSelectedTool(null);
+
+  canvas.on("mouse:dblclick", (e) => {
+    const target = e.target;
+
+    if (
+      target instanceof fabric.Group &&
+      target.subTargetCheck &&
+      e.subTargets
+    ) {
+      const subTarget = e.subTargets[0];
+      if (subTarget instanceof fabric.IText) {
+        canvas.setActiveObject(subTarget as fabric.Object);
+        subTarget.enterEditing();
+        subTarget.selectAll();
+      } else if (target instanceof fabric.IText) {
+        target.enterEditing();
+        target.selectAll();
+      }
+    }
+  });
 };

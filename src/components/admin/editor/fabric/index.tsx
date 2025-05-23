@@ -6,9 +6,9 @@ import styles from "./canvas.module.css";
 import Toolbar from "./settings/Toolbar";
 import Settings from "./settings";
 
-import { addRectangleFn } from "./settings/shapes/Rect";
-import { addCircleFn } from "./settings/shapes/Circle";
-import { addTextFn } from "./settings/shapes/Text";
+import { addRectangleFn } from "./shapes/Rect";
+import { addCircleFn } from "./shapes/Circle";
+import { addTextFn } from "./shapes/Text";
 
 export default function FabricEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -32,6 +32,7 @@ export default function FabricEditor() {
         height: window.innerHeight,
         selection: true,
       });
+
       initCanvas.backgroundColor = "#dfdfdf";
       initCanvas.renderAll();
 

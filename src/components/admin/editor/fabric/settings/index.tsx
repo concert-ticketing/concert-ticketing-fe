@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
 import * as fabric from "fabric";
+
+import { LockToggle } from "./LockToggle";
+import { ObjectId } from "./ObjectId";
+import { Position } from "./Position";
+import { Angle } from "./Angle";
+import { Opacity } from "./Opacity";
+import { StrokeWidth } from "./StrokeWidth";
+import { Fill } from "./Fill";
+import { StrokeColor } from "./StrokeFill";
+
 import styles from "../canvas.module.css";
-import Image from "next/image";
-import { lockIcon, unlockIcon } from "@public/icons";
+import { RectSize } from "./RectSize";
+import { CircleDiameter } from "./CircleDiameter";
+import { TextObject } from "./TextObject";
 
 interface SettingProps {
   canvas: fabric.Canvas;
@@ -147,436 +158,116 @@ export default function Settings({ canvas }: SettingProps) {
     setSelectedObject(null);
   };
 
-  // 객체 사각형 너비
-  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, "");
-    const intValue = Math.max(1, parseInt(value, 10));
-    const result = !isNaN(intValue) && intValue >= 0 ? intValue : 1;
-    setWidth(result);
-
-    if (selectedObject) {
-      if (selectedObject.type === "group") {
-        const group = selectedObject as fabric.Group;
-        group._objects.forEach((obj) => {
-          if (obj.type === "rect") {
-            obj.set({ width: result });
-          }
-        });
-        group.set({ width: result });
-      } else if (selectedObject.type === "rect") {
-        selectedObject.set({ width: result });
-      }
-      canvas.requestRenderAll();
-    }
-  };
-
-  // 객체 사각형 높이
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, "");
-    const intValue = Math.max(1, parseInt(value, 10));
-    const result = !isNaN(intValue) && intValue >= 0 ? intValue : 1;
-    setHeight(result);
-
-    if (selectedObject) {
-      if (selectedObject.type === "group") {
-        const group = selectedObject as fabric.Group;
-        group._objects.forEach((obj) => {
-          if (obj.type === "rect") {
-            obj.set({ height: intValue });
-          }
-        });
-        group.set({ height: intValue });
-      } else if (selectedObject.type === "rect") {
-        selectedObject.set({ height: intValue });
-      }
-      canvas.requestRenderAll();
-    }
-  };
-
-  // 객체 원 지름
-  const handleDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, "");
-    const intValue = Math.max(1, parseInt(value, 10));
-    const result = !isNaN(intValue) && intValue >= 0 ? intValue : 1;
-    setDiameter(result);
-
-    if (selectedObject) {
-      if (selectedObject.type === "group") {
-        const group = selectedObject as fabric.Group;
-        group._objects.forEach((obj) => {
-          if (obj.type === "circle") {
-            obj.set({ radius: result / 2 });
-          }
-        });
-        group.set({
-          radius: result,
-        });
-      } else if (selectedObject.type === "circle") {
-        selectedObject.set({ radius: result / 2 });
-      }
-      canvas.requestRenderAll();
-    }
-  };
-
-  // 객체 색상
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const activeObject = canvas.getActiveObject();
-
-    if (!activeObject) return;
-
-    if (activeObject.type === "activeSelection") {
-      const selection = activeObject as fabric.ActiveSelection;
-      selection.getObjects().forEach((obj) => {
-        if (obj.type === "i-text") {
-          obj.set("fill", "#000000");
-        } else {
-          obj.set("fill", value);
-        }
-      });
-    } else if (activeObject.type === "group") {
-      const group = activeObject as fabric.Group;
-      group._objects.forEach((obj) => {
-        if (obj.type === "i-text") {
-          obj.set("fill", "#000000");
-        } else {
-          obj.set("fill", value);
-        }
-      });
-    } else {
-      if (activeObject.type === "i-text") {
-        activeObject.set("fill", "#000000");
-      } else {
-        activeObject.set("fill", value);
-      }
-    }
-    canvas.requestRenderAll();
-  };
-
-  // 객체 텍스트
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const activeObject = canvas.getActiveObject();
-
-    if (activeObject && activeObject.type === "i-text") {
-      const id = activeObject.id as string;
-      setText((prev) => ({
-        ...prev,
-        [id]: {
-          ...prev[id],
-          text: value,
-        },
-      }));
-      activeObject.set("i-text", value);
-      canvas.requestRenderAll();
-    }
-  };
-
-  // 객체 텍스트 글자 크기
-  const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, "");
-    const intValue = parseInt(value, 10);
-    const activeObject = canvas.getActiveObject();
-
-    if (activeObject && activeObject.type === "i-text" && intValue > 0) {
-      const id = activeObject.id as string;
-      setText((prev) => ({
-        ...prev,
-        [id]: {
-          ...prev[id],
-          fontSize: intValue,
-        },
-      }));
-      activeObject.set("fontSize", intValue);
-      canvas.requestRenderAll();
-    }
-  };
-
-  // 객체 위치 좌표 (x, y)
-  const handlePositionChange = (axis: "x" | "y", value: number) => {
-    if (selectedObject) {
-      selectedObject.set(axis === "x" ? "left" : "top", value);
-      canvas.requestRenderAll();
-      setPosition((prev) => ({ ...prev, [axis]: value }));
-    }
-  };
-
-  // 객체 각도
-  const handleAngleChange = (value: number) => {
-    if (selectedObject) {
-      // 회전 중심점을 중앙으로 설정
-      selectedObject.set({
-        originX: "center",
-        originY: "center",
-        angle: value,
-      });
-      canvas.requestRenderAll();
-      setAngle(value);
-    }
-  };
-
-  // 객체 투명도
-  const handleOpacityChange = (value: number) => {
-    if (selectedObject) {
-      selectedObject.set("opacity", value);
-      canvas.requestRenderAll();
-      setOpacity(value);
-    }
-  };
-
-  // 객체 테두리 두께
-  const handleStrokeWidthChange = (value: number | string) => {
-    const parsed = parseInt(value as string);
-    const strokeWidth = !isNaN(parsed) && parsed >= 0 ? parsed : 0;
-
-    setStrokeWidth(strokeWidth);
-
-    if (selectedObject) {
-      if (selectedObject.type === "group") {
-        const group = selectedObject as fabric.Group;
-        group._objects.forEach((obj) => {
-          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
-            obj.set("strokeWidth", strokeWidth);
-          }
-        });
-        group.set("strokeWidth", strokeWidth);
-      } else if (
-        selectedObject instanceof fabric.Rect ||
-        selectedObject instanceof fabric.Circle
-      ) {
-        selectedObject.set("strokeWidth", strokeWidth);
-      }
-      canvas?.requestRenderAll();
-    }
-  };
-
-  // 객체 테두리 색상
-  const handleStrokeColorChange = (value: string) => {
-    if (selectedObject) {
-      if (selectedObject.type === "group") {
-        const group = selectedObject as fabric.Group;
-        group._objects.forEach((obj) => {
-          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
-            obj.set("stroke", value);
-          }
-        });
-      } else {
-        selectedObject.set("stroke", value);
-      }
-      canvas.requestRenderAll();
-      setStrokeColor(value);
-    }
-  };
-
-  // 객체 잠금
-  const handleLockToggle = () => {
-    if (selectedObject) {
-      const lock = !isLocked;
-
-      if (selectedObject.type === "group") {
-        const group = selectedObject as fabric.Group;
-        group._objects.forEach((obj) => {
-          if (obj.type === "i-text") {
-            obj.set("editable", !lock);
-          }
-          obj.set({
-            lockMovementX: lock,
-            lockMovementY: lock,
-            lockRotation: lock,
-            hasControls: !lock,
-          });
-        });
-      } else {
-        selectedObject.set({
-          lockMovementX: lock,
-          lockMovementY: lock,
-          lockRotation: lock,
-          editable: !lock,
-          hasControls: !lock,
-        });
-      }
-
-      canvas.requestRenderAll();
-      setIsLocked(lock);
-    }
-  };
-
   return (
     <div className={styles.settings}>
       {selectedObject && (
         <>
           {/* 잠금 토글 */}
-          <div className={styles.locked}>
-            <button onClick={handleLockToggle}>
-              <Image
-                src={isLocked ? lockIcon : unlockIcon}
-                alt={isLocked ? "lock" : "unlock"}
-                priority
-              />
-            </button>
-          </div>
+          <LockToggle
+            selectedObject={selectedObject}
+            isLocked={isLocked}
+            setIsLocked={setIsLocked}
+            canvas={canvas}
+          />
 
           {/* 공통 정보 */}
-          <label>객체 ID</label>
-          <input
-            type="text"
-            value={(selectedObject.id as string) || ""}
-            readOnly
-          />
+          <ObjectId objectId={selectedObject.id as string} />
 
-          <label>위치 (X, Y)</label>
-          <div className={styles.flexGroup}>
-            <input
-              type="number"
-              value={position.x.toFixed()}
-              onClick={(e) => e.currentTarget.select()}
-              onChange={(e) =>
-                handlePositionChange("x", parseFloat(e.target.value))
-              }
-              disabled={isLocked}
-            />
-            <input
-              type="number"
-              value={position.y.toFixed()}
-              onClick={(e) => e.currentTarget.select()}
-              onChange={(e) =>
-                handlePositionChange("y", parseFloat(e.target.value))
-              }
-              disabled={isLocked}
-            />
-          </div>
+          {/* 위치 좌표 */}
+          <Position
+            position={position}
+            setPosition={setPosition}
+            selectedObject={selectedObject}
+            disabled={isLocked}
+            canvas={canvas}
+          />
 
           {/* 각도 (타원일 경우만 표시) */}
-          {!(
-            selectedObject?.type === "circle" &&
-            selectedObject.scaleX === selectedObject.scaleY
-          ) && (
-            <>
-              <label>각도 (˚)</label>
-              <input
-                type="number"
-                value={angle.toFixed()}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={(e) => handleAngleChange(parseFloat(e.target.value))}
-                disabled={isLocked}
-              />
-            </>
-          )}
-
-          <label>투명도(%)</label>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={Math.round(opacity * 100)}
-            onClick={(e) => e.currentTarget.select()}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              const normalized = Math.min(Math.max(value, 0), 100) / 100;
-              handleOpacityChange(normalized);
-            }}
+          <Angle
+            angle={angle}
+            selectedObject={selectedObject}
+            setAngle={setAngle}
             disabled={isLocked}
+            canvas={canvas}
           />
 
-          {selectedObject.type !== "i-text" && (
-            <>
-              <label>테두리 두께 (px)</label>
-              <input
-                type="number"
-                value={strokeWidth}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={(e) => handleStrokeWidthChange(e.target.value)}
-                disabled={isLocked}
-              />
-            </>
-          )}
+          {/* 객체 투명도 */}
+          <Opacity
+            opacity={opacity}
+            selectedObject={selectedObject}
+            setOpacity={setOpacity}
+            disabled={isLocked}
+            canvas={canvas}
+          />
+
+          {/* 테두리 두께 */}
+          <StrokeWidth
+            strokeWidth={strokeWidth}
+            setStrokeWidth={setStrokeWidth}
+            selectedObject={selectedObject}
+            disabled={isLocked}
+            canvas={canvas}
+          />
 
           <div className={styles.flexGroup}>
-            <label>배경 색</label>
-            <input
-              type="color"
-              value={typeof color === "string" ? color : "#000000"}
-              onChange={handleColorChange}
+            {/* 배경 색상 */}
+            <Fill
+              color={color}
+              setColor={setColor}
+              selectedObject={selectedObject}
               disabled={isLocked}
+              canvas={canvas}
             />
-            {strokeWidth > 0 && selectedObject.type !== "i-text" && (
-              <>
-                <label>테두리 색</label>
-                <input
-                  type="color"
-                  value={
-                    typeof strokeColor === "string" ? strokeColor : "#000000"
-                  }
-                  onChange={(e) => handleStrokeColorChange(e.target.value)}
-                  disabled={isLocked}
-                />
-              </>
-            )}
+            {/* 테두리 색상 */}
+            <StrokeColor
+              strokeColor={strokeColor}
+              setStrokeColor={setStrokeColor}
+              selectedObject={selectedObject}
+              disabled={isLocked}
+              canvas={canvas}
+            />
           </div>
 
           {/* 도형별 고유 설정 */}
-          {selectedObject.type === "group" && (
+          {selectedObject?.type === "group" && (
             <>
               {(selectedObject as fabric.Group)._objects.map((child, index) => (
                 <div className={styles.group} key={index}>
                   {child.type === "rect" && (
-                    <>
-                      <label>너비 (px)</label>
-                      <input
-                        type="number"
-                        value={width}
-                        onClick={(e) => e.currentTarget.select()}
-                        onChange={handleWidthChange}
-                        disabled={isLocked}
-                      />
-                      <label>높이 (px)</label>
-                      <input
-                        type="number"
-                        value={height}
-                        onClick={(e) => e.currentTarget.select()}
-                        onChange={handleHeightChange}
-                        disabled={isLocked}
-                      />
-                    </>
+                    // 사각형
+                    <RectSize
+                      selectedObject={selectedObject}
+                      width={width}
+                      height={height}
+                      setWidth={setWidth}
+                      setHeight={setHeight}
+                      isLocked={isLocked}
+                      canvas={canvas}
+                    />
                   )}
                   {child.type === "circle" && (
-                    <>
-                      <label>지름</label>
-                      <input
-                        type="number"
-                        value={diameter}
-                        onClick={(e) => e.currentTarget.select()}
-                        onChange={handleDiameterChange}
-                        disabled={isLocked}
-                      />
-                    </>
+                    // 원형
+                    <CircleDiameter
+                      selectedObject={selectedObject}
+                      diameter={diameter}
+                      setDiameter={setDiameter}
+                      isLocked={isLocked}
+                      canvas={canvas}
+                    />
                   )}
                 </div>
               ))}
             </>
           )}
-          {selectedObject.type === "i-text" && (
-            <>
-              <label>텍스트 내용</label>
-              <input
-                type="text"
-                value={text[selectedObject.id as string]?.text || ""}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={handleTextChange}
-                placeholder="텍스트 입력"
-                disabled={isLocked}
-              />
-              <label>글자 크기</label>
-              <input
-                type="number"
-                value={text[selectedObject.id as string]?.fontSize || ""}
-                onClick={(e) => e.currentTarget.select()}
-                onChange={handleFontSizeChange}
-                placeholder="글자 크기 입력"
-                disabled={isLocked}
-              />
-            </>
-          )}
+
+          {/* 텍스트 객체 */}
+          <TextObject
+            selectedObject={selectedObject}
+            text={text}
+            setText={setText}
+            isLocked={isLocked}
+            canvas={canvas}
+          />
         </>
       )}
     </div>
