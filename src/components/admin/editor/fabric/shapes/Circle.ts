@@ -24,7 +24,7 @@ export const addCircleFn = (
     originY: "center",
   }) as fabric.Circle & { id: string };
 
-  const label = new fabric.IText("S1", {
+  const label = new fabric.IText("label", {
     fontSize: 16,
     fill: "#000000",
     originX: "center",

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import { lockIcon, unlockIcon } from "@public/icons";
 import * as fabric from "fabric";
@@ -18,57 +18,39 @@ export function LockToggle({
   isLocked,
   setIsLocked,
 }: LockToggleProps) {
-  useEffect(() => {
-    if (!selectedObject) {
-      setIsLocked(false);
-      return;
-    }
-
-    // 첫 로딩 시 잠금 상태 확인
-    const lockStatus =
-      selectedObject.lockMovementX &&
-      selectedObject.lockMovementY &&
-      selectedObject.lockRotation;
-    setIsLocked(lockStatus);
-  }, [selectedObject, setIsLocked]);
-
-  const handleLockToggle = () => {
+  const handleToggleLock = () => {
     if (!selectedObject) return;
 
-    const lock = !isLocked;
+    const newState = !isLocked;
 
-    if (selectedObject.type === "group") {
-      const group = selectedObject as fabric.Group;
-      group._objects.forEach((obj) => {
-        if (obj.type === "i-text") {
-          (obj as fabric.IText).set("editable", !lock);
-        }
-        obj.set({
-          lockMovementX: lock,
-          lockMovementY: lock,
-          lockRotation: lock,
-          hasControls: !lock,
-        });
+    // 선택된 단일 객체 또는 ActiveSelection 내의 모든 객체에 잠금 속성 적용
+    const objectsToLock =
+      selectedObject.type === "activeSelection"
+        ? (selectedObject as fabric.ActiveSelection).getObjects()
+        : [selectedObject];
+
+    objectsToLock.forEach((obj) => {
+      obj.set({
+        lockMovementX: newState,
+        lockMovementY: newState,
+        lockRotation: newState,
+        lockScalingX: newState,
+        lockScalingY: newState,
+        hasControls: !newState,
+        hasBorders: !newState,
+        selectable: true,
       });
-    } else {
-      selectedObject.set({
-        lockMovementX: lock,
-        lockMovementY: lock,
-        lockRotation: lock,
-        editable: !lock,
-        hasControls: !lock,
-      });
-    }
+      obj.setCoords();
+    });
 
     canvas.requestRenderAll();
-    setIsLocked(lock);
-  };
 
-  if (!selectedObject) return null;
+    setIsLocked(newState);
+  };
 
   return (
     <div className={styles.locked}>
-      <button onClick={handleLockToggle}>
+      <button onClick={handleToggleLock}>
         <Image
           src={isLocked ? lockIcon : unlockIcon}
           alt={isLocked ? "lock" : "unlock"}

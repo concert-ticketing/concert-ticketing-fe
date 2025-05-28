@@ -9,6 +9,15 @@ import Settings from "./settings";
 import { addRectangleFn } from "./shapes/Rect";
 import { addCircleFn } from "./shapes/Circle";
 import { addTextFn } from "./shapes/Text";
+import {
+  addPolygonFn,
+  cancelPolygonDrawing,
+  isPolygonDrawing,
+} from "./shapes/Polygon";
+
+/**
+ * 캔버스 초기 생성, 도구 선택 및 이벤트 처리를 위한 상위 컴포넌트 입니다.
+ */
 
 export default function FabricEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -73,6 +82,9 @@ export default function FabricEditor() {
           case "text":
             addTextFn(canvas, x, y, "변수 string", setSelectedTool);
             break;
+          case "polygon":
+            addPolygonFn(canvas, x, y, setSelectedTool);
+            break;
         }
       };
 
@@ -98,6 +110,13 @@ export default function FabricEditor() {
           canvas.discardActiveObject();
           canvas.requestRenderAll();
         }
+
+        // esc 키 누르면 폴리곤 그리기 취소
+        if (event.key === "Escape" && canvas) {
+          if (isPolygonDrawing()) {
+            cancelPolygonDrawing(canvas, setSelectedTool);
+          }
+        }
       };
 
       window.addEventListener("keydown", handleKeyDown);
@@ -121,6 +140,24 @@ export default function FabricEditor() {
       />
       {canvas && !(canvas instanceof HTMLCanvasElement) && (
         <Settings canvas={canvas} />
+      )}
+      {/* 폴리곤 그리기 안내 메시지 */}
+      {selectedTool === "polygon" && (
+        <div
+          style={{
+            position: "fixed",
+            top: "80px",
+            left: "20px",
+            background: "rgba(0, 0, 0, 0.8)",
+            color: "white",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "14px",
+            zIndex: 1000,
+          }}
+        >
+          폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
+        </div>
       )}
     </div>
   );

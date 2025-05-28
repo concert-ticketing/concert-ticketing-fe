@@ -35,6 +35,7 @@ export function RectSize({
           }
         });
         group.set({ width: result });
+        group.set({ scaleY: 1, scaleX: 1 });
       } else if (selectedObject.type === "rect") {
         selectedObject.set({ width: result });
       }
@@ -58,6 +59,7 @@ export function RectSize({
           }
         });
         group.set({ height: intValue });
+        group.set({ scaleY: 1, scaleX: 1 });
       } else if (selectedObject.type === "rect") {
         selectedObject.set({ height: intValue });
       }

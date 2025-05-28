@@ -27,16 +27,17 @@ export function StrokeWidth({
       if (selectedObject.type === "group") {
         const group = selectedObject as fabric.Group;
         group._objects.forEach((obj) => {
-          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
+          // 그룹 내 모든 객체에 strokeWidth 적용 (텍스트 제외)
+          if (obj.type !== "i-text") {
             obj.set("strokeWidth", newStrokeWidth);
           }
         });
         group.set("strokeWidth", newStrokeWidth);
-      } else if (
-        selectedObject instanceof fabric.Rect ||
-        selectedObject instanceof fabric.Circle
-      ) {
-        selectedObject.set("strokeWidth", newStrokeWidth);
+      } else {
+        // 모든 fabric 객체에 strokeWidth 적용 (텍스트 제외)
+        if (selectedObject.type !== "i-text") {
+          selectedObject.set("strokeWidth", newStrokeWidth);
+        }
       }
       canvas?.requestRenderAll();
     }

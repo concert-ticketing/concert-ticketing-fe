@@ -17,7 +17,7 @@ export function Angle({
 }: AngleProps) {
   // selectedObject가 circle이면서 정비율(scaleX === scaleY)이면 각도 입력 숨김
   if (
-    selectedObject?.type === "circle" &&
+    selectedObject?.type === "circle" || selectedObject?.type === "group" &&
     selectedObject.scaleX === selectedObject.scaleY
   ) {
     return null;

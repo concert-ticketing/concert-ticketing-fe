@@ -1,18 +1,19 @@
+import { getColorString } from "@/utils/getColorString";
 import * as fabric from "fabric";
 
 interface StrokeColorProps {
+  canvas: fabric.Canvas | null;
+  selectedObject: fabric.Object | null;
   strokeColor: string | fabric.TFiller | null;
   setStrokeColor: (value: string) => void;
-  selectedObject: fabric.Object | null;
-  canvas: fabric.Canvas | null;
   disabled: boolean;
 }
 
 export function StrokeColor({
+  canvas,
+  selectedObject,
   strokeColor,
   setStrokeColor,
-  selectedObject,
-  canvas,
   disabled,
 }: StrokeColorProps) {
   if (selectedObject?.type === "i-text") return null;
@@ -40,7 +41,7 @@ export function StrokeColor({
       <label>테두리 색</label>
       <input
         type="color"
-        value={typeof strokeColor || "#000000"}
+        value={getColorString(strokeColor)}
         onChange={(e) => handleStrokeChange(e.target.value)}
         disabled={disabled}
       />
