@@ -1,147 +1,37 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 
-import styles from "./styles.module.css";
+import styles from "./canvas.module.css";
 
-import Toolbar from "./Toolbar";
-import Settings from "./Settings";
+import Toolbar from "./settings/Toolbar";
+import Settings from "./settings";
+
+import { addRectangleFn } from "./shapes/Rect";
+import { addCircleFn } from "./shapes/Circle";
+import { addTextFn } from "./shapes/Text";
+import {
+  addPolygonFn,
+  cancelPolygonDrawing,
+  isPolygonDrawing,
+} from "./shapes/Polygon";
+
+/**
+ * 캔버스 초기 생성, 도구 선택 및 이벤트 처리를 위한 상위 컴포넌트 입니다.
+ */
 
 export default function FabricEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const selectedToolRef = useRef<"rect" | "circle" | "text" | "group" | null>(
-    null
-  );
+  const selectedToolRef = useRef<
+    "rect" | "circle" | "text" | "group" | "polygon" | null
+  >(null);
   const [selectedTool, setSelectedTool] = useState<
-    "rect" | "circle" | "text" | "group" | null
+    "rect" | "circle" | "text" | "group" | "polygon" | null
   >(null);
 
   useEffect(() => {
     selectedToolRef.current = selectedTool;
   }, [selectedTool]);
-
-  // 사각형 생성
-  const addRectangle = useCallback(
-    (x: number, y: number) => {
-      if (canvas) {
-        const rect = new fabric.Rect({
-          width: 60,
-          height: 60,
-          fill: "#ffffff",
-          strokeWidth: 1,
-          stroke: "#000000",
-          strokeUniform: true,
-          originX: "center",
-          originY: "center",
-        }) as fabric.Rect & { id: string };
-
-        const label = new fabric.IText("S1", {
-          fontSize: 16,
-          fill: "#000000",
-          originX: "center",
-          originY: "center",
-          editable: true,
-          selectable: true,
-          left: 0,
-          top: 0,
-        }) as fabric.FabricObject;
-
-        const group = new fabric.Group([rect, label], {
-          left: x,
-          top: y,
-          originX: "center",
-          originY: "center",
-          selectable: true,
-          stroke: "#000000",
-          strokeWidth: 1,
-          strokeUniform: true,
-          subTargetCheck: true,
-        }) as fabric.Group & { id: string };
-
-        group.id = `rect-${Date.now()}`;
-        canvas.add(group);
-        canvas.setActiveObject(group);
-        canvas.renderAll();
-        setSelectedTool(null);
-      }
-    },
-    [canvas]
-  );
-
-  // 원 생성
-  const addCircle = useCallback(
-    (x: number, y: number) => {
-      if (canvas) {
-        const circle = new fabric.Circle({
-          radius: 30,
-          fill: "#ffffff",
-          strokeWidth: 1,
-          stroke: "#000000",
-          strokeUniform: true, // strokeUniform 적용
-          originX: "center",
-          originY: "center",
-        }) as fabric.Circle & { id: string };
-
-        const label = new fabric.IText("S1", {
-          fontSize: 16,
-          fill: "#000000",
-          originX: "center",
-          originY: "center",
-          editable: true,
-          selectable: true,
-          left: 0,
-          top: 0,
-        }) as fabric.FabricObject;
-
-        const group = new fabric.Group([circle, label], {
-          left: x,
-          top: y,
-          originX: "center",
-          originY: "center",
-          selectable: true,
-          subTargetCheck: true,
-        }) as fabric.Group & { id: string };
-
-        // 그룹 내부의 객체에 strokeUniform 적용
-        group._objects.forEach((obj) => {
-          if (obj instanceof fabric.Rect || obj instanceof fabric.Circle) {
-            obj.set("strokeUniform", true);
-          }
-        });
-
-        group.id = `circle-${Date.now()}`;
-        canvas.add(group);
-        canvas.setActiveObject(group);
-        canvas.renderAll();
-        setSelectedTool(null);
-      }
-    },
-    [canvas]
-  );
-
-  // 텍스트 생성
-  const addText = useCallback(
-    (x: number, y: number) => {
-      if (canvas) {
-        const text = new fabric.IText("텍스트 입력", {
-          left: x,
-          top: y,
-          fontSize: 16,
-          fill: "#000000",
-          selectable: true,
-          editable: true,
-          lockScalingX: true,
-          lockScalingY: true,
-        }) as fabric.Text & { id: string };
-        text.id = `text-${Date.now()}`;
-        canvas.add(text);
-        canvas.setActiveObject(text);
-        canvas.renderAll();
-        setSelectedTool(null);
-      }
-    },
-    [canvas]
-  );
 
   // 초기 캔버스 생성 및 리사이즈 핸들링
   useEffect(() => {
@@ -151,6 +41,7 @@ export default function FabricEditor() {
         height: window.innerHeight,
         selection: true,
       });
+
       initCanvas.backgroundColor = "#dfdfdf";
       initCanvas.renderAll();
 
@@ -183,13 +74,16 @@ export default function FabricEditor() {
 
         switch (selectedToolRef.current) {
           case "rect":
-            addRectangle(x, y);
+            addRectangleFn(canvas, x, y, setSelectedTool);
             break;
           case "circle":
-            addCircle(x, y);
+            addCircleFn(canvas, x, y, setSelectedTool);
             break;
           case "text":
-            addText(x, y);
+            addTextFn(canvas, x, y, "변수 string", setSelectedTool);
+            break;
+          case "polygon":
+            addPolygonFn(canvas, x, y, setSelectedTool);
             break;
         }
       };
@@ -216,6 +110,13 @@ export default function FabricEditor() {
           canvas.discardActiveObject();
           canvas.requestRenderAll();
         }
+
+        // esc 키 누르면 폴리곤 그리기 취소
+        if (event.key === "Escape" && canvas) {
+          if (isPolygonDrawing()) {
+            cancelPolygonDrawing(canvas, setSelectedTool);
+          }
+        }
       };
 
       window.addEventListener("keydown", handleKeyDown);
@@ -226,7 +127,7 @@ export default function FabricEditor() {
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [canvas, addRectangle, addCircle, addText]);
+  }, [canvas]);
 
   return (
     <div className={styles.canvas}>
@@ -239,6 +140,24 @@ export default function FabricEditor() {
       />
       {canvas && !(canvas instanceof HTMLCanvasElement) && (
         <Settings canvas={canvas} />
+      )}
+      {/* 폴리곤 그리기 안내 메시지 */}
+      {selectedTool === "polygon" && (
+        <div
+          style={{
+            position: "fixed",
+            top: "80px",
+            left: "20px",
+            background: "rgba(0, 0, 0, 0.8)",
+            color: "white",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "14px",
+            zIndex: 1000,
+          }}
+        >
+          폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
+        </div>
       )}
     </div>
   );

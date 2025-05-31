@@ -1,11 +1,19 @@
 import Image from "next/image";
 
-import styles from "./styles.module.css";
-import { circleIcon, pointerIcon, squareIcon, textIcon } from "@public/icons";
+import styles from "../canvas.module.css";
+import {
+  circleIcon,
+  pointerIcon,
+  polygonIcon,
+  squareIcon,
+  textIcon,
+} from "@public/icons";
 
 interface ToolbarProps {
-  setSelectedTool: (tool: "rect" | "circle" | "text" | "group" | null) => void;
-  selectedTool: "rect" | "circle" | "text" | "group" | null;
+  setSelectedTool: (
+    tool: "rect" | "circle" | "text" | "group" | "polygon" | null
+  ) => void;
+  selectedTool: "rect" | "circle" | "text" | "group" | "polygon" | null;
 }
 
 export default function Toolbar({
@@ -31,6 +39,12 @@ export default function Toolbar({
         className={selectedTool === "text" ? styles.active : ""}
       >
         <Image src={textIcon} alt="text icon" priority />
+      </button>
+      <button
+        onClick={() => setSelectedTool("polygon")}
+        className={selectedTool === "polygon" ? styles.active : ""}
+      >
+        <Image src={polygonIcon} alt="polygon icon" priority />
       </button>
       <button
         onClick={() => setSelectedTool(null)}
