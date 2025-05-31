@@ -259,8 +259,8 @@ function finishPolygon(
   const polygon = new fabric.Polygon(polygonPoints, {
     left: Math.min(...polygonPoints.map((p) => p.x)),
     top: Math.min(...polygonPoints.map((p) => p.y)),
-    fill: "rgba(0, 255, 0, 0.3)",
-    stroke: "#0000ff",
+    fill: "#ffffff",
+    stroke: "#000000",
     strokeWidth: 1,
     selectable: true,
     evented: true,

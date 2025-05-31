@@ -48,7 +48,7 @@ export const addRectangleFn = (
     subTargetCheck: true,
   }) as fabric.Group & { id: string };
 
-  group._objects.forEach((obj) => {
+  group.getObjects().find((obj) => {
     if (obj instanceof fabric.Rect) {
       obj.set("strokeUniform", true);
     }

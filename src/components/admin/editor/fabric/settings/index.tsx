@@ -12,11 +12,10 @@ import { StrokeColor } from "./StrokeFill";
 import { RectSize } from "./RectSize";
 import { CircleDiameter } from "./CircleDiameter";
 import { TextObject } from "./TextObject";
+import { TextColor } from "./TextColor";
 
 import styles from "../canvas.module.css";
 import { getColorString } from "@/utils/getColorString";
-import { TextColor } from "./TextColor";
-// import { normalizeObjectSize } from "@/utils/fabricUtils";
 
 interface SettingProps {
   canvas: fabric.Canvas;
@@ -35,7 +34,7 @@ export default function Settings({ canvas }: SettingProps) {
   const [height, setHeight] = useState<string | number>("");
   const [diameter, setDiameter] = useState<string | number>("");
   const [color, setColor] = useState<string>("#ffffff");
-  const [textColor, setTextColor] = useState<string>("#000000"); // 그룹 안에 text color
+  const [textColor, setTextColor] = useState<string>("#000000");
   const [text, setText] = useState<Record<string, TextState>>({});
   const [position, setPosition] = useState<{ x: number; y: number }>({
     x: 0,
@@ -58,7 +57,7 @@ export default function Settings({ canvas }: SettingProps) {
     setAngle(0);
     setOpacity(1);
     setStrokeWidth(0);
-    setStrokeColor("#ffffff");
+    setStrokeColor("#000000"); // 테두리색도 검은색으로 초기화
     setSelectedObject(null);
   }, []);
 
@@ -86,39 +85,66 @@ export default function Settings({ canvas }: SettingProps) {
     setColor((obj.fill as string) || "#ffffff");
   }, []);
 
-  // 사각형/그룹 객체 처리
-  const handleRectOrGroupObject = useCallback((obj: fabric.Object) => {
-    setWidth(Math.round(obj.width * obj.scaleX));
-    setHeight(Math.round(obj.height * obj.scaleY));
-    setColor(obj.fill as string);
-    setDiameter("");
+  // 원의 지름 계산 함수
+  const calculateCircleDiameter = useCallback(
+    (circle: fabric.Circle, group?: fabric.Group) => {
+      if (!circle || !circle.radius) return 0;
 
-    if (obj.type === "group") {
-      const group = obj as fabric.Group;
-      const circle = group
-        .getObjects()
-        .find((o) => o.type === "circle") as fabric.Circle;
+      const circleScale = circle.scaleX || 1;
+      const groupScale = group ? group.scaleX || 1 : 1;
+      const effectiveRadius = circle.radius * circleScale * groupScale;
 
-      if (circle) {
-        const effectiveRadius =
-          (circle.radius || 0) * (circle.scaleX || 1) * (group.scaleX || 1);
-        setDiameter(Math.round(effectiveRadius * 2));
+      return Math.round(effectiveRadius * 2);
+    },
+    []
+  );
+
+  // 그룹 객체 처리
+  const handleGroupObject = useCallback(
+    (obj: fabric.Object, updateDiameter: boolean = true) => {
+      if (obj.type === "group") {
+        const group = obj as fabric.Group;
+
+        // 그룹 내에서 Circle과 Rect 찾기
+        const circle = group
+          .getObjects()
+          .find((o) => o.type === "circle") as fabric.Circle;
+        const rect = group
+          .getObjects()
+          .find((o) => o.type === "rect") as fabric.Rect;
+
+        if (circle && updateDiameter) {
+          const calculatedDiameter = calculateCircleDiameter(circle, group);
+          setDiameter(calculatedDiameter);
+        }
+
+        if (rect) {
+          // Rect가 있으면 크기 설정
+          setWidth(
+            Math.round(
+              (rect.width || 0) * (rect.scaleX || 1) * (group.scaleX || 1)
+            )
+          );
+          setHeight(
+            Math.round(
+              (rect.height || 0) * (rect.scaleY || 1) * (group.scaleY || 1)
+            )
+          );
+        }
+
+        // 그룹의 배경색 처리 - 그룹 내 첫 번째 도형의 색상 가져오기
+        const firstShape = circle || rect;
+        if (firstShape && firstShape.fill) {
+          setColor(getColorString(firstShape.fill));
+        }
       }
-    }
-  }, []);
+    },
+    [calculateCircleDiameter]
+  );
 
-  // 원형 객체 처리
-  const handleCircleObject = useCallback((obj: fabric.Object) => {
-    const circle = obj as fabric.Circle;
-    setDiameter(Math.round(circle.radius * 2 * obj.scaleX));
-    setColor(obj.fill as string);
-    setWidth("");
-    setHeight("");
-  }, []);
-
-  // 메인 객체 선택 핸들러
+  // 메인 객체 선택 핸들러 (크기 업데이트 포함)
   const handleObjectSelection = useCallback(
-    (obj: fabric.Object | undefined) => {
+    (obj: fabric.Object | undefined, updateSizes: boolean = true) => {
       if (!obj) return;
 
       setSelectedObject(obj);
@@ -152,17 +178,33 @@ export default function Settings({ canvas }: SettingProps) {
           handleTextObject(targetObject);
           break;
         case "rect":
-        case "group":
-          handleRectOrGroupObject(targetObject);
+          if (updateSizes) {
+            setWidth(
+              Math.round((targetObject.width || 0) * (targetObject.scaleX || 1))
+            );
+            setHeight(
+              Math.round(
+                (targetObject.height || 0) * (targetObject.scaleY || 1)
+              )
+            );
+          }
           break;
         case "circle":
+          if (updateSizes) {
+            const circle = targetObject as fabric.Circle;
+            const calculatedDiameter = calculateCircleDiameter(circle);
+            setDiameter(calculatedDiameter);
+          }
+          break;
         case "group":
-          handleCircleObject(targetObject);
+          handleGroupObject(targetObject, updateSizes);
           break;
         default:
-          setWidth("");
-          setHeight("");
-          setDiameter("");
+          if (updateSizes) {
+            setWidth("");
+            setHeight("");
+            setDiameter("");
+          }
           setText({});
           break;
       }
@@ -170,9 +212,21 @@ export default function Settings({ canvas }: SettingProps) {
     [
       checkObjectLockState,
       handleTextObject,
-      handleRectOrGroupObject,
-      handleCircleObject,
+      handleGroupObject,
+      calculateCircleDiameter,
     ]
+  );
+
+  // 위치/각도만 업데이트하는 핸들러 (크기는 업데이트하지 않음)
+  const handleObjectPositionChange = useCallback(
+    (obj: fabric.Object | undefined) => {
+      if (!obj) return;
+
+      // 위치와 각도만 업데이트
+      setPosition({ x: obj.left || 0, y: obj.top || 0 });
+      setAngle(obj.angle || 0);
+    },
+    []
   );
 
   // 선택 해제 처리
@@ -194,7 +248,7 @@ export default function Settings({ canvas }: SettingProps) {
   // 객체 수정 처리
   const handleObjectModified = useCallback(
     (e: { target?: fabric.Object }) => {
-      handleObjectSelection(e.target);
+      handleObjectSelection(e.target, true); // 크기 업데이트 포함
 
       if (e.target) {
         const obj = e.target;
@@ -204,15 +258,13 @@ export default function Settings({ canvas }: SettingProps) {
             (o) => o.type === "circle"
           ) as fabric.Circle;
           if (circle) {
-            setDiameter(Math.round(circle.radius * 2 * (circle.scaleX || 1)));
+            const calculatedDiameter = calculateCircleDiameter(circle, group);
+            setDiameter(calculatedDiameter);
           }
-        } else if (obj.type === "circle") {
-          const circle = obj as fabric.Circle;
-          setDiameter(Math.round(circle.radius * 2 * obj.scaleX));
         }
       }
     },
-    [handleObjectSelection]
+    [handleObjectSelection, calculateCircleDiameter]
   );
 
   // 스케일링 처리
@@ -222,8 +274,8 @@ export default function Settings({ canvas }: SettingProps) {
       if (!obj) return;
 
       if (obj.type === "rect" || obj.type === "group") {
-        setWidth(Math.round(obj.width * obj.scaleX));
-        setHeight(Math.round(obj.height * obj.scaleY));
+        setWidth(Math.round((obj.width || 0) * (obj.scaleX || 1)));
+        setHeight(Math.round((obj.height || 0) * (obj.scaleY || 1)));
 
         if (obj.type === "group") {
           const group = obj as fabric.Group;
@@ -231,22 +283,19 @@ export default function Settings({ canvas }: SettingProps) {
             .getObjects()
             .find((o) => o.type === "circle") as fabric.Circle;
           if (circle) {
-            const effectiveRadius =
-              (circle.radius || 0) * (circle.scaleX || 1) * (group.scaleX || 1);
-            const calculatedDiameter = Math.round(effectiveRadius * 2);
+            const calculatedDiameter = calculateCircleDiameter(circle, group);
             setDiameter(calculatedDiameter);
-          } else {
-            setDiameter("");
           }
         }
-      } else {
-        setDiameter("");
+      } else if (obj.type === "circle") {
+        const circle = obj as fabric.Circle;
+        const calculatedDiameter = calculateCircleDiameter(circle);
+        setDiameter(calculatedDiameter);
       }
 
-      // normalizeObjectSize(obj);
       canvas.requestRenderAll();
     },
-    [canvas]
+    [canvas, calculateCircleDiameter]
   );
 
   // 더블클릭 처리 (텍스트 편집)
@@ -278,16 +327,16 @@ export default function Settings({ canvas }: SettingProps) {
     if (!canvas) return;
 
     const selectionCreatedHandler = (e: { selected: fabric.Object[] }) => {
-      handleObjectSelection(e.selected[0]);
+      handleObjectSelection(e.selected[0], true);
     };
     const selectionUpdatedHandler = (e: { selected: fabric.Object[] }) => {
-      handleObjectSelection(e.selected[0]);
+      handleObjectSelection(e.selected[0], true);
     };
     const objectMovingHandler = (e: { target?: fabric.Object }) => {
-      handleObjectSelection(e.target);
+      handleObjectPositionChange(e.target); // 위치만 업데이트
     };
     const objectRotatingHandler = (e: { target?: fabric.Object }) => {
-      handleObjectSelection(e.target);
+      handleObjectPositionChange(e.target); // 위치와 각도만 업데이트
     };
 
     // 이벤트 리스너 등록
@@ -314,6 +363,7 @@ export default function Settings({ canvas }: SettingProps) {
   }, [
     canvas,
     handleObjectSelection,
+    handleObjectPositionChange,
     handleSelectionCleared,
     handleObjectModified,
     handleObjectScaling,

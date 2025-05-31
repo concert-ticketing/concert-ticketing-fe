@@ -1,77 +1,67 @@
 import * as fabric from "fabric";
 
-export const normalizeObjectSize = (obj: fabric.Object) => {
-  if (!obj) return;
-
-  // activeSelection은 내부 객체를 정규화해야 함
-  if (obj.type === "activeSelection") {
-    (obj as fabric.ActiveSelection).getObjects().forEach((child) => {
-      normalizeObjectSize(child);
-    });
-    return;
+/**
+ * Fabric.js 객체의 유효 너비를 계산합니다.
+ * 객체가 그룹 내부에 있을 경우 그룹의 스케일도 함께 고려합니다.
+ * @param obj 계산할 Fabric.js 객체
+ * @returns 객체의 유효 너비 (정수)
+ */
+export const getEffectiveWidth = (obj: fabric.Object): number => {
+  if (obj.group) {
+    // 객체가 그룹 안에 있을 경우: (자신의 너비 * 자신의 스케일X) * (부모 그룹의 스케일X)
+    return Math.round(
+      (obj.width || 0) * (obj.scaleX || 1) * (obj.group.scaleX || 1)
+    );
   }
+  // 단일 객체일 경우: 자신의 너비 * 자신의 스케일X
+  return Math.round((obj.width || 0) * (obj.scaleX || 1));
+};
 
-  // 그룹 객체는 내부 객체를 정규화하고, 자신은 scale 1, width/height는 실제 크기로.
-  if (obj.type === "group") {
-    const group = obj as fabric.Group;
-    const currentScaleX = group.scaleX || 1;
-    const currentScaleY = group.scaleY || 1;
-
-    // 그룹 내 자식 객체들의 스케일을 그룹 스케일로 나눈 후, 자식 객체 자체 스케일을 1로 만듭니다.
-    group.getObjects().forEach((child) => {
-      child.set({
-        scaleX: (child.scaleX || 1) * currentScaleX,
-        scaleY: (child.scaleY || 1) * currentScaleY,
-      });
-      child.setCoords(); // 자식 객체의 내부 좌표 업데이트
-      // 자식 객체에 대해서도 normalizeObjectSize를 재귀적으로 호출할 수 있지만,
-      // 보통은 그룹 스케일이 자식에게 반영된 후, 자식은 다시 1로 스케일이 복구되는 것을 의미합니다.
-      // 여기서는 부모 스케일을 자식에게 '상속'시킨 후 자식 스케일을 1로 만드는 개념이 필요합니다.
-      // 예를 들어:
-      // if (child.type === 'circle') {
-      //    const circle = child as fabric.Circle;
-      //    circle.set({ radius: (circle.radius || 0) * (circle.scaleX || 1) });
-      //    circle.scaleX = 1;
-      //    circle.scaleY = 1;
-      // } else if (child.type === 'rect') {
-      //    child.set({ width: (child.width || 0) * (child.scaleX || 1), height: (child.height || 0) * (child.scaleY || 1) });
-      //    child.scaleX = 1;
-      //    child.scaleY = 1;
-      // }
-    });
-
-    // 그룹 자체의 width, height를 실제 렌더링된 크기로 설정하고 스케일을 1로 만듭니다.
-    // Fabric.js 그룹은 내부 객체들의 경계 박스에 기반하여 width/height를 계산합니다.
-    // 이 작업은 setCoords()를 호출하여 내부적으로 수행됩니다.
-    // 명시적으로 width/height를 설정하기보다는, setCoords() 호출 후 group.width, group.height를 사용하는 것이 좋습니다.
-    group.set({
-      width: group.width * (group.scaleX || 1),
-      height: group.height * (group.scaleY || 1),
-      scaleX: 1,
-      scaleY: 1,
-    });
-    group.setCoords(); // 그룹 자체의 경계 상자 업데이트
-    return;
+/**
+ * Fabric.js 객체의 유효 높이를 계산합니다.
+ * 객체가 그룹 내부에 있을 경우 그룹의 스케일도 함께 고려합니다.
+ * @param obj 계산할 Fabric.js 객체
+ * @returns 객체의 유효 높이 (정수)
+ */
+export const getEffectiveHeight = (obj: fabric.Object): number => {
+  if (obj.group) {
+    // 객체가 그룹 안에 있을 경우: (자신의 높이 * 자신의 스케일Y) * (부모 그룹의 스케일Y)
+    return Math.round(
+      (obj.height || 0) * (obj.scaleY || 1) * (obj.group.scaleY || 1)
+    );
   }
+  // 단일 객체일 경우: 자신의 높이 * 자신의 스케일Y
+  return Math.round((obj.height || 0) * (obj.scaleY || 1));
+};
 
-  // 일반 객체 (rect, circle, i-text 등)
-  const currentScaleX = obj.scaleX || 1;
-  const currentScaleY = obj.scaleY || 1;
-
+/**
+ * Fabric.js 원형 객체 또는 그룹 내 원형 객체의 유효 지름을 계산합니다.
+ * 그룹 내부에 원형이 있을 경우 그룹의 스케일도 함께 고려합니다.
+ * @param obj 계산할 Fabric.js 객체 (fabric.Circle 또는 fabric.Group)
+ * @returns 객체의 유효 지름 (정수), 원형 객체가 아니거나 그룹 내에 원형이 없으면 NaN 반환
+ */
+export const getEffectiveDiameter = (obj: fabric.Object): number => {
   if (obj.type === "circle") {
     const circle = obj as fabric.Circle;
-    circle.set({
-      radius: (circle.radius || 0) * currentScaleX, // 현재 스케일을 반경에 통합
-      scaleX: 1, // 스케일을 1로 재설정
-      scaleY: 1,
-    });
-  } else if (obj.type === "rect" || obj.type === "i-text") {
-    obj.set({
-      width: (obj.width || 0) * currentScaleX, // 현재 스케일을 너비에 통합
-      height: (obj.height || 0) * currentScaleY, // 현재 스케일을 높이에 통합
-      scaleX: 1, // 스케일을 1로 재설정
-      scaleY: 1,
-    });
+    // 단일 원형 객체의 경우: (반지름 * 2) * 자신의 스케일X
+    return Math.round((circle.radius || 0) * 2 * (circle.scaleX || 1));
+  } else if (obj.type === "group") {
+    const group = obj as fabric.Group;
+    // 그룹 내에서 'circle' 타입의 객체를 찾습니다.
+    const circleInGroup = group
+      .getObjects()
+      .find((o) => o.type === "circle") as fabric.Circle;
+
+    if (circleInGroup) {
+      // 그룹 내 원형 객체의 유효 반지름 계산:
+      // (자식 원형의 반지름 * 자식 원형의 스케일X) * (부모 그룹의 스케일X)
+      // 일반적으로 그룹 스케일은 X, Y 축이 동일하다고 가정합니다.
+      const effectiveRadius =
+        (circleInGroup.radius || 0) *
+        (circleInGroup.scaleX || 1) *
+        (group.scaleX || 1);
+      return Math.round(effectiveRadius * 2); // 유효 반지름을 지름으로 변환
+    }
   }
-  obj.setCoords(); // 객체 경계 상자 업데이트
+  return NaN; // 원형 객체가 아니거나 그룹 내에 원형이 없는 경우
 };

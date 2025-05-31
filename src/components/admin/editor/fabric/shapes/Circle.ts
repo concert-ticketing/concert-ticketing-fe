@@ -48,7 +48,7 @@ export const addCircleFn = (
   }) as fabric.Group & { id: string };
 
   // 그룹 내부의 객체에 strokeUniform 적용
-  group._objects.forEach((obj) => {
+  group.getObjects().find((obj) => {
     if (obj instanceof fabric.Circle) {
       obj.set("strokeUniform", true);
     }

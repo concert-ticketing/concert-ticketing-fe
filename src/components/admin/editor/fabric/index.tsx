@@ -3,8 +3,9 @@ import * as fabric from "fabric";
 
 import styles from "./canvas.module.css";
 
-import Toolbar from "./settings/Toolbar";
+import Toolbar from "./Toolbar";
 import Settings from "./settings";
+import BulkObjectCreator from "./bulkObjectCreator";
 
 import { addRectangleFn } from "./shapes/Rect";
 import { addCircleFn } from "./shapes/Circle";
@@ -138,8 +139,12 @@ export default function FabricEditor() {
         tabIndex={0}
         onClick={() => canvasRef.current?.focus()}
       />
+      {/* canvas가 있을 경우 렌더링 */}
       {canvas && !(canvas instanceof HTMLCanvasElement) && (
-        <Settings canvas={canvas} />
+        <>
+          <Settings canvas={canvas} />
+          <BulkObjectCreator canvas={canvas} />
+        </>
       )}
       {/* 폴리곤 그리기 안내 메시지 */}
       {selectedTool === "polygon" && (

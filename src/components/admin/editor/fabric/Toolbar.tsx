@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import styles from "../canvas.module.css";
+import styles from "./canvas.module.css";
 import {
   circleIcon,
   pointerIcon,
