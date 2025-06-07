@@ -1,7 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 
-import styles from './canvas.module.css';
 import {
   circleIcon,
   pointerIcon,
@@ -9,6 +8,8 @@ import {
   squareIcon,
   textIcon,
 } from '@public/icons';
+
+import styles from './canvas.module.css';
 
 interface ToolbarProps {
   setSelectedTool: (

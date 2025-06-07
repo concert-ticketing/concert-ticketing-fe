@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { GridConfig, ObjectConfig } from '@/types/BulkObject';
+import { GridConfig, ObjectConfig } from '@/types/Bulk';
 
-import styles from '../bulkObject.module.css';
-import Tooltip from '../../ui/Tooltip';
+import styles from '../bulk.module.css';
+import Tooltip from '@/components/admin/common/ui/Tooltip';
 
 interface GridSettingsProps {
   gridConfig: GridConfig;

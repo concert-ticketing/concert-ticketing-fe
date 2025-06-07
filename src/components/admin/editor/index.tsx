@@ -4,7 +4,7 @@ import * as fabric from 'fabric';
 import styles from './canvas.module.css';
 import Toolbar from './Toolbar';
 import Settings from './settings';
-import BulkObjectCreator from './bulkObjectCreator';
+import BulkObjectCreator from './bulkCreator';
 import { addRectangleFn } from './shapes/Rect';
 import { addCircleFn } from './shapes/Circle';
 import { addTextFn } from './shapes/Text';

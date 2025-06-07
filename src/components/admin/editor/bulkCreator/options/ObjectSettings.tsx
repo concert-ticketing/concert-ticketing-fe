@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { ObjectConfig, ObjectType } from '@/types/BulkObject';
+import { ObjectConfig, ObjectType } from '@/types/Bulk';
 
-import styles from '../bulkObject.module.css';
+import styles from '../bulk.module.css';
 
 interface ObjectSettingsProps {
   objectConfig: ObjectConfig;

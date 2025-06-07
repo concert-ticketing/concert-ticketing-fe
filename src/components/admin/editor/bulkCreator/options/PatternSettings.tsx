@@ -1,21 +1,21 @@
 import React from 'react';
 
-import { PatternConfig } from '@/types/BulkObject';
+import { PatternConfig } from '@/types/Bulk';
 
-import styles from '../bulkObject.module.css';
+import styles from '../bulk.module.css';
 
 interface PatternSettingsProps {
   patternConfig: PatternConfig;
   setPatternConfig: React.Dispatch<React.SetStateAction<PatternConfig>>;
   autoSpacing: boolean;
-  setAutoSpacing: React.Dispatch<React.SetStateAction<boolean>>; // 추가
+  setAutoSpacing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function PatternSettings({
   patternConfig,
   setPatternConfig,
   autoSpacing,
-  setAutoSpacing, // 추가
+  setAutoSpacing,
 }: PatternSettingsProps) {
   return (
     <div className={styles.section}>

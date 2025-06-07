@@ -1,0 +1,520 @@
+/* Container */
+.container {
+  padding: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* Header */
+.header {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.headerInfo {
+  flex: 1;
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.createButton {
+  padding: 12px 20px;
+  background-color: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  transition: background-color 0.2s ease;
+}
+
+.createButton:hover {
+  background-color: #2563eb;
+}
+
+/* Filter Grid */
+.filterGrid {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sortButton {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.sortButton:hover {
+  background-color: #f3f4f6;
+}
+
+.searchInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.viewModeButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.viewModeButton {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.viewModeButton:hover {
+  background-color: #f3f4f6;
+}
+
+.viewModeButton.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Venue Grid */
+.venueGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.venueGrid.listMode {
+  grid-template-columns: 1fr;
+}
+
+/* Empty State */
+.emptyState {
+  background-color: white;
+  padding: 48px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+  font-size: 20px;
+}
+
+.emptyDescription {
+  margin: 0 0 24px 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.emptyCreateButton {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.emptyCreateButton:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filterGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .venueGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sortButton:hover {
+  background-color: #f3f4f6;
+}
+
+.searchInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.viewModeButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.viewModeButton {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.viewModeButton:hover {
+  background-color: #f3f4f6;
+}
+
+.viewModeButton.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Venue Grid */
+.venueGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.venueGrid.listMode {
+  grid-template-columns: 1fr;
+}
+
+/* Venue Card */
+.venueCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.venueCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.venueCard.archived {
+  opacity: 0.7;
+}
+
+/* Thumbnail */
+.thumbnail {
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
+  position: relative;
+}
+
+.statusContainer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+/* Status Badges */
+.statusBadge {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid;
+}
+
+.statusActive {
+  background-color: #d1fae5;
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.statusDraft {
+  background-color: #fef3c7;
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.statusArchived {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.2);
+}
+
+/* Venue Info */
+.venueInfo {
+  margin-bottom: 12px;
+}
+
+.venueName {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.venueLocation {
+  margin: 0 0 8px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.venueDescription {
+  margin: 0;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.4;
+  height: 36px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Tags */
+.tagContainer {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 2px 6px;
+  font-size: 10px;
+  background-color: #e5e7eb;
+  color: #374151;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Date Info */
+.dateInfo {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.editButton {
+  flex: 1;
+  padding: 10px;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.editButton:hover {
+  opacity: 0.9;
+}
+
+.duplicateButton,
+.deleteButton {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.duplicateButton {
+  background-color: #6b7280;
+  color: white;
+}
+
+.duplicateButton:hover {
+  background-color: #4b5563;
+}
+
+.deleteButton {
+  background-color: #ef4444;
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #dc2626;
+}
+
+/* Empty State */
+.emptyState {
+  background-color: white;
+  padding: 48px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+  font-size: 20px;
+}
+
+.emptyDescription {
+  margin: 0 0 24px 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.emptyCreateButton {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.emptyCreateButton:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filterGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .venueGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

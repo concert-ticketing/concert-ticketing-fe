@@ -158,7 +158,8 @@
     "no-use-before-define": ["error", { "functions": false, "classes": true }], // 함수는 선언 전 사용 허용, 클래스는 금지
     "no-unused-vars": ["warn", { "args": "none" }], // 함수 매개변수는 사용하지 않아도 경고 안함
     "no-restricted-globals": ["error", { "name": "event", "message": "Use local parameter instead." }], // isNaN은 허용, event만 제한
-    "no-else-return": "off" // else 에서 return 강제 안함
+    "no-else-return": "off", // else 에서 return 강제 안함
+    "no-alert": "off" // alert, confirm 허용
   },
   "globals": {
     "navigation": "readonly", // 'navigation'을 전역 읽기 전용 변수로 선언

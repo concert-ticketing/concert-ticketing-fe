@@ -1,0 +1,757 @@
+/* Container */
+.container {
+  padding: 0;
+  font-family: system-ui, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.headerContent {
+  max-width: 800px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.breadcrumbLink {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.breadcrumbLink:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbSeparator {
+  margin: 0 8px;
+  color: #6b7280;
+}
+
+.breadcrumbCurrent {
+  color: #6b7280;
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Content */
+.content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  align-items: start;
+  padding: 0 15px;
+}
+
+/* Preview Section */
+.previewSection {
+  position: sticky;
+  top: 24px;
+  padding: 12px;
+}
+
+.sectionTitle {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.previewCard {
+  max-width: 300px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.previewThumbnail {
+  width: 100%;
+  height: 160px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.previewInfo {
+  /* Preview info styles */
+}
+
+.previewName {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.previewLocation {
+  margin: 0 0 8px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.previewDescription {
+  margin: 0 0 16px 0;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.previewStats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.previewStat {
+  padding: 4px 8px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.previewTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.previewTag {
+  padding: 2px 6px;
+  font-size: 10px;
+  background-color: #e5e7eb;
+  color: #374151;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Form */
+.form {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section {
+  padding: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.input,
+.select {
+  width: 90%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputError {
+  border-color: #ef4444;
+}
+
+.inputError:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.errorMessage {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.inputHint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Color Grid */
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  max-width: 240px;
+}
+
+.colorButton {
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.colorButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.colorButtonActive {
+  border-color: #1f2937;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Radio Group */
+.radioGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.radioOption {
+  flex: 1;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.radioInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radioContent {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.radioInput:checked + .radioContent {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.radioContent:hover {
+  border-color: #3b82f6;
+}
+
+.radioIcon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.radioText {
+  flex: 1;
+}
+
+.radioLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.radioDesc {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Capacity Info */
+.capacityInfo {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0369a1;
+}
+
+/* Tag Grid */
+.tagGrid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tagButton {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tagButton:hover:not(:disabled) {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.tagButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tagButtonActive {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+  color: white;
+}
+
+.tagButtonActive:hover {
+  background-color: #2563eb;
+}
+
+/* Submit Section */
+.submitSection {
+  padding: 24px;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.submitButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.cancelButton {
+  padding: 12px 24px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancelButton:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.submitButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 160px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submitHint {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .previewSection {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .radioGroup {
+    flex-direction: column;
+  }
+  
+  .radioOption {
+    min-width: auto;
+  }
+  
+  .colorGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .submitButtons {
+    flex-direction: column;
+  }
+  
+  .cancelButton,
+  .submitButton {
+    width: 100%;
+  }
+}
+
+/* 이미지 업로드 관련 스타일 */
+.imageUploadSection {
+  margin-bottom: 16px;
+}
+
+.imageUploadBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.imageUploadBox:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.imageInput {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.uploadIcon {
+  font-size: 32px;
+  opacity: 0.6;
+}
+
+.uploadText {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.uploadSubtext {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.imagePreview {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+}
+
+.uploadedImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.removeImageButton:hover {
+  background-color: rgba(239, 68, 68, 0.8);
+}
+
+/* 아이콘 선택 관련 스타일 */
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+  max-width: 600px;
+}
+
+.iconButton {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.2s ease;
+}
+
+.iconButton:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  transform: scale(1.05);
+}
+
+.iconButtonActive {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.iconButtonActive:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+/* 색상 그리드 개선 */
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+  max-width: 520px;
+}
+
+.colorButton {
+  width: 40px;
+  height: 40px;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.colorButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.colorButtonActive {
+  border-color: #1f2937;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 미리보기 썸네일 개선 */
+.previewThumbnail {
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .imageUploadBox,
+  .imagePreview {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .uploadIcon {
+    font-size: 24px;
+  }
+  
+  .uploadText {
+    font-size: 13px;
+  }
+  
+  .uploadSubtext {
+    font-size: 11px;
+  }
+  
+  .iconGrid {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    max-width: 100%;
+  }
+  
+  .iconButton {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .colorGrid {
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+    max-width: 100%;
+  }
+  
+  .colorButton {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}

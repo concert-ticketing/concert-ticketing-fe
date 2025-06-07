@@ -1,18 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import * as fabric from 'fabric';
 
-import { ObjectConfig, GridConfig, PatternConfig, TabType } from '@/types/BulkObject';
+import { ObjectConfig, GridConfig, PatternConfig, TabType } from '@/types/Bulk';
 
 import ObjectSettings from './options/ObjectSettings';
 import GridSettings from './options/GridSettings';
 import PatternSettings from './options/PatternSettings';
-import styles from './bulkObject.module.css';
+import styles from './bulk.module.css';
 
 interface BulkObjectCreatorProps {
   canvas: fabric.Canvas;
 }
 
-export default function BulkObjectCreator({ canvas }: BulkObjectCreatorProps) {
+export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('grid');
   const [autoSpacing, setAutoSpacing] = useState(false);
