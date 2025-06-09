@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { THUMBNAIL_COLORS, PREDEFINED_ICONS, PREDEFINED_TAGS } from './options';
 import styles from './venueCreateForm.module.css';
 
 interface VenueFormData {
@@ -26,80 +27,6 @@ interface FormErrors {
   floorCount?: string;
   estimatedSeats?: string;
 }
-
-const THUMBNAIL_COLORS = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#06b6d4',
-  '#84cc16',
-  '#f97316',
-  '#ec4899',
-  '#6366f1',
-  '#14b8a6',
-  '#eab308',
-];
-
-const PREDEFINED_ICONS = [
-  '🎪',
-  '🎭',
-  '🎵',
-  '🎼',
-  '🎤',
-  '🎨',
-  '🎬',
-  '🎯',
-  '🎲',
-  '🎳',
-  '🏛️',
-  '🏢',
-  '🏟️',
-  '🌟',
-  '⭐',
-  '🔥',
-  '💎',
-  '🎊',
-  '🎉',
-  '🎀',
-  '🎺',
-  '🎸',
-  '🥁',
-  '🎷',
-  '🎹',
-  '🎻',
-  '🪕',
-  '🏆',
-  '👑',
-  '',
-];
-
-const PREDEFINED_TAGS = [
-  '대형',
-  '중형',
-  '소형',
-  '실내',
-  '야외',
-  '복합',
-  '클래식',
-  '팝',
-  '록',
-  '재즈',
-  '뮤지컬',
-  '오페라',
-  '서울',
-  '부산',
-  '대구',
-  '인천',
-  '광주',
-  '대전',
-  '수도권',
-  '지방',
-  '역사적',
-  '현대적',
-  '친환경',
-];
 
 export default function VenueCreateForm() {
   const router = useRouter();
@@ -215,48 +142,20 @@ export default function VenueCreateForm() {
         venueType: formData.venueType,
         capacity: formData.capacity,
         createdAt: new Date().toISOString(),
-        id: `venue_${Date.now()}`, // 임시 ID 생성
+        id: `venue_${Date.now()}`,
       };
-
-      console.log('🎪 콘서트장 생성 요청 데이터:');
-      console.log('='.repeat(50));
-      console.log('📝 기본 정보:');
-      console.log(`  - 이름: ${postData.name}`);
-      console.log(`  - 위치: ${postData.location}`);
-      console.log(`  - 설명: ${postData.description}`);
-      console.log('');
-      console.log('🎨 시각적 설정:');
-      console.log(`  - 테마 색상: ${postData.thumbnail}`);
-      console.log(`  - 선택된 아이콘: ${postData.selectedIcon}`);
-      console.log(`  - 이미지 업로드: ${postData.thumbnailImage ? '있음' : '없음'}`);
-      console.log('');
-      console.log('📊 규모 및 타입:');
-      console.log(`  - 층 수: ${postData.floorCount}층`);
-      console.log(`  - 예상 좌석 수: ${postData.estimatedSeats.toLocaleString()}석`);
-      console.log(`  - 공연장 타입: ${postData.venueType}`);
-      console.log(`  - 규모 분류: ${postData.capacity}`);
-      console.log('');
-      console.log('🏷️ 태그:');
-      console.log(
-        `  - 선택된 태그 (${postData.tags.length}개): [${postData.tags.join(', ')}]`,
-      );
-      console.log('');
-      console.log('📅 생성 정보:');
-      console.log(`  - 생성 시간: ${postData.createdAt}`);
-      console.log(`  - 임시 ID: ${postData.id}`);
-      console.log('='.repeat(50));
       console.log('전체 POST 데이터:', postData);
 
       await new Promise((resolve) => {
         setTimeout(resolve, 1500);
       });
 
-      console.log('✅ 콘서트장 생성 완료!');
+      console.log('콘서트장 생성 완료!');
 
       // 성공 시 목록 페이지로 이동
       router.push('/admin/venues');
     } catch (error) {
-      console.error('❌ 콘서트장 생성 실패:', error);
+      console.error('콘서트장 생성 실패:', error);
       alert('콘서트장 생성에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
