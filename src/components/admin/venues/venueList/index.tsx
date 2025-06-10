@@ -145,18 +145,6 @@ export default function VenueList({ initialVenues }: VenueListProps = {}) {
     }
   };
 
-  const duplicateVenue = (venue: Venue): void => {
-    const newVenue: Venue = {
-      ...venue,
-      id: `${venue.id}-copy-${Date.now()}`,
-      name: `${venue.name} (복사본)`,
-      status: 'draft',
-      createdAt: new Date().toISOString().split('T')[0],
-      lastModified: new Date().toLocaleString(),
-    };
-    setVenues([newVenue, ...venues]);
-  };
-
   return (
     <div className={styles.container}>
       {/* 헤더 */}
@@ -269,12 +257,7 @@ export default function VenueList({ initialVenues }: VenueListProps = {}) {
           className={`${styles.venueGrid} ${viewMode === 'list' ? styles.listMode : ''}`}
         >
           {filteredVenues.map((venue) => (
-            <VenueCard
-              key={venue.id}
-              venue={venue}
-              onDelete={handleDeleteVenue}
-              onDuplicate={duplicateVenue}
-            />
+            <VenueCard key={venue.id} venue={venue} onDelete={handleDeleteVenue} />
           ))}
         </div>
       )}

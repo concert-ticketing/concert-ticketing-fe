@@ -3,15 +3,14 @@ import Link from 'next/link';
 
 import { Venue } from '@/types/venues';
 
-import styles from './venueCard.module.css';
+import styles from './venueList.module.css';
 
 interface VenueCardProps {
   venue: Venue;
   onDelete: (venueId: string, venueName: string) => void;
-  onDuplicate: (venue: Venue) => void;
 }
 
-export function VenueCard({ venue, onDelete, onDuplicate }: VenueCardProps) {
+export function VenueCard({ venue, onDelete }: VenueCardProps) {
   const getStatusBadge = (status: Venue['status']): React.ReactNode => {
     const statusConfig = {
       active: { label: '활성', className: styles.statusActive },
@@ -83,14 +82,6 @@ export function VenueCard({ venue, onDelete, onDuplicate }: VenueCardProps) {
         >
           📝 편집
         </Link>
-
-        <button
-          onClick={() => onDuplicate(venue)}
-          className={styles.duplicateButton}
-          title='복사'
-        >
-          📋
-        </button>
 
         <button
           onClick={() => onDelete(venue.id, venue.name)}

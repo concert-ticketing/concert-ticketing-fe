@@ -6,3 +6,115 @@ a {
   text-decoration: none;
   color: #000;
 }
+
+/* CSS 변수 정의 */
+:root {
+  /* 라이트모드 색상 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #2563eb;
+  --success-bg: #d1fae5;
+  --success-color: #10b981;
+  --success-border: rgba(16, 185, 129, 0.2);
+  --warning-bg: #fef3c7;
+  --warning-color: #f59e0b;
+  --warning-border: rgba(245, 158, 11, 0.2);
+  --neutral-bg: #f3f4f6;
+  --neutral-color: #6b7280;
+  --neutral-border: rgba(107, 114, 128, 0.2);
+  --danger-primary: #ef4444;
+  --danger-secondary: #dc2626;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 다크모드 색상 */
+.dark {
+  --bg-primary: #1f2937;
+  --bg-secondary: #374151;
+  --bg-tertiary: #4b5563;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-primary: #4b5563;
+  --border-secondary: #6b7280;
+  --accent-primary: #60a5fa;
+  --accent-secondary: #3b82f6;
+  --success-bg: rgb(16, 185, 129);
+  --success-color: #ffffff;
+  --success-border: rgba(16, 185, 129, 0.3);
+  --warning-bg: rgb(245, 159, 11);
+  --warning-color: #ffffff;
+  --warning-border: rgba(245, 158, 11, 0.3);
+  --neutral-bg: rgb(107, 114, 128);
+  --neutral-color: #ffffff;
+  --neutral-border: rgba(107, 114, 128, 0.3);
+  --danger-primary: #f87171;
+  --danger-secondary: #ef4444;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* 기본 요소들에 테마 적용 */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 스크롤바 다크모드 대응 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* 다크모드에서 이미지 밝기 조정 */
+.dark img {
+  filter: brightness(0.9);
+}
+
+/* 선택 영역 색상 */
+::selection {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.dark ::selection {
+  background-color: #60a5fa;
+  color: #0f172a;
+}
+
+
+/* 부드러운 전환 효과 */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* 다크모드 토글 애니메이션 최적화 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { THUMBNAIL_COLORS, PREDEFINED_ICONS, PREDEFINED_TAGS } from './options';
-import styles from './venueCreateForm.module.css';
+import styles from './create.module.css';
 
 interface VenueFormData {
   name: string;
@@ -28,7 +28,7 @@ interface FormErrors {
   estimatedSeats?: string;
 }
 
-export default function VenueCreateForm() {
+export default function CreateForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -167,14 +167,6 @@ export default function VenueCreateForm() {
       {/* 헤더 */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <div className={styles.breadcrumb}>
-            <Link href='/admin/venues' className={styles.breadcrumbLink}>
-              콘서트장 관리
-            </Link>
-            <span className={styles.breadcrumbSeparator}>›</span>
-            <span className={styles.breadcrumbCurrent}>새 콘서트장 만들기</span>
-          </div>
-
           <h1 className={styles.title}>🎪 새 콘서트장 만들기</h1>
           <p className={styles.subtitle}>
             새로운 콘서트장의 기본 정보를 입력하고 첫 번째 층을 설계해보세요.

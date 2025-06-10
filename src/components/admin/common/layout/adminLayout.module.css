@@ -1,299 +1,333 @@
-/* AdminLayout.module.css */
-
 .container {
-    display: flex;
-    min-height: 100vh;
-    background-color: #f8fafc;
-    font-family: system-ui, sans-serif;
-  }
-  
-  .mainContent {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    transition: margin-left 0.3s ease;
-  }
-  
-  .mainContent.sidebarOpen {
-    margin-left: 280px;
-  }
-  
-  .mainContent.sidebarClosed {
-    margin-left: 80px;
-  }
-  
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  transition: background-color 0.2s ease;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+.main {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+}
+
+.main.desktop {
+  margin-left: 280px;
+}
+
+.main.desktopClosed {
+  margin-left: 80px;
+}
+
+.main.mobile {
+  margin-left: 0;
+}
+
+.header {
+  height: 64px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menuButton {
+  padding: 8px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.menuButton:hover {
+  background-color: var(--bg-tertiary);
+  transform: scale(1.05);
+}
+
+.menuButton:focus-visible {
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.menuButton:active {
+  transform: scale(0.95);
+}
+
+.menuButtonMobile {
+  composes: menuButton;
+}
+
+.menuButtonDesktop {
+  composes: menuButton;
+}
+
+.menuIcon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.menuIconMobile {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+}
+
+/* 아이콘 호버 애니메이션 */
+.menuButton:hover .menuIcon,
+.menuButton:hover .menuIconMobile {
+  transform: scale(1.1);
+}
+
+.menuButton:active .menuIcon,
+.menuButton:active .menuIconMobile {
+  transform: scale(0.9);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.userMenu {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  border: 2px solid transparent;
+}
+
+.userMenu:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.userMenu:active {
+  transform: scale(0.95);
+}
+
+.content {
+  padding: 24px;
+  transition: padding 0.2s ease;
+}
+
+.contentMobile {
+  padding: 16px;
+}
+
+/* 다크모드 특별 스타일 */
+:global(.dark) .header {
+  box-shadow: 
+    var(--shadow-sm),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark) .menuButton:hover {
+  background-color: var(--bg-tertiary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark) .userMenu {
+  box-shadow: 
+    0 2px 4px rgba(59, 130, 246, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+:global(.dark) .userMenu:hover {
+  box-shadow: 
+    0 4px 8px rgba(59, 130, 246, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* 모바일 스타일 */
+@media (max-width: 768px) {
   .header {
-    background-color: white;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 16px 24px;
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  .headerContent {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 0 16px;
+    height: 56px;
   }
   
   .headerLeft {
-    display: flex;
-    align-items: center;
-  }
-  
-  .toggleButton {
-    padding: 8px;
-    border: none;
-    background-color: transparent;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-right: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-  }
-  
-  .toggleButton:hover {
-    background-color: #f3f4f6;
-  }
-  
-  .toggleButton:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-  }
-  
-  .title {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: #1f2937;
+    gap: 12px;
   }
   
   .headerRight {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  
-  .notificationButton {
-    padding: 8px;
-    border: none;
-    background-color: transparent;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    transition: background-color 0.2s ease;
-  }
-  
-  .notificationButton:hover {
-    background-color: #f3f4f6;
-  }
-  
-  .notificationIcon {
-    width: 20px;
-    height: 20px;
-    background-color: #6b7280;
-    border-radius: 2px;
-  }
-  
-  .notificationBadge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    background-color: #ef4444;
-    border-radius: 50%;
-    border: 2px solid white;
-  }
-  
-  .userProfile {
-    display: flex;
-    align-items: center;
     gap: 12px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background-color: #f9fafb;
-    border: 1px solid #e5e7eb;
   }
   
-  .userAvatar {
+  .title {
+    font-size: 16px;
+  }
+  
+  .userMenu {
     width: 32px;
     height: 32px;
-    background-color: #3b82f6;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  
-  .userInfo {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .userName {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f2937;
-  }
-  
-  .userEmail {
     font-size: 12px;
-    color: #6b7280;
   }
   
-  .main {
-    flex: 1;
-    padding: 24px;
-    overflow: auto;
+  .content {
+    padding: 16px;
+  }
+}
+
+/* 작은 모바일 디바이스 */
+@media (max-width: 480px) {
+  .header {
+    padding: 0 12px;
   }
   
-  .footer {
-    background-color: white;
-    border-top: 1px solid #e5e7eb;
-    padding: 16px 24px;
-    text-align: center;
+  .headerLeft {
+    gap: 8px;
   }
   
-  .footerText {
-    margin: 0;
-    font-size: 14px;
-    color: #6b7280;
+  .headerRight {
+    gap: 8px;
   }
   
+  .title {
+    font-size: 15px;
+  }
+  
+  .content {
+    padding: 12px;
+  }
+}
+
+/* 태블릿 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header {
+    padding: 0 20px;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+}
+
+/* 애니메이션 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* 고대비 모드 */
+@media (prefers-contrast: high) {
+  .header {
+    border-bottom-width: 2px;
+  }
+  
+  .menuButton {
+    outline: 1px solid currentColor;
+  }
+  
+  .userMenu {
+    border: 2px solid currentColor;
+  }
+}
+
+/* 움직임 감소 설정 */
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .main,
+  .header,
+  .menuButton,
+  .userMenu,
+  .content,
   .overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 30;
-    transition: opacity 0.3s ease;
+    transition: none;
   }
   
-  /* 모바일 스타일 */
-  @media (max-width: 768px) {
-    .mainContent {
-      margin-left: 0 !important;
-    }
-    
-    .header {
-      padding: 12px 16px;
-    }
-    
-    .headerContent {
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    
-    .title {
-      font-size: 20px;
-    }
-    
-    .headerRight {
-      gap: 12px;
-    }
-    
-    .userProfile {
-      padding: 6px 8px;
-      gap: 8px;
-    }
-    
-    .userAvatar {
-      width: 28px;
-      height: 28px;
-      font-size: 12px;
-    }
-    
-    .userName {
-      font-size: 13px;
-    }
-    
-    .userEmail {
-      font-size: 11px;
-    }
-    
-    .main {
-      padding: 16px;
-    }
-    
-    .footer {
-      padding: 12px 16px;
-    }
+  .menuButton:hover,
+  .userMenu:hover {
+    transform: none;
   }
   
-  /* 작은 모바일 디바이스 */
-  @media (max-width: 480px) {
-    .headerContent {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .headerRight {
-      width: 100%;
-      justify-content: space-between;
-    }
-    
-    .userInfo {
-      display: none;
-    }
-    
-    .main {
-      padding: 12px;
-    }
+  .header {
+    animation: none;
+  }
+}
+
+/* 포커스 스타일 개선 */
+.menuButton:focus-visible,
+.userMenu:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .menuButton,
+  .userMenu {
+    min-width: 44px;
+    min-height: 44px;
   }
   
-  /* 다크모드 지원 */
-  @media (prefers-color-scheme: dark) {
-    .container {
-      background-color: #0f172a;
-    }
-    
-    .header {
-      background-color: #1e293b;
-      border-bottom-color: #334155;
-    }
-    
-    .title {
-      color: #f1f5f9;
-    }
-    
-    .toggleButton:hover {
-      background-color: #334155;
-    }
-    
-    .notificationButton:hover {
-      background-color: #334155;
-    }
-    
-    .notificationIcon {
-      background-color: #94a3b8;
-    }
-    
-    .userProfile {
-      background-color: #1e293b;
-      border-color: #334155;
-    }
-    
-    .userName {
-      color: #f1f5f9;
-    }
-    
-    .userEmail {
-      color: #94a3b8;
-    }
-    
-    .footer {
-      background-color: #1e293b;
-      border-top-color: #334155;
-    }
-    
-    .footerText {
-      color: #94a3b8;
-    }
+  .menuButton:hover,
+  .userMenu:hover {
+    transform: none;
   }
+}

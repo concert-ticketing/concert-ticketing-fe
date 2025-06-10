@@ -1,165 +1,192 @@
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 
-import { sidebarIcon } from '@public/icons';
+import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
 
 import Sidebar from './Sidebar';
+import ThemeToggle from '../ui/theme/ThemeToggle';
 import styles from './adminLayout.module.css';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  title?: string;
+  title: string | null;
 }
 
-export default function AdminLayout({ children, title = '관리자' }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+interface IconComponentProps {
+  children: React.ReactNode;
+  isMobile?: boolean;
+}
 
-  // 클라이언트 사이드에서만 window 객체 접근
+// 컴포넌트를 렌더링 외부로 이동
+const IconComponent: React.FC<IconComponentProps> = ({ children, isMobile = false }) => (
+  <svg
+    className={isMobile ? styles.menuIconMobile : styles.menuIcon}
+    viewBox='0 0 24 24'
+    fill='currentColor'
+  >
+    {children}
+  </svg>
+);
+
+export default function AdminLayout({ children, title }: AdminLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const initializeTheme = useThemeStore((state) => state.initializeTheme);
+
   useEffect(() => {
-    const checkMobile = (): void => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      
-      // 모바일에서는 기본적으로 사이드바를 닫힌 상태로
-      if (mobile) {
+    // 테마 초기화
+    initializeTheme();
+
+    // 시스템 테마 변경 리스너 설정
+    const cleanup = initializeSystemThemeListener();
+
+    return cleanup;
+  }, [initializeTheme]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+
+      // 모바일에서는 기본적으로 사이드바 닫기
+      if (isMobileView) {
         setSidebarOpen(false);
       }
     };
 
-    // 초기 체크
     checkMobile();
-
-    // 리사이즈 이벤트 리스너
     window.addEventListener('resize', checkMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const toggleSidebar = (): void => {
+  const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // ESC 키로 모바일에서 사이드바 닫기
-  useEffect(() => {
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isMobile && sidebarOpen) {
-        setSidebarOpen(false);
-      }
-    };
+  const getMainClasses = () => {
+    if (isMobile) {
+      return `${styles.main} ${styles.mobile}`;
+    }
+    return `${styles.main} ${sidebarOpen ? styles.desktop : styles.desktopClosed}`;
+  };
 
-    document.addEventListener('keydown', handleEscKey);
-    return () => document.removeEventListener('keydown', handleEscKey);
-  }, [isMobile, sidebarOpen]);
-
-  // 모바일에서 사이드바가 열려있을 때 body 스크롤 방지
-  useEffect(() => {
-    if (isMobile && sidebarOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+  const renderMenuButton = () => {
+    if (isMobile) {
+      return (
+        <button
+          onClick={toggleSidebar}
+          className={styles.menuButtonMobile}
+          aria-label='메뉴 열기'
+        >
+          <IconComponent isMobile>
+            {/* 햄버거 메뉴 아이콘 */}
+            <path
+              d='M4 6h16M4 12h16M4 18h16'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              fill='none'
+            />
+          </IconComponent>
+        </button>
+      );
     }
 
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobile, sidebarOpen]);
+    return (
+      <button
+        onClick={toggleSidebar}
+        className={styles.menuButtonDesktop}
+        title={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
+        aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
+      >
+        <IconComponent isMobile={false}>
+          {sidebarOpen ? (
+            /* 왼쪽 화살표 (닫기) */
+            <>
+              <path
+                d='M11 19l-7-7 7-7'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                fill='none'
+              />
+              <path
+                d='M20 12H4'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                fill='none'
+              />
+            </>
+          ) : (
+            /* 오른쪽 화살표 (열기) */
+            <>
+              <path
+                d='M13 5l7 7-7 7'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                fill='none'
+              />
+              <path
+                d='M4 12h16'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                fill='none'
+              />
+            </>
+          )}
+        </IconComponent>
+      </button>
+    );
+  };
 
   return (
     <div className={styles.container}>
-      {/* 사이드바 */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        onToggle={toggleSidebar}
-        isMobile={isMobile}
-      />
+      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} isMobile={isMobile} />
 
-      {/* 메인 콘텐츠 영역 */}
-      <div
-        className={`${styles.mainContent} ${
-          sidebarOpen ? styles.sidebarOpen : styles.sidebarClosed
-        }`}
-      >
-        {/* 상단 헤더 */}
-        <header className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.headerLeft}>
-              <button
-                onClick={toggleSidebar}
-                className={styles.toggleButton}
-                title={sidebarOpen ? '사이드바 숨기기' : '사이드바 표시'}
-                aria-label={sidebarOpen ? '사이드바 숨기기' : '사이드바 표시'}
-              >
-                <Image
-                  src={sidebarIcon}
-                  alt="사이드바 토글"
-                  width={20}
-                  height={20}
-                  style={{
-                    filter: 'invert(0.4)',
-                  }}
-                />
-              </button>
-
-              <h1 className={styles.title}>
-                {title}
-              </h1>
-            </div>
-
-            {/* 사용자 정보 영역 */}
-            <div className={styles.headerRight}>
-              {/* 알림 */}
-              <button
-                className={styles.notificationButton}
-                title="알림"
-                aria-label="알림"
-              >
-                <div className={styles.notificationIcon} />
-                {/* 알림 뱃지 */}
-                <div className={styles.notificationBadge} />
-              </button>
-
-              {/* 사용자 프로필 */}
-              <div className={styles.userProfile}>
-                <div className={styles.userAvatar}>
-                  관
-                </div>
-                <div className={styles.userInfo}>
-                  <div className={styles.userName}>
-                    관리자
-                  </div>
-                  <div className={styles.userEmail}>
-                    admin@venue.com
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* 메인 콘텐츠 */}
-        <main className={styles.main}>
-          {children}
-        </main>
-
-        {/* 푸터 */}
-        <footer className={styles.footer}>
-          <p className={styles.footerText}>
-            © 2025 Venue Management System. All rights reserved.
-          </p>
-        </footer>
-      </div>
-
-      {/* 사이드바 오버레이 (모바일) */}
-      {sidebarOpen && isMobile && (
+      {/* 모바일에서 사이드바가 열려있을 때 오버레이 */}
+      {isMobile && sidebarOpen && (
         <div
           className={styles.overlay}
           onClick={toggleSidebar}
-          aria-label="사이드바 닫기"
+          aria-label='사이드바 닫기'
         />
       )}
+
+      <main className={getMainClasses()}>
+        {/* 헤더 */}
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            {renderMenuButton()}
+
+            <h1 className={styles.title}>{title}</h1>
+          </div>
+
+          {/* 헤더 우측 */}
+          <div className={styles.headerRight}>
+            {/* 테마 토글 */}
+            <ThemeToggle size='small' showLabel={!isMobile} />
+
+            {/* 사용자 메뉴 */}
+            <button
+              className={styles.userMenu}
+              title='사용자 메뉴'
+              aria-label='사용자 메뉴'
+            >
+              👤
+            </button>
+          </div>
+        </header>
+
+        {/* 콘텐츠 영역 */}
+        <div className={isMobile ? styles.contentMobile : styles.content}>{children}</div>
+      </main>
     </div>
   );
 }

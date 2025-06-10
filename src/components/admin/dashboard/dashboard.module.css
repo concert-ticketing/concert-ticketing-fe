@@ -1,0 +1,564 @@
+/* dashboard.module.css */
+
+/* 레이아웃 */
+.dashboard {
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+  }
+  
+  /* 헤더 */
+  .dashboardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+  
+  .dashboardTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+  }
+  
+  .dashboardSubtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  
+  .dashboardActions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .primaryButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  }
+  
+  .primaryButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* 통계 그리드 */
+  .statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  
+  /* 통계 카드 */
+  .statCard {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .statCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--border-secondary);
+  }
+  
+  .statCardHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .statCardIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  
+  :global(.dark) .statCardIcon {
+    background: linear-gradient(135deg, #374151, #4b5563);
+  }
+  
+  .statCardInfo {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .statCardTitle {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  .statCardValue {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  
+  .statCardChange {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .statCardChange.positive {
+    color: #059669;
+  }
+  
+  .statCardChange.negative {
+    color: #dc2626;
+  }
+  
+  .statCardChange.neutral {
+    color: var(--text-secondary);
+  }
+  
+  /* 메인 컨텐츠 그리드 */
+  .contentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  /* 카드 공통 스타일 */
+  .card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  
+  .card:hover {
+    border-color: var(--border-secondary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-primary);
+  }
+  
+  .cardTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .cardAction {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .cardAction:hover {
+    color: var(--accent-secondary);
+  }
+  
+  .cardContent {
+    padding: 0;
+  }
+  
+  /* 활동 리스트 */
+  .activityList {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .activityItem {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-primary);
+    transition: background-color 0.2s ease;
+  }
+  
+  .activityItem:last-child {
+    border-bottom: none;
+  }
+  
+  .activityItem:hover {
+    background-color: var(--bg-tertiary);
+  }
+  
+  .activityIcon {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .activityContent {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .activityTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+  }
+  
+  .activityDescription {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+  }
+  
+  .activityTimestamp {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+  
+  /* 이벤트 리스트 */
+  .eventList {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .eventItem {
+    display: flex;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-primary);
+    transition: background-color 0.2s ease;
+  }
+  
+  .eventItem:last-child {
+    border-bottom: none;
+  }
+  
+  .eventItem:hover {
+    background-color: var(--bg-tertiary);
+  }
+  
+  .eventDate {
+    flex-shrink: 0;
+    text-align: center;
+    width: 48px;
+  }
+  
+  .eventDay {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  
+  .eventMonth {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  
+  .eventDetails {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .eventHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .eventTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+  }
+  
+  .eventVenue {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 8px 0;
+  }
+  
+  .eventMeta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+  
+  /* 상태 배지 */
+  .statusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  .statusConfirmed {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  .statusPending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  .statusCancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .statusSuccess {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  .statusWarning {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  .statusInfo {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  
+  /* 다크모드 상태 배지 */
+  :global(.dark) .statusConfirmed {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+  }
+  
+  :global(.dark) .statusPending {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+  }
+  
+  :global(.dark) .statusCancelled {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+  
+  :global(.dark) .statusSuccess {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+  }
+  
+  :global(.dark) .statusWarning {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+  }
+  
+  :global(.dark) .statusInfo {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+  }
+  
+  /* 빠른 액션 */
+  .quickActions {
+    margin-bottom: 32px;
+  }
+  
+  .sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 20px 0;
+  }
+  
+  .actionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .actionCard {
+    display: block;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 24px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .actionCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-primary);
+  }
+  
+  .actionIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: 16px;
+  }
+  
+  .actionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+  }
+  
+  .actionDescription {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  /* 반응형 디자인 */
+  @media (max-width: 1024px) {
+    .contentGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .statsGrid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard {
+      padding: 16px;
+    }
+    
+    .dashboardHeader {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+    }
+    
+    .dashboardActions {
+      justify-content: stretch;
+    }
+    
+    .primaryButton {
+      justify-content: center;
+    }
+    
+    .statsGrid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .contentGrid {
+      gap: 16px;
+    }
+    
+    .actionGrid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .statCard {
+      padding: 20px;
+    }
+    
+    .card {
+      border-radius: 8px;
+    }
+    
+    .cardHeader {
+      padding: 16px 20px 12px;
+    }
+    
+    .activityItem,
+    .eventItem {
+      padding: 12px 20px;
+    }
+    
+    .eventHeader {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .dashboard {
+      padding: 12px;
+    }
+    
+    .dashboardTitle {
+      font-size: 1.75rem;
+    }
+    
+    .statCardHeader {
+      gap: 12px;
+    }
+    
+    .statCardIcon {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .statCardValue {
+      font-size: 1.5rem;
+    }
+    
+    .eventDate {
+      width: 40px;
+    }
+    
+    .eventDay {
+      font-size: 1.25rem;
+    }
+  }

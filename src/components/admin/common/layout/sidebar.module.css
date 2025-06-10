@@ -1,391 +1,481 @@
 .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    background-color: white;
-    border-right: 1px solid #e5e7eb;
-    transition: width 0.3s ease, transform 0.3s ease;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-primary);
+  transition: width 0.3s ease, transform 0.3s ease, background-color 0.2s ease, border-color 0.2s ease;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar.open {
+  width: 280px;
+}
+
+.sidebar.closed {
+  width: 80px;
+}
+
+.header {
+  padding: 20px 16px;
+  border-bottom: 1px dotted var(--border-tertiary);
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s ease;
+}
+
+.header.open {
+  justify-content: flex-start;
+}
+
+.header.closed {
+  justify-content: center;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  background-color: #3b82f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.logo.open {
+  margin-right: 12px;
+}
+
+.logoText {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.logoText.hidden {
+  opacity: 0;
+}
+
+.logoTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  transition: color 0.2s ease;
+}
+
+.logoSubtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.nav {
+  flex: 1;
+  overflow: hidden;
+  padding: 16px 0;
+}
+
+.menuItem {
+  margin-bottom: 4px;
+}
+
+.menuItem.subItem {
+  margin-bottom: 2px;
+}
+
+.menuButton,
+.menuLink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border: none;
+  text-decoration: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin: 0 8px;
+}
+
+.menuButton.subItem,
+.menuLink.subItem {
+  font-size: 13px;
+  font-weight: 400;
+  margin: 0 8px 0 16px;
+}
+
+.menuButton.open,
+.menuLink.open {
+  padding: 12px 16px;
+}
+
+.menuButton.closed,
+.menuLink.closed {
+  padding: 12px 16px;
+  justify-content: center;
+}
+
+.menuButton.subItem.open,
+.menuLink.subItem.open {
+  padding: 8px 16px 8px 40px;
+}
+
+/* 활성 상태 스타일 */
+.menuButton.active,
+.menuLink.active {
+  background-color: #3b82f6;
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* 비활성 상태 스타일 */
+.menuButton:not(.active),
+.menuLink:not(.active) {
+  background-color: transparent;
+  color: var(--text-primary);
+}
+
+.menuButton:not(.active):hover,
+.menuLink:not(.active):hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* 다크모드에서 호버 효과 강화 */
+:global(.dark) .menuButton:not(.active):hover,
+:global(.dark) .menuLink:not(.active):hover {
+  background-color: var(--bg-tertiary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.menuIcon {
+  font-size: 16px;
+  min-width: 16px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.menuIcon.open {
+  margin-right: 12px;
+}
+
+.menuIcon.closed {
+  margin-right: 0;
+}
+
+.menuLabel {
+  flex: 1;
+  text-align: left;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.menuLabel.hidden {
+  opacity: 0;
+}
+
+.menuRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.menuRight.hidden {
+  opacity: 0;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.badge.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.badge.inactive {
+  background-color: #ef4444;
+}
+
+/* 다크모드에서 배지 스타일 조정 */
+:global(.dark) .badge.inactive {
+  background-color: #dc2626;
+}
+
+.expandIcon {
+  width: 12px;
+  height: 12px;
+  border-radius: 1px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expandIcon.active {
+  color: white;
+}
+
+.expandIcon.inactive {
+  color: var(--text-tertiary);
+}
+
+.expandIcon.expanded {
+  transform: rotate(90deg);
+}
+
+.expandIcon.collapsed {
+  transform: rotate(0deg);
+}
+
+/* 아이콘 SVG 스타일 */
+.menuIcon svg,
+.logo svg {
+  transition: all 0.2s ease;
+}
+
+/* 호버 시 아이콘 효과 */
+.menuButton:hover .menuIcon svg,
+.menuLink:hover .menuIcon svg {
+  transform: scale(1.1);
+}
+
+.menuButton:active .menuIcon svg,
+.menuLink:active .menuIcon svg {
+  transform: scale(0.9);
+}
+
+/* 활성 메뉴의 아이콘 스타일 */
+.menuButton.active .menuIcon svg,
+.menuLink.active .menuIcon svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* 다크모드에서 아이콘 그림자 강화 */
+:global(.dark) .menuButton.active .menuIcon svg,
+:global(.dark) .menuLink.active .menuIcon svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.subMenu {
+  padding: 5px 0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 다크모드에서 서브메뉴 스타일 강화 */
+:global(.dark) .subMenu {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-primary);
+  transition: border-color 0.2s ease;
+}
+
+.footer.open {
+  text-align: left;
+}
+
+.footer.closed {
+  text-align: center;
+}
+
+.footerContent {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.footerContent.hidden {
+  opacity: 0;
+}
+
+.version {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+.lastUpdate {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  transition: color 0.2s ease;
+}
+
+.footerPlaceholder {
+  width: 24px;
+  height: 24px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  margin: 0 auto;
+  transition: background-color 0.2s ease;
+}
+
+/* 스크롤바 스타일링 */
+.nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 2px;
+}
+
+.nav::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* 포커스 스타일 */
+.menuButton:focus-visible,
+.menuLink:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 다크모드 특별 스타일 */
+:global(.dark) .sidebar {
+  box-shadow: 
+    2px 0 8px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark) .logo {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 활성 메뉴 항목의 다크모드 스타일 */
+:global(.dark) .menuButton.active,
+:global(.dark) .menuLink.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 
+    0 2px 4px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 모바일 스타일 */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px !important;
   }
   
-  .sidebar.open {
-    width: 280px;
-  }
-  
-  .sidebar.closed {
-    width: 80px;
+  .sidebar.mobileOpen {
+    transform: translateX(0);
   }
   
   .header {
-    padding: 20px 16px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-  }
-  
-  .header.open {
-    justify-content: flex-start;
-  }
-  
-  .header.closed {
-    justify-content: center;
-  }
-  
-  .logo {
-    width: 32px;
-    height: 32px;
-    background-color: #3b82f6;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  
-  .logo.open {
-    margin-right: 12px;
-  }
-  
-  .logoText {
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
-  
-  .logoText.hidden {
-    opacity: 0;
+    padding: 16px;
   }
   
   .logoTitle {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1f2937;
-    line-height: 1.2;
+    font-size: 15px;
   }
   
   .logoSubtitle {
-    font-size: 12px;
-    color: #6b7280;
+    font-size: 11px;
   }
   
   .nav {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 0;
-  }
-  
-  .menuItem {
-    margin-bottom: 4px;
-  }
-  
-  .menuItem.subItem {
-    margin-bottom: 2px;
+    padding: 12px 0;
   }
   
   .menuButton,
   .menuLink {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    border: none;
-    text-decoration: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    margin: 0 8px;
+    font-size: 13px;
+    margin: 0 12px;
   }
   
   .menuButton.subItem,
   .menuLink.subItem {
-    font-size: 13px;
-    font-weight: 400;
-    margin: 0 8px 0 16px;
+    margin: 0 12px 0 20px;
+    font-size: 12px;
   }
   
   .menuButton.open,
   .menuLink.open {
-    padding: 12px 16px;
-  }
-  
-  .menuButton.closed,
-  .menuLink.closed {
-    padding: 12px 16px;
-    justify-content: center;
+    padding: 10px 12px;
   }
   
   .menuButton.subItem.open,
   .menuLink.subItem.open {
-    padding: 8px 16px 8px 40px;
+    padding: 8px 12px 8px 32px;
+  }
+  
+  .menuIcon {
+    font-size: 15px;
+  }
+  
+  .menuIcon.open {
+    margin-right: 10px;
+  }
+  
+  .subMenu {
+    margin: 4px 12px 8px 12px;
+  }
+  
+  .footer {
+    padding: 12px 16px;
+  }
+  
+  /* 모바일에서 터치 친화적 스타일 */
+  .menuButton,
+  .menuLink {
+    min-height: 44px;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .sidebar {
+    border-right-width: 2px;
   }
   
   .menuButton.active,
   .menuLink.active {
-    background-color: #3b82f6;
-    color: white;
-  }
-  
-  .menuButton:not(.active),
-  .menuLink:not(.active) {
-    background-color: transparent;
-    color: #374151;
-  }
-  
-  .menuButton:not(.active):hover,
-  .menuLink:not(.active):hover {
-    background-color: #f3f4f6;
-  }
-  
-  .menuIcon {
-    font-size: 16px;
-    min-width: 16px;
-    flex-shrink: 0;
-  }
-  
-  .menuIcon.open {
-    margin-right: 12px;
-  }
-  
-  .menuIcon.closed {
-    margin-right: 0;
-  }
-  
-  .menuLabel {
-    flex: 1;
-    text-align: left;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
-  
-  .menuLabel.hidden {
-    opacity: 0;
-  }
-  
-  .menuRight {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
-  
-  .menuRight.hidden {
-    opacity: 0;
-  }
-  
-  .badge {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 10px;
-    min-width: 18px;
-    text-align: center;
-    color: white;
-  }
-  
-  .badge.active {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  .badge.inactive {
-    background-color: #ef4444;
-  }
-  
-  .expandIcon {
-    width: 12px;
-    height: 12px;
-    border-radius: 1px;
-    transition: transform 0.2s ease;
-  }
-  
-  .expandIcon.active {
-    background-color: white;
-  }
-  
-  .expandIcon.inactive {
-    background-color: #9ca3af;
-  }
-  
-  .expandIcon.expanded {
-    transform: rotate(90deg);
-  }
-  
-  .expandIcon.collapsed {
-    transform: rotate(0deg);
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
   }
   
   .subMenu {
-    margin: 4px 8px 8px 8px;
-    padding: 4px 0;
-    background-color: #f8fafc;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-width: 2px;
   }
-  
-  .footer {
-    padding: 16px;
-    border-top: 1px solid #e5e7eb;
-  }
-  
-  .footer.open {
-    text-align: left;
-  }
-  
-  .footer.closed {
-    text-align: center;
-  }
-  
+}
+
+/* 움직임 감소 설정 */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .menuButton,
+  .menuLink,
+  .expandIcon,
+  .logoText,
+  .menuLabel,
+  .menuRight,
   .footerContent {
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    transition: none;
   }
-  
-  .footerContent.hidden {
-    opacity: 0;
-  }
-  
-  .version {
-    font-size: 12px;
-    color: #6b7280;
-    margin-bottom: 4px;
-  }
-  
-  .lastUpdate {
-    font-size: 11px;
-    color: #9ca3af;
-  }
-  
-  .footerPlaceholder {
-    width: 24px;
-    height: 24px;
-    background-color: #f3f4f6;
-    border-radius: 4px;
-    margin: 0 auto;
-  }
-  
-  /* 모바일 스타일 */
-  @media (max-width: 768px) {
-    .sidebar {
-      transform: translateX(-100%);
-      width: 280px !important;
-    }
-    
-    .sidebar.mobileOpen {
-      transform: translateX(0);
-    }
-    
-    .header {
-      padding: 16px;
-    }
-    
-    .logoTitle {
-      font-size: 15px;
-    }
-    
-    .logoSubtitle {
-      font-size: 11px;
-    }
-    
-    .nav {
-      padding: 12px 0;
-    }
-    
-    .menuButton,
-    .menuLink {
-      font-size: 13px;
-      margin: 0 12px;
-    }
-    
-    .menuButton.subItem,
-    .menuLink.subItem {
-      margin: 0 12px 0 20px;
-      font-size: 12px;
-    }
-    
-    .menuButton.open,
-    .menuLink.open {
-      padding: 10px 12px;
-    }
-    
-    .menuButton.subItem.open,
-    .menuLink.subItem.open {
-      padding: 8px 12px 8px 32px;
-    }
-    
-    .menuIcon {
-      font-size: 15px;
-    }
-    
-    .menuIcon.open {
-      margin-right: 10px;
-    }
-    
-    .subMenu {
-      margin: 4px 12px 8px 12px;
-    }
-    
-    .footer {
-      padding: 12px 16px;
-    }
-  }
-  
-  /* 다크모드 지원 */
-  @media (prefers-color-scheme: dark) {
-    .sidebar {
-      background-color: #1e293b;
-      border-right-color: #334155;
-    }
-    
-    .header {
-      border-bottom-color: #334155;
-    }
-    
-    .logoTitle {
-      color: #f1f5f9;
-    }
-    
-    .logoSubtitle {
-      color: #94a3b8;
-    }
-    
-    .menuButton:not(.active),
-    .menuLink:not(.active) {
-      color: #e2e8f0;
-    }
-    
-    .menuButton:not(.active):hover,
-    .menuLink:not(.active):hover {
-      background-color: #334155;
-    }
-    
-    .expandIcon.inactive {
-      background-color: #64748b;
-    }
-    
-    .subMenu {
-      background-color: #0f172a;
-    }
-    
-    .footer {
-      border-top-color: #334155;
-    }
-    
-    .version {
-      color: #94a3b8;
-    }
-    
-    .lastUpdate {
-      color: #64748b;
-    }
-    
-    .footerPlaceholder {
-      background-color: #334155;
-    }
-  }
+}
