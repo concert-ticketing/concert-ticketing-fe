@@ -1,6 +1,8 @@
 import React from 'react';
 import * as fabric from 'fabric';
 
+import styles from './field.module.css';
+
 interface AngleProps {
   angle: number;
   selectedObject: fabric.Object | null;
@@ -31,15 +33,16 @@ export function Angle({ angle, selectedObject, canvas, setAngle, disabled }: Ang
   };
 
   return (
-    <>
-      <label>각도 (˚)</label>
+    <div className={styles.container}>
+      <label className={styles.label}>각도 (˚)</label>
       <input
         type='number'
         value={angle.toFixed()}
+        className={`${styles.input} ${styles.numberInput}`}
         onClick={(e) => e.currentTarget.select()}
         onChange={(e) => handleAngleChange(parseFloat(e.target.value))}
         disabled={disabled}
       />
-    </>
+    </div>
   );
 }

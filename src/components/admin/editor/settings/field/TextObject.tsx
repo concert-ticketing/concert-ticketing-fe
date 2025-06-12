@@ -1,6 +1,8 @@
 import React from 'react';
 import * as fabric from 'fabric';
 
+import styles from './field.module.css';
+
 interface TextObjectProps {
   selectedObject: fabric.Object | null;
   text: Record<
@@ -33,7 +35,7 @@ export function TextObject({
   canvas,
 }: TextObjectProps) {
   // 텍스트 내용
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     const activeObject = canvas.getActiveObject();
 
@@ -78,25 +80,30 @@ export function TextObject({
   const id = selectedObject.id as string;
 
   return (
-    <>
-      <label>텍스트 내용</label>
-      <input
-        type='text'
-        value={text[id]?.text || ''}
-        onClick={(e) => e.currentTarget.select()}
-        onChange={handleTextChange}
-        placeholder='텍스트 입력'
-        disabled={isLocked}
-      />
-      <label>글자 크기</label>
-      <input
-        type='number'
-        value={text[id]?.fontSize || ''}
-        onClick={(e) => e.currentTarget.select()}
-        onChange={handleFontSizeChange}
-        placeholder='글자 크기 입력'
-        disabled={isLocked}
-      />
-    </>
+    <div className={styles.container}>
+      <div className={styles.field}>
+        <label className={styles.label}>텍스트 내용</label>
+        <textarea
+          value={text[id]?.text || ''}
+          className={styles.textarea}
+          onClick={(e) => e.currentTarget.select()}
+          onChange={handleTextChange}
+          placeholder='텍스트를 입력하세요...'
+          disabled={isLocked}
+        />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label}>글자 크기</label>
+        <input
+          type='number'
+          value={text[id]?.fontSize || ''}
+          className={`${styles.input} ${styles.numberInput}`}
+          onClick={(e) => e.currentTarget.select()}
+          onChange={handleFontSizeChange}
+          placeholder='글자 크기 입력'
+          disabled={isLocked}
+        />
+      </div>
+    </div>
   );
 }

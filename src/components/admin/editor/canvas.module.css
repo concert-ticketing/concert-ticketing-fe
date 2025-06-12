@@ -1,86 +1,204 @@
-.canvas {
-  position: relative !important;
-  z-index: 1;
-}
 
-.toolbar {
+.editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg-primary);
+  z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  position: fixed;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #000;
-  background-color: #9dcffa;
-  z-index: 2;
 }
 
-.toolbar button {
-  width: 30px;
-  height: 30px;
+.header {
+  height: 60px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
   display: flex;
-  border-radius: 4px;
-  justify-content: center;
   align-items: center;
-  cursor: pointer;
-  transition: 0.3s;
-  background-color: #537d8a;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
 }
 
-.toolbar button:hover {
-  background-color: #b9deff;
-}
-
-.active {
-  background-color: #4a4cbb !important;
-  border: 2px solid #ffffff;
-}
-
-.settings {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  gap: 8px;
+.headerLeft {
   display: flex;
-  flex-direction: column;
-  background-color: #9dcffa;
-  padding: 24px 8px;
-  border-radius: 8px;
-  text-align: left;
-  &:empty {
-    padding: 0;
-  }
+  align-items: center;
+  gap: 16px;
+  flex: 1;
 }
 
-.settings .locked {
-  position: absolute;
-  right: 20px;
-  top: 10px;
+.headerCenter {
   display: flex;
+  justify-content: center;
+  flex: 2;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
   justify-content: flex-end;
 }
 
-.settings input {
-  padding: 5px 7px;
-  border-radius: 5px;
-}
-
-.settings .flexGroup {
-  display: flex;
-  gap: 10px;
-}
-
-.settings .flexGroup button {
-  padding: 5px;
+.exitButton {
+  background: none;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.settings .group {
+.exitButton:hover {
+  background: var(--bg-tertiary);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.unsavedIndicator {
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.saveButton {
+  background: #3b82f6;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover {
+  background: #2563eb;
+}
+
+.saveExitButton {
+  background: #10b981;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.saveExitButton:hover {
+  background: #059669;
+}
+
+.canvasContainer {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas {
+  display: block;
+  cursor: crosshair;
+  width: 100%;
+  height: 100%;
+}
+
+.sidePanels {
+  position: absolute;
+  top: 20px;
+  right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.sidePanels > * {
+  pointer-events: auto;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+}
+
+.polygonGuide {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 10;
+  max-width: 350px;
+  line-height: 1.5;
+  backdrop-filter: blur(10px);
+}
+
+/* 반응형 처리 */
+@media (max-width: 1024px) {
+  .headerCenter {
+    flex: 1;
+  }
+  
+  .headerLeft,
+  .headerRight {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 50px;
+    padding: 0 12px;
+  }
+  
+  .headerLeft {
+    gap: 8px;
+  }
+  
+  .headerRight {
+    gap: 8px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+  
+  .exitButton,
+  .saveButton,
+  .saveExitButton {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .sidePanels {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .polygonGuide {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    font-size: 13px;
+  }
 }

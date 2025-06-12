@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import * as fabric from 'fabric';
 
-import styles from './canvas.module.css';
 import Toolbar from './Toolbar';
 import Settings from './settings';
 import BulkObjectCreator from './bulkCreator';
@@ -9,14 +9,24 @@ import { addRectangleFn } from './shapes/Rect';
 import { addCircleFn } from './shapes/Circle';
 import { addTextFn } from './shapes/Text';
 import { addPolygonFn, cancelPolygonDrawing, isPolygonDrawing } from './shapes/Polygon';
+import styles from './canvas.module.css';
+import ThemeToggle from '../common/ui/theme/ThemeToggle';
 
-/**
- * 캔버스 초기 생성, 도구 선택 및 이벤트 처리를 위한 상위 컴포넌트 입니다.
- */
+interface FullscreenEditorProps {
+  onSave?: (canvasData: string) => void;
+  onExit?: () => void;
+  initialData?: string;
+}
 
-export default function FabricEditor() {
+export default function FullscreenEditor({
+  onSave,
+  onExit,
+  initialData,
+}: FullscreenEditorProps) {
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const selectedToolRef = useRef<'rect' | 'circle' | 'text' | 'group' | 'polygon' | null>(
     null,
   );
@@ -28,24 +38,41 @@ export default function FabricEditor() {
     selectedToolRef.current = selectedTool;
   }, [selectedTool]);
 
-  // 초기 캔버스 생성 및 리사이즈 핸들링
+  // 초기 캔버스 생성
   useEffect(() => {
     if (canvasRef.current) {
       const initCanvas = new fabric.Canvas(canvasRef.current, {
         width: window.innerWidth,
-        height: window.innerHeight,
+        height: window.innerHeight - 60, // 헤더 높이 제외
         selection: true,
       });
 
       initCanvas.backgroundColor = '#dfdfdf';
-      initCanvas.renderAll();
+
+      // 초기 데이터가 있으면 로드
+      if (initialData) {
+        initCanvas.loadFromJSON(initialData, () => {
+          initCanvas.renderAll();
+        });
+      } else {
+        initCanvas.renderAll();
+      }
 
       setCanvas(initCanvas);
+
+      // 변경사항 감지
+      const handleCanvasChange = () => {
+        setHasUnsavedChanges(true);
+      };
+
+      initCanvas.on('object:added', handleCanvasChange);
+      initCanvas.on('object:removed', handleCanvasChange);
+      initCanvas.on('object:modified', handleCanvasChange);
 
       const handleResize = () => {
         initCanvas.setDimensions({
           width: window.innerWidth,
-          height: window.innerHeight,
+          height: window.innerHeight - 60,
         });
       };
       window.addEventListener('resize', handleResize);
@@ -56,9 +83,9 @@ export default function FabricEditor() {
         canvasRef.current = null;
       };
     }
-  }, []);
+  }, [initialData]);
 
-  // 캔버스 도구 선택 및 이벤트 처리
+  // 캔버스 이벤트 처리
   useEffect(() => {
     if (canvas) {
       const handleMouseDown = (opt: fabric.TEvent) => {
@@ -85,20 +112,16 @@ export default function FabricEditor() {
         }
       };
 
-      // delete 키 누르면 객체 삭제
       const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Delete' && canvas) {
           const activeObject = canvas.getActiveObject();
-
           if (!activeObject) return;
 
           if (activeObject.type === 'activeSelection') {
-            // 다중 선택된 객체일 경우 모두 삭제
             (activeObject as fabric.ActiveSelection).getObjects().forEach((obj) => {
               canvas.remove(obj);
             });
           } else {
-            // 단일 객체 삭제
             canvas.remove(activeObject);
           }
 
@@ -106,7 +129,6 @@ export default function FabricEditor() {
           canvas.requestRenderAll();
         }
 
-        // esc 키 누르면 폴리곤 그리기 취소
         if (event.key === 'Escape' && canvas) {
           if (isPolygonDrawing()) {
             cancelPolygonDrawing(canvas, setSelectedTool);
@@ -124,40 +146,108 @@ export default function FabricEditor() {
     }
   }, [canvas]);
 
+  // 페이지 떠날 때 확인
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const handleSave = async () => {
+    if (!canvas) return;
+
+    const canvasData = JSON.stringify(canvas.toJSON());
+
+    if (onSave) {
+      await onSave(canvasData);
+      setHasUnsavedChanges(false);
+    }
+  };
+
+  const handleExit = () => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm(
+        '저장하지 않은 변경사항이 있습니다. 정말 나가시겠습니까?',
+      );
+      if (!confirmed) return;
+    }
+
+    if (onExit) {
+      onExit();
+    } else {
+      router.back();
+    }
+  };
+
+  const handleSaveAndExit = async () => {
+    await handleSave();
+    if (onExit) {
+      onExit();
+    } else {
+      router.back();
+    }
+  };
+
   return (
-    <div className={styles.canvas}>
-      <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
-      <canvas
-        id='canvas'
-        ref={canvasRef}
-        tabIndex={0}
-        onClick={() => canvasRef.current?.focus()}
-      />
-      {/* canvas가 있을 경우 렌더링 */}
-      {canvas && !(canvas instanceof HTMLCanvasElement) && (
-        <>
-          <Settings canvas={canvas} />
-          <BulkObjectCreator canvas={canvas} />
-        </>
-      )}
-      {/* 폴리곤 그리기 안내 메시지 */}
-      {selectedTool === 'polygon' && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '80px',
-            left: '20px',
-            background: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            fontSize: '14px',
-            zIndex: 1000,
-          }}
-        >
-          폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
+    <div className={styles.editor}>
+      {/* 상단 헤더 */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <button onClick={handleExit} className={styles.exitButton}>
+            ← 나가기
+          </button>
+          <h1 className={styles.title}>콘서트장 에디터</h1>
+          {hasUnsavedChanges && (
+            <span className={styles.unsavedIndicator}>● 저장되지 않음</span>
+          )}
         </div>
-      )}
+
+        <div className={styles.headerCenter}>
+          <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+        </div>
+
+        <div className={styles.headerRight}>
+          <ThemeToggle />
+          <button onClick={handleSave} className={styles.saveButton}>
+            저장
+          </button>
+          <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
+            저장 후 나가기
+          </button>
+        </div>
+      </header>
+
+      {/* 캔버스 영역 */}
+      <div className={styles.canvasContainer}>
+        <canvas
+          id='canvas'
+          ref={canvasRef}
+          tabIndex={0}
+          onClick={() => canvasRef.current?.focus()}
+          className={styles.canvas}
+        />
+
+        {/* 사이드 패널들 */}
+        {canvas && !(canvas instanceof HTMLCanvasElement) && (
+          <div className={styles.sidePanels}>
+            <Settings canvas={canvas} />
+            <BulkObjectCreator canvas={canvas} />
+          </div>
+        )}
+
+        {/* 폴리곤 그리기 안내 */}
+        {selectedTool === 'polygon' && (
+          <div className={styles.polygonGuide}>
+            폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
+          </div>
+        )}
+      </div>
     </div>
   );
 }

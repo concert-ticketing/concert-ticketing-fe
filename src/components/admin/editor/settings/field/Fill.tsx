@@ -3,6 +3,8 @@ import * as fabric from 'fabric';
 
 import { getColorString } from '@/utils/getColorString';
 
+import styles from './field.module.css';
+
 interface FillProps {
   canvas: fabric.Canvas;
   selectedObject: fabric.Object | null;
@@ -40,14 +42,17 @@ export function Fill({ canvas, selectedObject, color, setColor, disabled }: Fill
   };
 
   return (
-    <>
-      <label>배경색</label>
-      <input
-        type='color'
-        value={getColorString(color)}
-        onChange={handleColorChange}
-        disabled={disabled}
-      />
-    </>
+    <div className={styles.field}>
+      <label className={styles.label}>배경색</label>
+      <div className={styles.colorContainer}>
+        <input
+          type='color'
+          className={styles.colorInput}
+          value={getColorString(color)}
+          onChange={handleColorChange}
+          disabled={disabled}
+        />
+      </div>
+    </div>
   );
 }

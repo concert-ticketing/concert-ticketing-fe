@@ -3,19 +3,21 @@ import * as fabric from 'fabric';
 
 import { getColorString } from '@/utils/getColorString';
 
-import { LockToggle } from './LockToggle';
-import { ObjectId } from './ObjectId';
-import { Position } from './Position';
-import { Angle } from './Angle';
-import { Opacity } from './Opacity';
-import { StrokeWidth } from './StrokeWidth';
-import { Fill } from './Fill';
-import { StrokeColor } from './StrokeFill';
-import { RectSize } from './RectSize';
-import { CircleDiameter } from './CircleDiameter';
-import { TextObject } from './TextObject';
-import { TextColor } from './TextColor';
-import styles from '../canvas.module.css';
+import styles from './settings.module.css';
+import {
+  Angle,
+  CircleDiameter,
+  Fill,
+  LockToggle,
+  ObjectId,
+  Opacity,
+  Position,
+  RectSize,
+  StrokeColor,
+  StrokeWidth,
+  TextColor,
+  TextObject,
+} from './field';
 
 interface SettingProps {
   canvas: fabric.Canvas;

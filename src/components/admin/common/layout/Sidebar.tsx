@@ -3,6 +3,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import styles from './sidebar.module.css';
+import {
+  DashboardIcon,
+  EditorIcon,
+  ExpandIcon,
+  ListIcon,
+  LogoIcon,
+  PlusIcon,
+  VenueIcon,
+} from '../ui/icons';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,114 +27,6 @@ interface MenuItem {
   badge?: number;
   subItems?: MenuItem[];
 }
-
-// 아이콘 컴포넌트들
-const DashboardIcon = () => (
-  <svg
-    width='16'
-    height='16'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <rect x='3' y='3' width='7' height='7' />
-    <rect x='14' y='3' width='7' height='7' />
-    <rect x='14' y='14' width='7' height='7' />
-    <rect x='3' y='14' width='7' height='7' />
-  </svg>
-);
-
-const VenueIcon = () => (
-  <svg
-    width='16'
-    height='16'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <path d='M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z' />
-    <line x1='3' y1='6' x2='21' y2='6' />
-    <path d='M16 10a4 4 0 0 1-8 0' />
-  </svg>
-);
-
-const ListIcon = () => (
-  <svg
-    width='14'
-    height='14'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <line x1='8' y1='6' x2='21' y2='6' />
-    <line x1='8' y1='12' x2='21' y2='12' />
-    <line x1='8' y1='18' x2='21' y2='18' />
-    <line x1='3' y1='6' x2='3.01' y2='6' />
-    <line x1='3' y1='12' x2='3.01' y2='12' />
-    <line x1='3' y1='18' x2='3.01' y2='18' />
-  </svg>
-);
-
-const PlusIcon = () => (
-  <svg
-    width='14'
-    height='14'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <circle cx='12' cy='12' r='10' />
-    <line x1='12' y1='8' x2='12' y2='16' />
-    <line x1='8' y1='12' x2='16' y2='12' />
-  </svg>
-);
-
-const EditorIcon = () => (
-  <svg
-    width='16'
-    height='16'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <path d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' />
-    <path d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' />
-  </svg>
-);
-
-const ExpandIcon = () => (
-  <svg
-    width='12'
-    height='12'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <polyline points='9,18 15,12 9,6' />
-  </svg>
-);
-
-const LogoIcon = () => (
-  <svg
-    width='24'
-    height='24'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-  >
-    <path d='M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z' />
-    <line x1='3' y1='6' x2='21' y2='6' />
-    <path d='M16 10a4 4 0 0 1-8 0' />
-    <circle cx='12' cy='13' r='2' fill='currentColor' />
-  </svg>
-);
 
 export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarProps) {
   const router = useRouter();
@@ -147,7 +48,7 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
     {
       id: 'venues',
       label: '콘서트장 관리',
-      href: '/admin/venues',
+      href: '',
       icon: <VenueIcon />,
       badge: 2,
       subItems: [
@@ -204,11 +105,38 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
     }
   };
 
+  // 사이드바가 닫혔을 때 렌더링할 메뉴 아이템들을 생성
+  const getMenuItemsForRender = (): MenuItem[] => {
+    if (isOpen) {
+      return menuItems;
+    }
+
+    // 사이드바가 닫혔을 때: 서브메뉴가 있는 항목은 서브메뉴들로 대체
+    const flattenedItems: MenuItem[] = [];
+
+    menuItems.forEach((item) => {
+      if (item.subItems && item.subItems.length > 0) {
+        // 서브메뉴가 있는 경우 서브메뉴들을 추가
+        flattenedItems.push(...item.subItems);
+      } else {
+        // 서브메뉴가 없는 경우 그대로 추가
+        flattenedItems.push(item);
+      }
+    });
+
+    return flattenedItems;
+  };
+
   const renderMenuItem = (item: MenuItem, level: number = 0): React.ReactNode => {
     const hasSubItems = item.subItems && item.subItems.length > 0;
     const isExpanded = expandedItems.includes(item.id);
     const active = isActive(item.href, item.subItems, hasSubItems);
     const isSubItem = level > 0;
+
+    // 사이드바가 닫혀있고 서브메뉴가 있는 항목인 경우 렌더링하지 않음
+    if (!isOpen && hasSubItems) {
+      return null;
+    }
 
     const buttonClasses = [
       hasSubItems ? styles.menuButton : styles.menuLink,
@@ -335,7 +263,9 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
       </div>
 
       {/* 메뉴 영역 */}
-      <nav className={styles.nav}>{menuItems.map((item) => renderMenuItem(item))}</nav>
+      <nav className={styles.nav}>
+        {getMenuItemsForRender().map((item) => renderMenuItem(item))}
+      </nav>
 
       {/* 하단 정보 */}
       <div className={footerClasses}>

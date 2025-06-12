@@ -77,7 +77,7 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
         objectHeight = diameter;
       } else if (objectConfig.type === 'text') {
         const fontSize = objectConfig.fontSize || 16;
-        const textLength = objectConfig.text ? objectConfig.text.length : 4; // 기본값 설정
+        const textLength = objectConfig.text ? objectConfig.text.length : 4;
         objectWidth = Math.max(60, textLength * fontSize * 0.6);
         objectHeight = Math.max(60, fontSize * 1.2);
       }
@@ -87,7 +87,7 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
         (objectConfig.type === 'rect' || objectConfig.type === 'circle') &&
         objectConfig.includeText
       ) {
-        const textContent = objectConfig.textContent || '텍스트'; // 기본값 설정
+        const textContent = objectConfig.textContent || '텍스트';
         const textWidth = textContent.length * objectConfig.textFontSize * 0.6;
         const textHeight = objectConfig.textFontSize * 1.2;
 
@@ -95,14 +95,13 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
           objectWidth = Math.max(objectWidth, textWidth + 20);
           objectHeight = Math.max(objectHeight, textHeight + 20);
         } else if (objectConfig.type === 'circle') {
-          // 원 안에 텍스트가 들어가야 하므로
           const requiredDiameter = Math.max(textWidth, textHeight) * 1.4;
           objectWidth = Math.max(objectWidth, requiredDiameter);
           objectHeight = Math.max(objectHeight, requiredDiameter);
         }
       }
 
-      // 적응형 여백 계산 (ESLint 에러 수정)
+      // 적응형 여백 계산
       const baseMargin = 30;
       const maxSize = Math.max(objectWidth, objectHeight);
       let marginMultiplier;
@@ -117,7 +116,7 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
       const optimalSpacingX = Math.ceil(objectWidth * marginMultiplier + baseMargin);
       const optimalSpacingY = Math.ceil(objectHeight * marginMultiplier + baseMargin);
 
-      // 현재 간격과 차이가 클 때만 업데이트 (너무 자주 변경되지 않도록)
+      // 현재 간격과 차이가 클 때만 업데이트
       const currentSpacingX = gridConfig.spacingX;
       const currentSpacingY = gridConfig.spacingY;
 
@@ -167,7 +166,7 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
         (objectConfig.type === 'rect' || objectConfig.type === 'circle') &&
         objectConfig.includeText
       ) {
-        const textContent = objectConfig.textContent || '텍스트'; // 기본값 설정
+        const textContent = objectConfig.textContent || '텍스트';
         const textWidth = textContent.length * objectConfig.textFontSize * 0.6;
         if (objectConfig.type === 'circle') {
           objectSize = Math.max(objectSize, textWidth * 1.4);
@@ -219,8 +218,6 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
   ]);
 
   // 객체 생성 함수
-  // BulkObjectCreator.tsx - 완전히 안정적인 텍스트 편집 해결책
-
   const createObject = useCallback(
     (x: number, y: number, index: number): fabric.FabricObject => {
       const id = `bulk_${objectConfig.type}_${Date.now()}_${index}`;
@@ -326,10 +323,6 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
 
       group.id = id;
 
-      // 방법 1: Settings의 캔버스 레벨 더블클릭에 의존 (가장 안전)
-      // 별도의 더블클릭 이벤트를 추가하지 않고 Settings의 handleDoubleClick이 처리하도록 함
-
-      // 방법 2: 안전한 더블클릭 처리 (Settings와 동일한 로직)
       group.on('mousedblclick', (e: any) => {
         e.e?.preventDefault();
         e.e?.stopPropagation();
@@ -337,7 +330,6 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
         if (group.subTargetCheck && e.subTargets && e.subTargets.length > 0) {
           const subTarget = e.subTargets[0];
           if (subTarget instanceof fabric.IText) {
-            // Settings의 handleDoubleClick과 완전히 동일한 로직
             canvas.setActiveObject(subTarget as fabric.Object);
             subTarget.enterEditing();
             subTarget.selectAll();
@@ -475,9 +467,11 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
 
   if (!isOpen) {
     return (
-      <button onClick={() => setIsOpen(true)} className={styles.openButton}>
-        대량 객체 생성
-      </button>
+      <div className={styles.container}>
+        <button onClick={() => setIsOpen(true)} className={styles.openButton}>
+          대량 객체 생성
+        </button>
+      </div>
     );
   }
 
@@ -507,54 +501,55 @@ export default function BulkCreator({ canvas }: BulkObjectCreatorProps) {
           </button>
         </div>
 
-        {/* 객체 설정 */}
-        <ObjectSettings objectConfig={objectConfig} setObjectConfig={setObjectConfig} />
+        {/* 스크롤 가능한 콘텐츠 영역 */}
+        <div className={styles.content}>
+          {/* 객체 설정 */}
+          <ObjectSettings objectConfig={objectConfig} setObjectConfig={setObjectConfig} />
 
-        {/* 그리드 설정 */}
-        {activeTab === 'grid' && (
-          <GridSettings
-            gridConfig={gridConfig}
-            setGridConfig={setGridConfig}
-            objectConfig={objectConfig}
-            autoSpacing={autoSpacing}
-            setAutoSpacing={setAutoSpacing}
-          />
-        )}
+          {/* 그리드 설정 */}
+          {activeTab === 'grid' && (
+            <GridSettings
+              gridConfig={gridConfig}
+              setGridConfig={setGridConfig}
+              objectConfig={objectConfig}
+              autoSpacing={autoSpacing}
+              setAutoSpacing={setAutoSpacing}
+            />
+          )}
 
-        {/* 패턴 설정 */}
-        {activeTab === 'pattern' && (
-          <PatternSettings
-            patternConfig={patternConfig}
-            setPatternConfig={setPatternConfig}
-            autoSpacing={autoSpacing}
-            setAutoSpacing={setAutoSpacing}
-          />
-        )}
+          {/* 패턴 설정 */}
+          {activeTab === 'pattern' && (
+            <PatternSettings
+              patternConfig={patternConfig}
+              setPatternConfig={setPatternConfig}
+              autoSpacing={autoSpacing}
+              setAutoSpacing={setAutoSpacing}
+            />
+          )}
 
-        {/* 버튼 */}
-        <div className={styles.buttonContainer}>
-          <button onClick={() => setIsOpen(false)} className={styles.cancelButton}>
-            취소
-          </button>
-
-          <button
-            onClick={activeTab === 'grid' ? handleCreateGrid : handleCreatePattern}
-            className={styles.createButton}
-          >
-            생성
-          </button>
+          {/* 사용법 안내 */}
+          {(objectConfig.type === 'rect' || objectConfig.type === 'circle') &&
+            objectConfig.includeText && (
+              <div className={styles.info}>
+                💡 Tip: 생성된 도형을 더블클릭하면 텍스트를 편집할 수 있습니다.
+              </div>
+            )}
         </div>
 
-        {/* 사용법 안내 */}
-        {(objectConfig.type === 'rect' || objectConfig.type === 'circle') &&
-          objectConfig.includeText && (
-            <div
-              className={styles.info}
-              style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}
+        {/* 버튼 영역 (고정) */}
+        <div className={styles.footer}>
+          <div className={styles.buttonContainer}>
+            <button onClick={() => setIsOpen(false)} className={styles.cancelButton}>
+              취소
+            </button>
+            <button
+              onClick={activeTab === 'grid' ? handleCreateGrid : handleCreatePattern}
+              className={styles.createButton}
             >
-              💡 Tip: 생성된 도형을 더블클릭하면 텍스트를 편집할 수 있습니다.
-            </div>
-          )}
+              생성
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

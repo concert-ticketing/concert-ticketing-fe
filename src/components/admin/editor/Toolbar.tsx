@@ -9,7 +9,7 @@ import {
   textIcon,
 } from '@public/icons';
 
-import styles from './canvas.module.css';
+import styles from './toolbar.module.css';
 
 interface ToolbarProps {
   setSelectedTool: (

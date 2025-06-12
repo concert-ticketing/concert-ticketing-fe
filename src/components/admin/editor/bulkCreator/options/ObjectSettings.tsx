@@ -212,16 +212,7 @@ export default function ObjectSettings({
       {/* 텍스트 설정 (체크박스가 활성화된 경우만) */}
       {(objectConfig.type === 'rect' || objectConfig.type === 'circle') &&
         objectConfig.includeText && (
-          <div
-            className={styles.section}
-            style={{
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              padding: '12px',
-              marginBottom: '16px',
-            }}
-          >
+          <div className={styles.section}>
             <div className={styles.row}>
               <div className={styles.field}>
                 <label className={styles.label}>텍스트 내용</label>

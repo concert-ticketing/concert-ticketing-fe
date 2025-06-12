@@ -4,7 +4,7 @@
 .dashboard {
     border-radius: 8px;
     padding: 24px;
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
     background-color: var(--bg-primary);
     min-height: 100vh;
@@ -24,37 +24,6 @@
     font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 4px 0;
-  }
-  
-  .dashboardSubtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin: 0;
-  }
-  
-  .dashboardActions {
-    display: flex;
-    gap: 12px;
-  }
-  
-  .primaryButton {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-  }
-  
-  .primaryButton:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   }
   
   /* 통계 그리드 */

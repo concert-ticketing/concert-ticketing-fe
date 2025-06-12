@@ -1,0 +1,32 @@
+.toolbar {
+    display: flex;
+    gap: 8px;
+    left: 20px;
+    top: 50%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #000;
+    background-color: #9dcffa;
+    z-index: 2;
+  }
+  
+  .toolbar button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: #537d8a;
+  }
+  
+  .toolbar button:hover {
+    background-color: #b9deff;
+  }
+  
+  .active {
+    background-color: #4a4cbb !important;
+    border: 2px solid #ffffff;
+  }
