@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import * as fabric from 'fabric';
 
+import { useCanvasStore } from '@/core/canvasStore';
+import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
+
 import Toolbar from './Toolbar';
 import Settings from './settings';
 import BulkObjectCreator from './bulkCreator';
@@ -10,141 +13,111 @@ import { addCircleFn } from './shapes/Circle';
 import { addTextFn } from './shapes/Text';
 import { addPolygonFn, cancelPolygonDrawing, isPolygonDrawing } from './shapes/Polygon';
 import styles from './canvas.module.css';
-import ThemeToggle from '../common/ui/theme/ThemeToggle';
+import { CloseIcon, HamburgerIcon } from '../common/ui/icons';
 
-interface FullscreenEditorProps {
+interface EditorProps {
   onSave?: (canvasData: string) => void;
   onExit?: () => void;
   initialData?: string;
 }
 
-export default function FullscreenEditor({
-  onSave,
-  onExit,
-  initialData,
-}: FullscreenEditorProps) {
+export default function CanvasEditor({ onSave, onExit, initialData }: EditorProps) {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const selectedToolRef = useRef<'rect' | 'circle' | 'text' | 'group' | 'polygon' | null>(
-    null,
-  );
-  const [selectedTool, setSelectedTool] = useState<
-    'rect' | 'circle' | 'text' | 'group' | 'polygon' | null
-  >(null);
+  const { initializeTheme } = useThemeStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Zustand store
+  const {
+    canvas,
+    selectedTool,
+    hasUnsavedChanges,
+    setSelectedTool,
+    setHasUnsavedChanges,
+    initializeCanvas,
+    disposeCanvas,
+    saveCanvasData,
+    deleteSelectedObjects,
+    handleResize,
+  } = useCanvasStore();
+
+  // 라이트모드, 다크모드 감지 클린업 함수
   useEffect(() => {
-    selectedToolRef.current = selectedTool;
-  }, [selectedTool]);
+    initializeTheme();
+
+    const cleanup = initializeSystemThemeListener();
+    return cleanup;
+  }, [initializeTheme]);
 
   // 초기 캔버스 생성
   useEffect(() => {
     if (canvasRef.current) {
-      const initCanvas = new fabric.Canvas(canvasRef.current, {
-        width: window.innerWidth,
-        height: window.innerHeight - 60, // 헤더 높이 제외
-        selection: true,
-      });
+      initializeCanvas(canvasRef.current, initialData);
 
-      initCanvas.backgroundColor = '#dfdfdf';
-
-      // 초기 데이터가 있으면 로드
-      if (initialData) {
-        initCanvas.loadFromJSON(initialData, () => {
-          initCanvas.renderAll();
-        });
-      } else {
-        initCanvas.renderAll();
-      }
-
-      setCanvas(initCanvas);
-
-      // 변경사항 감지
-      const handleCanvasChange = () => {
-        setHasUnsavedChanges(true);
-      };
-
-      initCanvas.on('object:added', handleCanvasChange);
-      initCanvas.on('object:removed', handleCanvasChange);
-      initCanvas.on('object:modified', handleCanvasChange);
-
-      const handleResize = () => {
-        initCanvas.setDimensions({
-          width: window.innerWidth,
-          height: window.innerHeight - 60,
-        });
-      };
+      // 리사이즈 이벤트 등록
       window.addEventListener('resize', handleResize);
 
       return () => {
         window.removeEventListener('resize', handleResize);
-        initCanvas.dispose();
-        canvasRef.current = null;
+        disposeCanvas();
       };
     }
-  }, [initialData]);
+  }, [initialData, initializeCanvas, handleResize, disposeCanvas]);
 
-  // 캔버스 이벤트 처리
+  // 캔버스 마우스 이벤트 처리
   useEffect(() => {
-    if (canvas) {
-      const handleMouseDown = (opt: fabric.TEvent) => {
-        const pointer = canvas.getPointer(opt.e);
-        if (!pointer) return;
+    if (!canvas) return;
 
-        const { x, y } = pointer;
+    const handleMouseDown = (opt: fabric.TEvent) => {
+      const pointer = canvas.getPointer(opt.e);
+      if (!pointer) return;
 
-        switch (selectedToolRef.current) {
-          case 'rect':
-            addRectangleFn(canvas, x, y, setSelectedTool);
-            break;
-          case 'circle':
-            addCircleFn(canvas, x, y, setSelectedTool);
-            break;
-          case 'text':
-            addTextFn(canvas, x, y, '변수 string', setSelectedTool);
-            break;
-          case 'polygon':
-            addPolygonFn(canvas, x, y, setSelectedTool);
-            break;
-          default:
-            break;
+      const { x, y } = pointer;
+
+      switch (selectedTool) {
+        case 'rect':
+          addRectangleFn(canvas, x, y, setSelectedTool);
+          break;
+        case 'circle':
+          addCircleFn(canvas, x, y, setSelectedTool);
+          break;
+        case 'text':
+          addTextFn(canvas, x, y, '변수 string', setSelectedTool);
+          break;
+        case 'polygon':
+          addPolygonFn(canvas, x, y, setSelectedTool);
+          break;
+        default:
+          break;
+      }
+    };
+
+    canvas.on('mouse:down', handleMouseDown);
+
+    return () => {
+      canvas.off('mouse:down', handleMouseDown);
+    };
+  }, [canvas, selectedTool, setSelectedTool]);
+
+  // 키보드 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Delete' && canvas) {
+        deleteSelectedObjects();
+      }
+
+      if (event.key === 'Escape' && canvas) {
+        if (isPolygonDrawing()) {
+          cancelPolygonDrawing(canvas, setSelectedTool);
+        } else if (isMobileMenuOpen) {
+          setIsMobileMenuOpen(false);
         }
-      };
+      }
+    };
 
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Delete' && canvas) {
-          const activeObject = canvas.getActiveObject();
-          if (!activeObject) return;
-
-          if (activeObject.type === 'activeSelection') {
-            (activeObject as fabric.ActiveSelection).getObjects().forEach((obj) => {
-              canvas.remove(obj);
-            });
-          } else {
-            canvas.remove(activeObject);
-          }
-
-          canvas.discardActiveObject();
-          canvas.requestRenderAll();
-        }
-
-        if (event.key === 'Escape' && canvas) {
-          if (isPolygonDrawing()) {
-            cancelPolygonDrawing(canvas, setSelectedTool);
-          }
-        }
-      };
-
-      window.addEventListener('keydown', handleKeyDown);
-      canvas.on('mouse:down', handleMouseDown);
-
-      return () => {
-        canvas.off('mouse:down', handleMouseDown);
-        window.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [canvas]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canvas, deleteSelectedObjects, setSelectedTool, isMobileMenuOpen]);
 
   // 페이지 떠날 때 확인
   useEffect(() => {
@@ -159,17 +132,20 @@ export default function FullscreenEditor({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
+  // 저장 핸들러
   const handleSave = async () => {
     if (!canvas) return;
 
-    const canvasData = JSON.stringify(canvas.toJSON());
+    const canvasData = saveCanvasData();
 
     if (onSave) {
       await onSave(canvasData);
       setHasUnsavedChanges(false);
     }
+    setIsMobileMenuOpen(false);
   };
 
+  // 나가기 핸들러
   const handleExit = () => {
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(
@@ -185,6 +161,7 @@ export default function FullscreenEditor({
     }
   };
 
+  // 저장 후 나가기 핸들러
   const handleSaveAndExit = async () => {
     await handleSave();
     if (onExit) {
@@ -194,8 +171,24 @@ export default function FullscreenEditor({
     }
   };
 
+  // 모바일 메뉴 토글
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // 오버레이 클릭시 메뉴 닫기
+  const handleOverlayClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className={styles.editor}>
+      {/* 모바일 메뉴 오버레이 */}
+      <div 
+        className={`${styles.mobileMenuOverlay} ${isMobileMenuOpen ? styles.open : ''}`}
+        onClick={handleOverlayClick}
+      />
+
       {/* 상단 헤더 */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
@@ -210,16 +203,57 @@ export default function FullscreenEditor({
 
         <div className={styles.headerCenter}>
           <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+          {canvas && !(canvas instanceof HTMLCanvasElement) && (
+            <BulkObjectCreator canvas={canvas} />
+          )}
         </div>
 
         <div className={styles.headerRight}>
-          <ThemeToggle />
           <button onClick={handleSave} className={styles.saveButton}>
             저장
           </button>
           <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
             저장 후 나가기
           </button>
+          <button 
+            className={`${styles.hamburgerButton} ${isMobileMenuOpen ? styles.active : ''}`}
+            onClick={toggleMobileMenu}
+            aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
+          </button>
+        </div>
+
+        {/* 모바일 메뉴 */}
+        <div className={`${styles.mobileMenu} ${isMobileMenuOpen ? styles.open : ''}`}>
+          <div className={styles.mobileMenuSection}>
+            <div className={styles.mobileMenuTitle}>도구</div>
+            <div className={styles.mobileToolbar}>
+              <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+            </div>
+          </div>
+
+          {canvas && !(canvas instanceof HTMLCanvasElement) && (
+            <div className={styles.mobileMenuSection}>
+              <div className={styles.mobileMenuTitle}>대량 생성</div>
+              <div className={styles.mobileBulkCreator}>
+                <BulkObjectCreator canvas={canvas} />
+              </div>
+            </div>
+          )}
+
+          <div className={styles.mobileMenuSection}>
+            <div className={styles.mobileMenuTitle}>작업</div>
+            <div className={styles.mobileActions}>
+              <button onClick={handleSave} className={styles.saveButton}>
+                저장
+              </button>
+              <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
+                저장 후 나가기
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -233,11 +267,10 @@ export default function FullscreenEditor({
           className={styles.canvas}
         />
 
-        {/* 사이드 패널들 */}
+        {/* 사이드 패널 */}
         {canvas && !(canvas instanceof HTMLCanvasElement) && (
           <div className={styles.sidePanels}>
             <Settings canvas={canvas} />
-            <BulkObjectCreator canvas={canvas} />
           </div>
         )}
 

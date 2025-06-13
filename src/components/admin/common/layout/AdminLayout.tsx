@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
-import { useSidebar } from '@/hooks/useSidebar'; // 새로 추가된 훅
+import { useSidebar } from '@/hooks/useSidebar';
 
 import Sidebar from './Sidebar';
 import ThemeToggle from '../ui/theme/ThemeToggle';

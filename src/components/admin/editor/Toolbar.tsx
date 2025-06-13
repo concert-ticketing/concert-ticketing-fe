@@ -18,39 +18,40 @@ interface ToolbarProps {
   selectedTool: 'rect' | 'circle' | 'text' | 'group' | 'polygon' | null;
 }
 
+const tools = [
+  { type: 'rect', icon: squareIcon, alt: 'Rectangle', label: '사각형' },
+  { type: 'circle', icon: circleIcon, alt: 'Circle', label: '원형' },
+  { type: 'text', icon: textIcon, alt: 'Text', label: '텍스트' },
+  { type: 'polygon', icon: polygonIcon, alt: 'Polygon', label: '다각형' },
+  { type: null, icon: pointerIcon, alt: 'Select', label: '선택' },
+] as const;
+
 export default function Toolbar({ setSelectedTool, selectedTool }: ToolbarProps) {
   return (
     <div className={styles.toolbar}>
-      <button
-        onClick={() => setSelectedTool('rect')}
-        className={selectedTool === 'rect' ? styles.active : ''}
-      >
-        <Image src={squareIcon} alt='square icon' priority />
-      </button>
-      <button
-        onClick={() => setSelectedTool('circle')}
-        className={selectedTool === 'circle' ? styles.active : ''}
-      >
-        <Image src={circleIcon} alt='circle icon' priority />
-      </button>
-      <button
-        onClick={() => setSelectedTool('text')}
-        className={selectedTool === 'text' ? styles.active : ''}
-      >
-        <Image src={textIcon} alt='text icon' priority />
-      </button>
-      <button
-        onClick={() => setSelectedTool('polygon')}
-        className={selectedTool === 'polygon' ? styles.active : ''}
-      >
-        <Image src={polygonIcon} alt='polygon icon' priority />
-      </button>
-      <button
-        onClick={() => setSelectedTool(null)}
-        className={selectedTool === null ? styles.active : ''}
-      >
-        <Image src={pointerIcon} alt='pointer icon' priority />
-      </button>
+      <div className={styles.toolbarContainer}>
+        {tools.map((tool) => (
+          <button
+            key={tool.type || 'select'}
+            onClick={() => setSelectedTool(tool.type)}
+            className={`${styles.toolButton} ${
+              selectedTool === tool.type ? styles.active : ''
+            }`}
+            title={tool.label}
+            data-tool={tool.type || 'select'}
+          >
+            <div className={styles.iconWrapper}>
+              <Image
+                src={tool.icon}
+                alt={tool.alt}
+                priority
+                className={styles.toolIcon}
+              />
+            </div>
+            <div className={styles.ripple} />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

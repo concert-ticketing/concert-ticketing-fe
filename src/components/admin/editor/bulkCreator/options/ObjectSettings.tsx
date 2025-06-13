@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ObjectConfig, ObjectType } from '@/types/Bulk';
+import { ObjectConfig, ObjectType } from '@/types/bulk';
 
 import styles from '../bulk.module.css';
 

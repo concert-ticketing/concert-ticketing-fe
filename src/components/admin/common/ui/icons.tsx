@@ -180,3 +180,40 @@ export const LogoIcon: () => JSX.Element = () => {
     </svg>
   );
 };
+
+export const HamburgerIcon: () => JSX.Element = () => {
+  return (
+    <svg
+      width='20'
+      height='20'
+      viewBox='0 0 20 20'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <line x1='3' y1='6' x2='17' y2='6' />
+      <line x1='3' y1='12' x2='17' y2='12' />
+      <line x1='3' y1='18' x2='17' y2='18' />
+    </svg>
+  );
+};
+
+export const CloseIcon: () => JSX.Element = () => {
+  return (
+    <svg
+      width='20'
+      height='20'
+      viewBox='0 0 20 20'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <line x1='15' y1='5' x2='5' y2='15' />
+      <line x1='5' y1='5' x2='15' y2='15' />
+    </svg>
+  );
+};

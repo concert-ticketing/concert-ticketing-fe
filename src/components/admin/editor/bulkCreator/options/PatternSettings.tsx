@@ -1,14 +1,16 @@
 import React from 'react';
 
-import { PatternConfig } from '@/types/Bulk';
+import { PatternConfig } from '@/types/bulk';
 
 import styles from '../bulk.module.css';
 
 interface PatternSettingsProps {
   patternConfig: PatternConfig;
-  setPatternConfig: React.Dispatch<React.SetStateAction<PatternConfig>>;
+  setPatternConfig: (
+    config: PatternConfig | ((prev: PatternConfig) => PatternConfig),
+  ) => void;
   autoSpacing: boolean;
-  setAutoSpacing: React.Dispatch<React.SetStateAction<boolean>>;
+  setAutoSpacing: (autoSpacing: boolean) => void;
 }
 
 export default function PatternSettings({
@@ -56,6 +58,77 @@ export default function PatternSettings({
           />
           <span>자동 간격 조정</span>
         </label>
+      </div>
+
+      {/* 패턴 타입 선택 */}
+      <div className={styles.field}>
+        <label className={styles.label}>패턴 타입</label>
+        <select
+          value={patternConfig.pattern}
+          onChange={(e) =>
+            setPatternConfig((prev) => ({
+              ...prev,
+              pattern: e.target.value as 'circle' | 'line',
+            }))
+          }
+          className={styles.input}
+        >
+          <option value='circle'>원형 패턴</option>
+          <option value='line'>직선 패턴</option>
+        </select>
+      </div>
+
+      {/* 객체 개수 */}
+      <div className={styles.field}>
+        <label className={styles.label}>객체 개수</label>
+        <input
+          type='number'
+          value={patternConfig.count}
+          onClick={(e) => e.currentTarget.select()}
+          onChange={(e) =>
+            setPatternConfig((prev) => ({
+              ...prev,
+              count: Number(e.target.value),
+            }))
+          }
+          className={styles.input}
+          min='1'
+        />
+      </div>
+
+      {/* 중심 좌표 */}
+      <div className={styles.row}>
+        <div className={styles.field}>
+          <label className={styles.label}>중심 X</label>
+          <input
+            type='number'
+            value={patternConfig.centerX}
+            onClick={(e) => e.currentTarget.select()}
+            onChange={(e) =>
+              setPatternConfig((prev) => ({
+                ...prev,
+                centerX: Number(e.target.value),
+              }))
+            }
+            className={styles.input}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>중심 Y</label>
+          <input
+            type='number'
+            value={patternConfig.centerY}
+            onClick={(e) => e.currentTarget.select()}
+            onChange={(e) =>
+              setPatternConfig((prev) => ({
+                ...prev,
+                centerY: Number(e.target.value),
+              }))
+            }
+            className={styles.input}
+          />
+        </div>
       </div>
 
       {/* 패턴별 추가 설정 */}
@@ -137,6 +210,12 @@ export default function PatternSettings({
           자동 조정됩니다
         </div>
       )}
+
+      <div className={styles.info}>
+        {patternConfig.pattern === 'circle'
+          ? `원형으로 ${patternConfig.count}개 객체가 배치됩니다.`
+          : `직선으로 ${patternConfig.count}개 객체가 배치됩니다.`}
+      </div>
     </div>
   );
 }

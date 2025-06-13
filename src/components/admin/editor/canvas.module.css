@@ -1,4 +1,3 @@
-
 .editor {
   position: fixed;
   top: 0;
@@ -20,6 +19,8 @@
   justify-content: space-between;
   padding: 0 20px;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 .headerLeft {
@@ -27,12 +28,16 @@
   align-items: center;
   gap: 16px;
   flex: 1;
+  min-width: 0;
 }
 
 .headerCenter {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 16px;
   flex: 2;
+  min-width: 0;
 }
 
 .headerRight {
@@ -41,6 +46,122 @@
   gap: 12px;
   flex: 1;
   justify-content: flex-end;
+  min-width: 0;
+}
+
+/* 햄버거 메뉴 버튼 */
+.hamburgerButton {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburgerButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-secondary);
+}
+
+.hamburgerButton:active {
+  transform: scale(0.95);
+}
+
+.hamburgerButton svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburgerButton:hover svg {
+  transform: scale(1.1);
+}
+
+.hamburgerButton.active svg {
+  transform: rotate(90deg);
+}
+
+/* 모바일 메뉴 */
+.mobileMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 20px;
+  transform: translateY(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.mobileMenu.open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobileMenuSection {
+  margin-bottom: 24px;
+}
+
+.mobileMenuSection:last-child {
+  margin-bottom: 0;
+}
+
+.mobileMenuTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobileToolbar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.mobileBulkCreator {
+  display: flex;
+  justify-content: center;
+}
+
+.mobileActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 모바일 메뉴 오버레이 */
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.mobileMenuOverlay.open {
+  opacity: 1;
+  visibility: visible;
 }
 
 .exitButton {
@@ -52,10 +173,12 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .exitButton:hover {
   background: var(--bg-tertiary);
+  border-color: var(--border-secondary);
 }
 
 .title {
@@ -63,16 +186,20 @@
   font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .unsavedIndicator {
-  color: #ef4444;
+  color: var(--danger-primary);
   font-size: 14px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .saveButton {
-  background: #3b82f6;
+  background: var(--accent-primary);
   border: none;
   color: white;
   padding: 8px 16px;
@@ -81,14 +208,15 @@
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .saveButton:hover {
-  background: #2563eb;
+  background: var(--accent-secondary);
 }
 
 .saveExitButton {
-  background: #10b981;
+  background: var(--success-color);
   border: none;
   color: white;
   padding: 8px 16px;
@@ -97,6 +225,7 @@
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .saveExitButton:hover {
@@ -125,10 +254,12 @@
   gap: 16px;
   z-index: 10;
   pointer-events: none;
+  max-width: 320px;
 }
 
 .sidePanels > * {
   pointer-events: auto;
+  background: var(--bg-primary);
   border: 1px solid var(--border-primary);
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
@@ -139,7 +270,7 @@
   position: absolute;
   top: 20px;
   left: 20px;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 12px 16px;
   border-radius: 8px;
@@ -148,57 +279,527 @@
   max-width: 350px;
   line-height: 1.5;
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 반응형 처리 */
+.dark .polygonGuide {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid var(--border-primary);
+}
+
+/* 대형 데스크톱 (1440px 이상) */
+@media (min-width: 1440px) {
+  .header {
+    padding: 0 32px;
+  }
+  
+  .sidePanels {
+    top: 24px;
+    right: 24px;
+    max-width: 380px;
+  }
+  
+  .polygonGuide {
+    top: 24px;
+    left: 24px;
+    max-width: 400px;
+  }
+}
+
+/* 중형 태블릿 (1024px 이하) */
 @media (max-width: 1024px) {
-  .headerCenter {
-    flex: 1;
+  .header {
+    padding: 0 16px;
   }
   
   .headerLeft,
+  .headerCenter,
   .headerRight {
     flex: 1;
   }
+  
+  .sidePanels {
+    top: 16px;
+    right: 16px;
+    max-width: 280px;
+  }
+  
+  .polygonGuide {
+    top: 16px;
+    left: 16px;
+    max-width: 320px;
+  }
 }
 
+/* 소형 태블릿 (768px 이하) - 햄버거 메뉴 시작 */
 @media (max-width: 768px) {
   .header {
-    height: 50px;
-    padding: 0 12px;
+    height: 56px;
+    padding: 0 16px;
+  }
+  
+  .hamburgerButton {
+    display: flex;
+  }
+  
+  /* 데스크톱 헤더 요소들 숨김 */
+  .headerCenter,
+  .headerRight .saveButton,
+  .headerRight .saveExitButton {
+    display: none;
   }
   
   .headerLeft {
-    gap: 8px;
-  }
-  
-  .headerRight {
-    gap: 8px;
+    gap: 12px;
   }
   
   .title {
     font-size: 16px;
   }
   
-  .exitButton,
-  .saveButton,
-  .saveExitButton {
-    padding: 6px 12px;
-    font-size: 13px;
+  .unsavedIndicator {
+    font-size: 12px;
   }
   
   .sidePanels {
-    top: 12px;
-    right: 12px;
-    left: 12px;
-    flex-direction: row;
-    justify-content: space-between;
+    display: none; /* 모바일에서는 메뉴에서 접근 */
   }
   
   .polygonGuide {
-    top: 12px;
+    top: 72px; /* 헤더 + 메뉴 높이 고려 */
+    left: 16px;
+    right: 16px;
+    font-size: 13px;
+    max-width: none;
+  }
+  
+  .mobileMenuSection {
+    margin-bottom: 20px;
+  }
+  
+  .mobileActions {
+    gap: 8px;
+  }
+  
+  .mobileActions button {
+    flex: 1;
+  }
+}
+
+/* 모바일 (480px 이하) */
+@media (max-width: 480px) {
+  .header {
+    height: 52px;
+    padding: 0 12px;
+  }
+  
+  .title {
+    font-size: 14px;
+    max-width: 150px;
+  }
+  
+  .unsavedIndicator {
+    display: none; /* 공간 절약 */
+  }
+  
+  .mobileMenu {
+    padding: 16px;
+  }
+  
+  .mobileMenuTitle {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .mobileMenuSection {
+    margin-bottom: 16px;
+  }
+  
+  .mobileActions {
+    gap: 6px;
+  }
+  
+  .mobileActions button {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .polygonGuide {
+    top: 68px;
     left: 12px;
     right: 12px;
-    font-size: 13px;
+    font-size: 12px;
+    padding: 10px 12px;
   }
+}
+
+/* 초소형 모바일 (360px 이하) */
+@media (max-width: 360px) {
+  .header {
+    height: 48px;
+    padding: 0 8px;
+  }
+  
+  .title {
+    font-size: 13px;
+    max-width: 120px;
+  }
+  
+  .hamburgerButton {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+  
+  .hamburgerButton svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .mobileMenu {
+    padding: 12px;
+  }
+  
+  .mobileActions button {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  
+  .polygonGuide {
+    top: 60px;
+    left: 8px;
+    right: 8px;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+}
+
+/* 가로 방향 최적화 */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 768px) {
+  .header {
+    height: 48px;
+  }
+  
+  .mobileMenu {
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+  
+  .polygonGuide {
+    top: 58px;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .hamburgerButton {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .mobileActions button {
+    min-height: 44px;
+  }
+  
+  .exitButton {
+    min-height: 44px;
+  }
+}
+
+.saveButton:hover {
+  background: var(--accent-secondary);
+}
+
+.saveExitButton {
+  background: var(--success-bg);
+  border: none;
+  color: var(--success-color);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.saveExitButton:hover {
+  background: #059669;
+}
+
+.canvasContainer {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas {
+  display: block;
+  cursor: crosshair;
+  width: 100%;
+  height: 100%;
+}
+
+.sidePanels {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 10;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.sidePanels > * {
+  pointer-events: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+}
+
+.polygonGuide {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 10;
+  max-width: 350px;
+  line-height: 1.5;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .polygonGuide {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid var(--border-primary);
+}
+
+/* 대형 데스크톱 (1440px 이상) */
+@media (min-width: 1440px) {
+  .header {
+    padding: 0 32px;
+  }
+  
+  .sidePanels {
+    top: 24px;
+    right: 24px;
+    max-width: 380px;
+  }
+  
+  .polygonGuide {
+    top: 24px;
+    left: 24px;
+    max-width: 400px;
+  }
+}
+
+/* 중형 태블릿 (1024px 이하) */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 16px;
+  }
+  
+  .headerLeft,
+  .headerCenter,
+  .headerRight {
+    flex: 1;
+  }
+  
+  .sidePanels {
+    top: 16px;
+    right: 16px;
+    max-width: 280px;
+  }
+  
+  .polygonGuide {
+    top: 16px;
+    left: 16px;
+    max-width: 320px;
+  }
+}
+
+/* 소형 태블릿 (768px 이하) - 햄버거 메뉴 시작 */
+@media (max-width: 768px) {
+  .header {
+    height: 56px;
+    padding: 0 16px;
+  }
+  
+  .hamburgerButton {
+    display: flex;
+  }
+  
+  /* 데스크톱 헤더 요소들 숨김 */
+  .headerCenter,
+  .headerRight .saveButton,
+  .headerRight .saveExitButton {
+    display: none;
+  }
+  
+  .headerLeft {
+    gap: 12px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+  
+  .unsavedIndicator {
+    font-size: 12px;
+  }
+  
+  .sidePanels {
+    display: none; /* 모바일에서는 메뉴에서 접근 */
+  }
+  
+  .polygonGuide {
+    top: 72px; /* 헤더 + 메뉴 높이 고려 */
+    left: 16px;
+    right: 16px;
+    font-size: 13px;
+    max-width: none;
+  }
+}
+
+/* 모바일 (480px 이하) */
+@media (max-width: 480px) {
+  .header {
+    height: 52px;
+    padding: 0 12px;
+  }
+  
+  .title {
+    font-size: 14px;
+    max-width: 150px;
+  }
+  
+  .unsavedIndicator {
+    display: none; /* 공간 절약 */
+  }
+  
+  .mobileMenu {
+    padding: 12px 16px;
+  }
+  
+  .mobileMenuTitle {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .mobileToolbar {
+    gap: 6px;
+  }
+  
+  .mobileActions {
+    gap: 6px;
+  }
+  
+  .mobileActions button {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .polygonGuide {
+    top: 65px;
+    left: 12px;
+    right: 12px;
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
+/* 초소형 모바일 (360px 이하) */
+@media (max-width: 360px) {
+  .header {
+    height: 48px;
+    padding: 0 8px;
+  }
+  
+  .title {
+    font-size: 13px;
+    max-width: 120px;
+  }
+  
+  .hamburgerButton {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .hamburgerLine {
+    width: 16px;
+  }
+  
+  .mobileMenu {
+    padding: 10px 12px;
+  }
+  
+  .mobileActions button {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  
+  .polygonGuide {
+    top: 58px;
+    left: 8px;
+    right: 8px;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+}
+
+/* 가로 방향 최적화 */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 768px) {
+  .header {
+    height: 48px;
+  }
+  
+  .mobileMenu {
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+  
+  .polygonGuide {
+    top: 58px;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .hamburgerButton {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .mobileActions button {
+    min-height: 44px;
+  }
+}
+
+/* 모바일 메뉴 오버레이 */
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.mobileMenuOverlay.open {
+  opacity: 1;
+  visibility: visible;
 }

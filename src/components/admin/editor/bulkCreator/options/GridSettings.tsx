@@ -1,16 +1,16 @@
 import React from 'react';
 
-import { GridConfig, ObjectConfig } from '@/types/Bulk';
+import { GridConfig, ObjectConfig } from '@/types/bulk';
 
 import styles from '../bulk.module.css';
 import Tooltip from '@/components/admin/common/ui/Tooltip';
 
 interface GridSettingsProps {
   gridConfig: GridConfig;
-  setGridConfig: React.Dispatch<React.SetStateAction<GridConfig>>;
+  setGridConfig: (config: GridConfig | ((prev: GridConfig) => GridConfig)) => void;
   objectConfig: ObjectConfig;
   autoSpacing: boolean;
-  setAutoSpacing: React.Dispatch<React.SetStateAction<boolean>>;
+  setAutoSpacing: (autoSpacing: boolean) => void;
 }
 
 export default function GridSettings({

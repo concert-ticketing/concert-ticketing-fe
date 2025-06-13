@@ -7,7 +7,7 @@ interface PositionProps {
   position: { x: number; y: number };
   selectedObject: fabric.Object | null;
   canvas: fabric.Canvas | null;
-  setPosition: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  setPosition: (position: { x: number; y: number }) => void;
   disabled?: boolean;
 }
 
@@ -22,7 +22,7 @@ export function Position({
     if (selectedObject && canvas) {
       selectedObject.set(axis === 'x' ? 'left' : 'top', value);
       canvas.requestRenderAll();
-      setPosition((prev) => ({ ...prev, [axis]: value }));
+      setPosition({ ...position, [axis]: value });
     }
   };
 
