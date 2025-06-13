@@ -11,6 +11,18 @@ interface ThemeState {
   initializeTheme: () => void;
 }
 
+// DOM에 테마 클래스 적용하는 함수
+const applyThemeToDOM = (theme: Theme) => {
+  if (typeof window !== 'undefined') {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }
+};
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
@@ -35,22 +47,14 @@ export const useThemeStore = create<ThemeState>()(
       },
 
       initializeTheme: () => {
-        const { theme } = get();
-
         // 브라우저 환경에서만 실행
         if (typeof window !== 'undefined') {
-          // localStorage에서 저장된 테마가 없다면 시스템 테마 감지
-          const savedTheme = localStorage.getItem('theme-storage');
-
-          if (!savedTheme) {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const systemTheme = prefersDark ? 'dark' : 'light';
-            get().setTheme(systemTheme);
-          } else {
-            // 저장된 테마가 있다면 DOM에 적용
-            applyThemeToDOM(theme);
-            set({ isDark: theme === 'dark' });
-          }
+          // 컴포넌트 마운트 시 짧은 지연 후 테마 적용 (persist 완료 대기)
+          setTimeout(() => {
+            const currentTheme = get().theme;
+            applyThemeToDOM(currentTheme);
+            set({ isDark: currentTheme === 'dark' });
+          }, 0);
         }
       },
     }),
@@ -62,29 +66,17 @@ export const useThemeStore = create<ThemeState>()(
   ),
 );
 
-// DOM에 테마 클래스 적용하는 함수
-function applyThemeToDOM(theme: Theme) {
-  if (typeof window !== 'undefined') {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }
-}
-
-// 시스템 테마 변경 감지 (선택사항)
+// 시스템 테마 변경 감지
 export const initializeSystemThemeListener = () => {
   if (typeof window !== 'undefined') {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-      const { theme } = useThemeStore.getState();
-      // 사용자가 수동으로 설정한 테마가 없다면 시스템 테마 따라가기
-      const hasUserPreference = localStorage.getItem('theme-storage');
+      // 사용자가 수동으로 설정한 테마가 있는지 확인
+      const storage = localStorage.getItem('theme-storage');
 
-      if (!hasUserPreference) {
+      if (!storage) {
+        // 저장된 테마가 없으면 시스템 테마 따라가기
         const systemTheme = e.matches ? 'dark' : 'light';
         useThemeStore.getState().setTheme(systemTheme);
       }

@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import * as fabric from 'fabric';
 
-import styles from './canvas.module.css';
+import { useCanvasStore } from '@/core/canvasStore';
+import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
+
 import Toolbar from './Toolbar';
 import Settings from './settings';
 import BulkObjectCreator from './bulkCreator';
@@ -9,155 +12,275 @@ import { addRectangleFn } from './shapes/Rect';
 import { addCircleFn } from './shapes/Circle';
 import { addTextFn } from './shapes/Text';
 import { addPolygonFn, cancelPolygonDrawing, isPolygonDrawing } from './shapes/Polygon';
+import styles from './canvas.module.css';
+import { CloseIcon, HamburgerIcon } from '../common/ui/icons';
 
-/**
- * 캔버스 초기 생성, 도구 선택 및 이벤트 처리를 위한 상위 컴포넌트 입니다.
- */
+interface EditorProps {
+  onSave?: (canvasData: string) => void;
+  onExit?: () => void;
+  initialData?: string;
+}
 
-export default function FabricEditor() {
+export default function CanvasEditor({ onSave, onExit, initialData }: EditorProps) {
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const selectedToolRef = useRef<'rect' | 'circle' | 'text' | 'group' | 'polygon' | null>(
-    null,
-  );
-  const [selectedTool, setSelectedTool] = useState<
-    'rect' | 'circle' | 'text' | 'group' | 'polygon' | null
-  >(null);
+  const { initializeTheme } = useThemeStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Zustand store
+  const {
+    canvas,
+    selectedTool,
+    hasUnsavedChanges,
+    setSelectedTool,
+    setHasUnsavedChanges,
+    initializeCanvas,
+    disposeCanvas,
+    saveCanvasData,
+    deleteSelectedObjects,
+    handleResize,
+  } = useCanvasStore();
+
+  // 라이트모드, 다크모드 감지 클린업 함수
   useEffect(() => {
-    selectedToolRef.current = selectedTool;
-  }, [selectedTool]);
+    initializeTheme();
 
-  // 초기 캔버스 생성 및 리사이즈 핸들링
+    const cleanup = initializeSystemThemeListener();
+    return cleanup;
+  }, [initializeTheme]);
+
+  // 초기 캔버스 생성
   useEffect(() => {
     if (canvasRef.current) {
-      const initCanvas = new fabric.Canvas(canvasRef.current, {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        selection: true,
-      });
+      initializeCanvas(canvasRef.current, initialData);
 
-      initCanvas.backgroundColor = '#dfdfdf';
-      initCanvas.renderAll();
-
-      setCanvas(initCanvas);
-
-      const handleResize = () => {
-        initCanvas.setDimensions({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-      };
+      // 리사이즈 이벤트 등록
       window.addEventListener('resize', handleResize);
 
       return () => {
         window.removeEventListener('resize', handleResize);
-        initCanvas.dispose();
-        canvasRef.current = null;
+        disposeCanvas();
       };
     }
-  }, []);
+  }, [initialData, initializeCanvas, handleResize, disposeCanvas]);
 
-  // 캔버스 도구 선택 및 이벤트 처리
+  // 캔버스 마우스 이벤트 처리
   useEffect(() => {
-    if (canvas) {
-      const handleMouseDown = (opt: fabric.TEvent) => {
-        const pointer = canvas.getPointer(opt.e);
-        if (!pointer) return;
+    if (!canvas) return;
 
-        const { x, y } = pointer;
+    const handleMouseDown = (opt: fabric.TEvent) => {
+      const pointer = canvas.getPointer(opt.e);
+      if (!pointer) return;
 
-        switch (selectedToolRef.current) {
-          case 'rect':
-            addRectangleFn(canvas, x, y, setSelectedTool);
-            break;
-          case 'circle':
-            addCircleFn(canvas, x, y, setSelectedTool);
-            break;
-          case 'text':
-            addTextFn(canvas, x, y, '변수 string', setSelectedTool);
-            break;
-          case 'polygon':
-            addPolygonFn(canvas, x, y, setSelectedTool);
-            break;
-          default:
-            break;
+      const { x, y } = pointer;
+
+      switch (selectedTool) {
+        case 'rect':
+          addRectangleFn(canvas, x, y, setSelectedTool);
+          break;
+        case 'circle':
+          addCircleFn(canvas, x, y, setSelectedTool);
+          break;
+        case 'text':
+          addTextFn(canvas, x, y, '변수 string', setSelectedTool);
+          break;
+        case 'polygon':
+          addPolygonFn(canvas, x, y, setSelectedTool);
+          break;
+        default:
+          break;
+      }
+    };
+
+    canvas.on('mouse:down', handleMouseDown);
+
+    return () => {
+      canvas.off('mouse:down', handleMouseDown);
+    };
+  }, [canvas, selectedTool, setSelectedTool]);
+
+  // 키보드 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Delete' && canvas) {
+        deleteSelectedObjects();
+      }
+
+      if (event.key === 'Escape' && canvas) {
+        if (isPolygonDrawing()) {
+          cancelPolygonDrawing(canvas, setSelectedTool);
+        } else if (isMobileMenuOpen) {
+          setIsMobileMenuOpen(false);
         }
-      };
+      }
+    };
 
-      // delete 키 누르면 객체 삭제
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Delete' && canvas) {
-          const activeObject = canvas.getActiveObject();
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canvas, deleteSelectedObjects, setSelectedTool, isMobileMenuOpen]);
 
-          if (!activeObject) return;
+  // 페이지 떠날 때 확인
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
 
-          if (activeObject.type === 'activeSelection') {
-            // 다중 선택된 객체일 경우 모두 삭제
-            (activeObject as fabric.ActiveSelection).getObjects().forEach((obj) => {
-              canvas.remove(obj);
-            });
-          } else {
-            // 단일 객체 삭제
-            canvas.remove(activeObject);
-          }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
-          canvas.discardActiveObject();
-          canvas.requestRenderAll();
-        }
+  // 저장 핸들러
+  const handleSave = async () => {
+    if (!canvas) return;
 
-        // esc 키 누르면 폴리곤 그리기 취소
-        if (event.key === 'Escape' && canvas) {
-          if (isPolygonDrawing()) {
-            cancelPolygonDrawing(canvas, setSelectedTool);
-          }
-        }
-      };
+    const canvasData = saveCanvasData();
 
-      window.addEventListener('keydown', handleKeyDown);
-      canvas.on('mouse:down', handleMouseDown);
-
-      return () => {
-        canvas.off('mouse:down', handleMouseDown);
-        window.removeEventListener('keydown', handleKeyDown);
-      };
+    if (onSave) {
+      await onSave(canvasData);
+      setHasUnsavedChanges(false);
     }
-  }, [canvas]);
+    setIsMobileMenuOpen(false);
+  };
+
+  // 나가기 핸들러
+  const handleExit = () => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm(
+        '저장하지 않은 변경사항이 있습니다. 정말 나가시겠습니까?',
+      );
+      if (!confirmed) return;
+    }
+
+    if (onExit) {
+      onExit();
+    } else {
+      router.back();
+    }
+  };
+
+  // 저장 후 나가기 핸들러
+  const handleSaveAndExit = async () => {
+    await handleSave();
+    if (onExit) {
+      onExit();
+    } else {
+      router.back();
+    }
+  };
+
+  // 모바일 메뉴 토글
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // 오버레이 클릭시 메뉴 닫기
+  const handleOverlayClick = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <div className={styles.canvas}>
-      <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
-      <canvas
-        id='canvas'
-        ref={canvasRef}
-        tabIndex={0}
-        onClick={() => canvasRef.current?.focus()}
+    <div className={styles.editor}>
+      {/* 모바일 메뉴 오버레이 */}
+      <div 
+        className={`${styles.mobileMenuOverlay} ${isMobileMenuOpen ? styles.open : ''}`}
+        onClick={handleOverlayClick}
       />
-      {/* canvas가 있을 경우 렌더링 */}
-      {canvas && !(canvas instanceof HTMLCanvasElement) && (
-        <>
-          <Settings canvas={canvas} />
-          <BulkObjectCreator canvas={canvas} />
-        </>
-      )}
-      {/* 폴리곤 그리기 안내 메시지 */}
-      {selectedTool === 'polygon' && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '80px',
-            left: '20px',
-            background: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            fontSize: '14px',
-            zIndex: 1000,
-          }}
-        >
-          폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
+
+      {/* 상단 헤더 */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <button onClick={handleExit} className={styles.exitButton}>
+            ← 나가기
+          </button>
+          <h1 className={styles.title}>콘서트장 에디터</h1>
+          {hasUnsavedChanges && (
+            <span className={styles.unsavedIndicator}>● 저장되지 않음</span>
+          )}
         </div>
-      )}
+
+        <div className={styles.headerCenter}>
+          <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+          {canvas && !(canvas instanceof HTMLCanvasElement) && (
+            <BulkObjectCreator canvas={canvas} />
+          )}
+        </div>
+
+        <div className={styles.headerRight}>
+          <button onClick={handleSave} className={styles.saveButton}>
+            저장
+          </button>
+          <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
+            저장 후 나가기
+          </button>
+          <button 
+            className={`${styles.hamburgerButton} ${isMobileMenuOpen ? styles.active : ''}`}
+            onClick={toggleMobileMenu}
+            aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
+          </button>
+        </div>
+
+        {/* 모바일 메뉴 */}
+        <div className={`${styles.mobileMenu} ${isMobileMenuOpen ? styles.open : ''}`}>
+          <div className={styles.mobileMenuSection}>
+            <div className={styles.mobileMenuTitle}>도구</div>
+            <div className={styles.mobileToolbar}>
+              <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+            </div>
+          </div>
+
+          {canvas && !(canvas instanceof HTMLCanvasElement) && (
+            <div className={styles.mobileMenuSection}>
+              <div className={styles.mobileMenuTitle}>대량 생성</div>
+              <div className={styles.mobileBulkCreator}>
+                <BulkObjectCreator canvas={canvas} />
+              </div>
+            </div>
+          )}
+
+          <div className={styles.mobileMenuSection}>
+            <div className={styles.mobileMenuTitle}>작업</div>
+            <div className={styles.mobileActions}>
+              <button onClick={handleSave} className={styles.saveButton}>
+                저장
+              </button>
+              <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
+                저장 후 나가기
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 캔버스 영역 */}
+      <div className={styles.canvasContainer}>
+        <canvas
+          id='canvas'
+          ref={canvasRef}
+          tabIndex={0}
+          onClick={() => canvasRef.current?.focus()}
+          className={styles.canvas}
+        />
+
+        {/* 사이드 패널 */}
+        {canvas && !(canvas instanceof HTMLCanvasElement) && (
+          <div className={styles.sidePanels}>
+            <Settings canvas={canvas} />
+          </div>
+        )}
+
+        {/* 폴리곤 그리기 안내 */}
+        {selectedTool === 'polygon' && (
+          <div className={styles.polygonGuide}>
+            폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
+          </div>
+        )}
+      </div>
     </div>
   );
 }

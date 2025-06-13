@@ -1,6 +1,8 @@
 import React from 'react';
 import * as fabric from 'fabric';
 
+import styles from './field.module.css';
+
 interface StrokeWidthProps {
   strokeWidth: number;
   setStrokeWidth: (value: number) => void;
@@ -44,15 +46,16 @@ export function StrokeWidth({
   };
 
   return (
-    <>
-      <label>테두리 두께 (px)</label>
+    <div className={styles.container}>
+      <label className={styles.label}>테두리 두께 (px)</label>
       <input
         type='number'
         value={strokeWidth}
+        className={`${styles.input} ${styles.numberInput}`}
         onClick={(e) => e.currentTarget.select()}
         onChange={(e) => handleStrokeWidthChange(e.target.value)}
         disabled={disabled}
       />
-    </>
+    </div>
   );
 }

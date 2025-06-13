@@ -3,6 +3,8 @@ import * as fabric from 'fabric';
 
 import { getColorString } from '@/utils/getColorString';
 
+import styles from './field.module.css';
+
 interface StrokeColorProps {
   canvas: fabric.Canvas | null;
   selectedObject: fabric.Object | null;
@@ -39,14 +41,17 @@ export function StrokeColor({
   };
 
   return (
-    <>
-      <label>테두리 색</label>
-      <input
-        type='color'
-        value={getColorString(strokeColor)}
-        onChange={(e) => handleStrokeChange(e.target.value)}
-        disabled={disabled}
-      />
-    </>
+    <div className={styles.field}>
+      <label className={styles.label}>테두리 색</label>
+      <div className={styles.colorContainer}>
+        <input
+          type='color'
+          value={getColorString(strokeColor)}
+          className={styles.colorInput}
+          onChange={(e) => handleStrokeChange(e.target.value)}
+          disabled={disabled}
+        />
+      </div>
+    </div>
   );
 }

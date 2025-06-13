@@ -1,6 +1,8 @@
 import React from 'react';
 import * as fabric from 'fabric';
 
+import styles from './field.module.css';
+
 interface RectSizeProps {
   selectedObject: fabric.Object | null;
   width: string | number;
@@ -69,23 +71,30 @@ export function RectSize({
   };
 
   return (
-    <>
-      <label>너비 (px)</label>
-      <input
-        type='number'
-        value={width}
-        onClick={(e) => e.currentTarget.select()}
-        onChange={handleWidthChange}
-        disabled={isLocked}
-      />
-      <label>높이 (px)</label>
-      <input
-        type='number'
-        value={height}
-        onClick={(e) => e.currentTarget.select()}
-        onChange={handleHeightChange}
-        disabled={isLocked}
-      />
-    </>
+    <div className={styles.container}>
+      <div className={styles.labelWithIcon}>📐 크기</div>
+      <div className={styles.row}>
+        <div className={styles.field}>
+          <label className={styles.label}>너비 (px)</label>
+          <input
+            type='number'
+            value={width}
+            onClick={(e) => e.currentTarget.select()}
+            onChange={handleWidthChange}
+            disabled={isLocked}
+          />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label}>높이 (px)</label>
+          <input
+            type='number'
+            value={height}
+            onClick={(e) => e.currentTarget.select()}
+            onChange={handleHeightChange}
+            disabled={isLocked}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

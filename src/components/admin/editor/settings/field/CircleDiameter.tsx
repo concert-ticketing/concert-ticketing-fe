@@ -1,6 +1,8 @@
 import React from 'react';
 import * as fabric from 'fabric';
 
+import styles from './field.module.css';
+
 interface CircleDiameterProps {
   selectedObject: fabric.Object | null;
   diameter: string | number;
@@ -67,15 +69,19 @@ export function CircleDiameter({
   };
 
   return (
-    <>
-      <label>지름</label>
-      <input
-        type='number'
-        value={diameter}
-        onClick={(e) => e.currentTarget.select()}
-        onChange={handleDiameterChange}
-        disabled={isLocked}
-      />
-    </>
+    <div className={styles.container}>
+      <div className={styles.labelWithIcon}>⭕ 원 크기</div>
+      <div className={styles.field}>
+        <label className={styles.label}>지름</label>
+        <input
+          type='number'
+          value={diameter}
+          onClick={(e) => e.currentTarget.select()}
+          onChange={handleDiameterChange}
+          disabled={isLocked}
+        />
+        <div className={styles.info}>반지름: {Number(diameter) / 2}px</div>
+      </div>
+    </div>
   );
 }

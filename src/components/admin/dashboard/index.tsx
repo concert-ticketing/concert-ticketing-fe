@@ -266,15 +266,6 @@ export default function Dashboard() {
     },
   ];
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      month: 'long',
-      day: 'numeric',
-      weekday: 'short',
-    });
-  };
-
   const getStatusBadge = (status: string) => {
     const statusMap = {
       confirmed: { text: '확정', className: styles.statusConfirmed },
@@ -302,11 +293,6 @@ export default function Dashboard() {
           <p className={styles.dashboardSubtitle}>
             콘서트장 관리 현황을 한눈에 확인하세요
           </p>
-        </div>
-        <div className={styles.dashboardActions}>
-          <Link href='/admin/create' className={styles.primaryButton}>
-            새 콘서트장 등록
-          </Link>
         </div>
       </div>
 

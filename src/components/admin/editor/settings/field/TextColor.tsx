@@ -3,6 +3,8 @@ import * as fabric from 'fabric';
 
 import { getColorString } from '@/utils/getColorString';
 
+import styles from './field.module.css';
+
 interface TextColorProps {
   canvas: fabric.Canvas;
   selectedObject: fabric.Object | null;
@@ -46,14 +48,17 @@ export function TextColor({
   };
 
   return (
-    <>
-      <label>텍스트 색상</label>
-      <input
-        type='color'
-        value={getColorString(textColor)}
-        onChange={handleTextColorChange}
-        disabled={disabled}
-      />
-    </>
+    <div className={styles.field}>
+      <label className={styles.label}>텍스트 색상</label>
+      <div className={styles.colorContainer}>
+        <input
+          type='color'
+          value={getColorString(textColor)}
+          className={styles.colorInput}
+          onChange={handleTextColorChange}
+          disabled={disabled}
+        />
+      </div>
+    </div>
   );
 }

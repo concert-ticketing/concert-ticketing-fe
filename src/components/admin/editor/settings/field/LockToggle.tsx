@@ -4,7 +4,7 @@ import * as fabric from 'fabric';
 
 import { lockIcon, unlockIcon } from '@public/icons';
 
-import styles from '../canvas.module.css';
+import styles from './field.module.css';
 
 interface LockToggleProps {
   canvas: fabric.Canvas;
@@ -50,8 +50,11 @@ export function LockToggle({
   };
 
   return (
-    <div className={styles.locked}>
-      <button onClick={handleToggleLock}>
+    <div className={styles.container}>
+      <button
+        onClick={handleToggleLock}
+        className={`${styles.toggleButton} ${isLocked ? styles.locked : ''}`}
+      >
         <Image
           src={isLocked ? lockIcon : unlockIcon}
           alt={isLocked ? 'lock' : 'unlock'}
