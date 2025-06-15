@@ -346,9 +346,7 @@ export default function CreateForm() {
                   </label>
                 )}
               </div>
-              <div className={styles.inputHint}>
-                추천 크기: 400x400px, 최대 5MB (JPG, PNG, GIF)
-              </div>
+              <div className={styles.inputHint}>최대 5MB (JPG, PNG, GIF)</div>
             </div>
 
             {/* 아이콘 선택 (이미지가 없을 때만 표시) */}

@@ -5,15 +5,15 @@ import * as fabric from 'fabric';
 import { useCanvasStore } from '@/core/canvasStore';
 import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
 
-import Toolbar from './Toolbar';
+import Toolbar from './toolbar';
 import Settings from './settings';
 import BulkObjectCreator from './bulkCreator';
 import { addRectangleFn } from './shapes/Rect';
 import { addCircleFn } from './shapes/Circle';
 import { addTextFn } from './shapes/Text';
 import { addPolygonFn, cancelPolygonDrawing, isPolygonDrawing } from './shapes/Polygon';
-import styles from './canvas.module.css';
 import { CloseIcon, HamburgerIcon } from '../common/ui/icons';
+import styles from './editor.module.css';
 
 interface EditorProps {
   onSave?: (canvasData: string) => void;
@@ -43,10 +43,10 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
 
   // 라이트모드, 다크모드 감지 클린업 함수
   useEffect(() => {
+    // 테마 초기화
     initializeTheme();
 
-    const cleanup = initializeSystemThemeListener();
-    return cleanup;
+    return initializeSystemThemeListener();
   }, [initializeTheme]);
 
   // 초기 캔버스 생성
@@ -82,7 +82,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
           addCircleFn(canvas, x, y, setSelectedTool);
           break;
         case 'text':
-          addTextFn(canvas, x, y, '변수 string', setSelectedTool);
+          addTextFn(canvas, x, y, '텍스트', setSelectedTool);
           break;
         case 'polygon':
           addPolygonFn(canvas, x, y, setSelectedTool);
@@ -184,7 +184,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
   return (
     <div className={styles.editor}>
       {/* 모바일 메뉴 오버레이 */}
-      <div 
+      <div
         className={`${styles.mobileMenuOverlay} ${isMobileMenuOpen ? styles.open : ''}`}
         onClick={handleOverlayClick}
       />
@@ -215,7 +215,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
           <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
             저장 후 나가기
           </button>
-          <button 
+          <button
             className={`${styles.hamburgerButton} ${isMobileMenuOpen ? styles.active : ''}`}
             onClick={toggleMobileMenu}
             aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}

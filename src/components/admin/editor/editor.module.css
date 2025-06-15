@@ -208,11 +208,14 @@
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  box-shadow: var(--shadow-sm);
   white-space: nowrap;
 }
 
 .saveButton:hover {
   background: var(--accent-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .saveExitButton {
@@ -225,11 +228,14 @@
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  box-shadow: var(--shadow-sm);
   white-space: nowrap;
 }
 
 .saveExitButton:hover {
   background: #059669;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .canvasContainer {
@@ -563,22 +569,22 @@
 
 .polygonGuide {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.8);
+  top: 15px;
+  left: 15px;
+  background: rgba(0, 0, 0, 0.4);
   color: white;
-  padding: 12px 16px;
+  padding: 8px 10px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 11px;
   z-index: 10;
-  max-width: 350px;
+  max-width: 340px;
   line-height: 1.5;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dark .polygonGuide {
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(30, 41, 59, 0.6);
   border: 1px solid var(--border-primary);
 }
 

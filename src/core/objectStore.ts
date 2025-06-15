@@ -7,7 +7,7 @@ import { ObjectState } from '@/types/objectState';
 
 export const useObjectStore = create<ObjectState>()(
   devtools(
-    (set, get) => ({
+    (set, _get) => ({
       // 초기 상태
       selectedObject: null,
       width: '',
@@ -22,6 +22,7 @@ export const useObjectStore = create<ObjectState>()(
       strokeColor: '#ffffff',
       strokeWidth: 0,
       isLocked: false,
+      price: '',
 
       // Setters
       setSelectedObject: (selectedObject) => set({ selectedObject }),
@@ -43,6 +44,7 @@ export const useObjectStore = create<ObjectState>()(
       setStrokeColor: (strokeColor) => set({ strokeColor }),
       setStrokeWidth: (strokeWidth) => set({ strokeWidth }),
       setIsLocked: (isLocked) => set({ isLocked }),
+      setPrice: (price: number) => set({ price }),
     }),
     {
       name: 'object-store',
@@ -65,6 +67,7 @@ export const clearSettings = () => {
   store.setStrokeWidth(0);
   store.setStrokeColor('#000000');
   store.setText({});
+  store.setPrice('');
 };
 
 // 객체 잠금 상태 확인 함수
@@ -159,6 +162,7 @@ export const handleObjectSelection = (
     setHeight,
     setDiameter,
     setText,
+    setPrice,
   } = useObjectStore.getState();
 
   setSelectedObject(obj);
@@ -178,6 +182,7 @@ export const handleObjectSelection = (
   setOpacity(targetObject.opacity || 1);
   setStrokeWidth(targetObject.strokeWidth || 0);
   setStrokeColor(getColorString(targetObject.stroke));
+  setPrice(targetObject.price || '');
 
   // 텍스트 객체면 textColor에, 나머지는 color에 설정
   if (targetObject.type === 'i-text') {

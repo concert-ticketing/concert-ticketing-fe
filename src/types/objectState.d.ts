@@ -22,6 +22,7 @@ export interface ObjectState {
   strokeColor: string;
   strokeWidth: number;
   isLocked: boolean;
+  price: string | number;
 
   // Actions
   setSelectedObject: (object: fabric.Object | null) => void;
@@ -41,4 +42,5 @@ export interface ObjectState {
   setStrokeColor: (strokeColor: string) => void;
   setStrokeWidth: (strokeWidth: number) => void;
   setIsLocked: (isLocked: boolean) => void;
+  setPrice: (price: string | number) => void;
 }

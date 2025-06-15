@@ -41,14 +41,12 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   const [isMobile, setIsMobile] = useState(false);
   const initializeTheme = useThemeStore((state) => state.initializeTheme);
 
+  // 라이트모드, 다크모드 감지 클린업 함수
   useEffect(() => {
     // 테마 초기화
     initializeTheme();
 
-    // 시스템 테마 변경 리스너 설정
-    const cleanup = initializeSystemThemeListener();
-
-    return cleanup;
+    return initializeSystemThemeListener();
   }, [initializeTheme]);
 
   useEffect(() => {

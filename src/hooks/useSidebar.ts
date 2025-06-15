@@ -21,7 +21,7 @@ export const useSidebar = (defaultOpen: boolean = true): UseSidebarReturn => {
         setIsOpen(JSON.parse(savedState));
       }
     } catch (error) {
-      console.warn('Failed to load sidebar state from localStorage:', error);
+      console.log('localStore에서 사이드바 상태를 불러오지 못했습니다: ', error);
     } finally {
       setIsLoaded(true);
     }
@@ -35,7 +35,7 @@ export const useSidebar = (defaultOpen: boolean = true): UseSidebarReturn => {
     try {
       localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(newState));
     } catch (error) {
-      console.warn('Failed to save sidebar state to localStorage:', error);
+      console.log('localStore에서 사이드바 상태를 불러오지 못했습니다: ', error);
     }
   };
 
@@ -45,7 +45,7 @@ export const useSidebar = (defaultOpen: boolean = true): UseSidebarReturn => {
     try {
       localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(open));
     } catch (error) {
-      console.warn('Failed to save sidebar state to localStorage:', error);
+      console.log('localStore에서 사이드바 상태를 불러오지 못했습니다: ', error);
     }
   };
 

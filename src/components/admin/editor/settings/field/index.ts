@@ -10,6 +10,7 @@ import { StrokeColor } from './StrokeFill';
 import { StrokeWidth } from './StrokeWidth';
 import { TextColor } from './TextColor';
 import { TextObject } from './TextObject';
+import { Price } from './Price';
 
 export {
   Angle,
@@ -24,4 +25,5 @@ export {
   StrokeWidth,
   TextColor,
   TextObject,
+  Price,
 };

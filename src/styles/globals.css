@@ -20,8 +20,8 @@ a {
   --border-secondary: #d1d5db;
   --accent-primary: #3b82f6;
   --accent-secondary: #2563eb;
-  --success-bg: #d1fae5;
-  --success-color: #10b981;
+  --success-bg: #10b981;
+  --success-color: #ffffff;
   --success-border: rgba(16, 185, 129, 0.2);
   --warning-bg: #fef3c7;
   --warning-color: #f59e0b;
@@ -31,9 +31,9 @@ a {
   --neutral-border: rgba(107, 114, 128, 0.2);
   --danger-primary: #ef4444;
   --danger-secondary: #dc2626;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* 다크모드 색상 */
@@ -48,7 +48,7 @@ a {
   --border-secondary: #6b7280;
   --accent-primary: #60a5fa;
   --accent-secondary: #3b82f6;
-  --success-bg: rgb(16, 185, 129);
+  --success-bg: #01a34a;
   --success-color: #ffffff;
   --success-border: rgba(16, 185, 129, 0.3);
   --warning-bg: rgb(245, 159, 11);
@@ -59,9 +59,9 @@ a {
   --neutral-border: rgba(107, 114, 128, 0.3);
   --danger-primary: #f87171;
   --danger-secondary: #ef4444;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* 기본 요소들에 테마 적용 */

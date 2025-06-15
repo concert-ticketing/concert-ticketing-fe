@@ -70,6 +70,52 @@
     cursor: not-allowed;
     border-color: var(--border-tertiary, #e5e7eb);
   }
+
+  /* 가격 입력 필드 */
+  .priceInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .priceInput {
+    padding-right: 30px !important;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+  }
+
+  .priceUnit {
+    position: absolute;
+    right: 8px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    pointer-events: none;
+  }
+
+  /* 다크모드에서 가격 프리뷰 스타일 */
+  .dark .pricePreview {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  /* 가격 입력 필드 포커스 스타일 */
+  .priceInput:focus {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+  }
+
+  /* 가격이 높을 때 색상 변경 */
+  .priceInput[data-high-price="true"] {
+    border-color: var(--warning-color);
+  }
+
+  .priceInput[data-high-price="true"]:focus {
+    border-color: var(--warning-color);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+  }
   
   /* === 숫자 입력 필드 === */
   .numberInput {

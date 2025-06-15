@@ -21,6 +21,7 @@ import {
   ObjectId,
   Opacity,
   Position,
+  Price,
   RectSize,
   StrokeColor,
   StrokeWidth,
@@ -47,6 +48,7 @@ export default function Settings({ canvas }: SettingProps) {
     strokeColor,
     strokeWidth,
     isLocked,
+    price,
     setWidth,
     setHeight,
     setDiameter,
@@ -59,6 +61,7 @@ export default function Settings({ canvas }: SettingProps) {
     setAngle,
     setOpacity,
     setStrokeWidth,
+    setPrice,
   } = useObjectStore();
 
   // 캔버스 이벤트 리스너 설정
@@ -182,6 +185,15 @@ export default function Settings({ canvas }: SettingProps) {
 
       {/* 공통 정보 */}
       <ObjectId objectId={selectedObject.id as string} />
+
+      {/* 좌석 가격 */}
+      <Price
+        price={price}
+        setPrice={setPrice}
+        selectedObject={selectedObject}
+        disabled={isLocked}
+        canvas={canvas}
+      />
 
       {/* 위치 좌표 */}
       <Position
