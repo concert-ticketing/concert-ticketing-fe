@@ -6,9 +6,9 @@ import style from './LoginForm.module.css';
 const REDIRECT_URI = 'http://localhost:3000/api/callback';
 
 const CLIENT_IDS = {
-  kakao: '카카오 키',
-  naver: '네이버 키',
-  google: '구글 키',
+  kakao: 'f64869f097fa9ce71f4d1d614b6c896a',
+  naver: 'jE6XvGK6FxADoCMEjT0m',
+  google: '1033931690858-kk6du920qj7i9i0do2t376196pd5u2os.apps.googleusercontent.com',
 };
 
 export default function LoginForm() {

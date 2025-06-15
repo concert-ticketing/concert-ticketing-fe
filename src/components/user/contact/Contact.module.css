@@ -1,0 +1,283 @@
+.container {
+ min-width: 1400px;
+  width: 100%;
+  background-color: #f9fafb;
+}
+
+.wrapper{
+    padding: 20px 20%;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionContent {
+  padding: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.moreButton {
+  font-size: 0.875rem;
+  color: #6b7280;
+  background: none;
+  border: 1px solid #6b7280;
+  padding:5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.moreButton:hover {
+  color: #374151;
+}
+
+/* FAQ Tabs */
+.tabContainer {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.tabList {
+  display: flex;
+  gap: 2rem;
+}
+
+.tab {
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.activeTab {
+  border-bottom-color: #3b82f6;
+  color: #2563eb;
+}
+
+.inactiveTab {
+  color: #6b7280;
+}
+
+.inactiveTab:hover {
+  color: #374151;
+  border-bottom-color: #d1d5db;
+}
+
+.emptyContent {
+  text-align: center;
+  padding: 3rem 0;
+  color: #6b7280;
+}
+
+/* Notice List */
+.noticeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.noticeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.noticeItem:last-child {
+  border-bottom: none;
+}
+
+.noticeLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-radius: 0.25rem;
+}
+
+.noticeTitle {
+  color: #111827;
+}
+
+.noticeRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.noticeDate {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.arrowButton {
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.arrowButton:hover {
+  color: #4b5563;
+}
+
+/* Public Notice */
+.publicNoticeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.publicNoticeItem {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.publicNoticeItem:last-child {
+  border-bottom: none;
+}
+
+.publicNoticeButton {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.publicNoticeButton:hover {
+  background-color: #f9fafb;
+}
+
+.publicNoticeTitle {
+  color: #111827;
+}
+
+.expandIcon {
+  color: #9ca3af;
+  transform: rotate(0deg);
+  transition: transform 0.2s;
+}
+
+.expandIcon.expanded {
+  transform: rotate(180deg);
+}
+
+.publicNoticeContent {
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  border-top: 1px solid #f3f4f6;
+  background-color: #f9fafb;
+}
+
+.publicNoticeText {
+  padding-top: 1rem;
+}
+
+.moreButtonContainer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.moreNoticeButton {
+  font-size: 0.875rem;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.moreNoticeButton:hover {
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+
+  .tabList {
+    gap: 1rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.5rem;
+  }
+
+  .tab {
+    flex-shrink: 0;
+  }
+
+  .noticeItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .noticeRight {
+    align-self: flex-end;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .moreButton {
+    align-self: flex-end;
+  }
+}

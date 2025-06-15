@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         client_id: '카카오 REST API 키',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'http://localhost:3000/api/callback',
         code,
       }).toString(),
     });
