@@ -1,10 +1,12 @@
-import AdminLayout from '@/components/admin/common/layout/AdminLayout';
+import { withAdminLayout } from '@/utils/withAdminLayout';
+import type { NextPageWithLayout } from '@/types/layout';
+
 import VenueList from '@/components/admin/venues/venueList';
 
-export default function VenuesPage() {
-  return (
-    <AdminLayout title='콘서트장 목록'>
-      <VenueList />
-    </AdminLayout>
-  );
-}
+const VenueListPage: NextPageWithLayout = () => {
+  return <VenueList />;
+};
+
+VenueListPage.getLayout = withAdminLayout({ title: '공연장 관리' });
+
+export default VenueListPage;

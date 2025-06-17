@@ -377,6 +377,398 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+/* 기존 스타일에 추가할 아이콘 관련 스타일 */
+
+/* 아이콘 공통 스타일 */
+.iconSvg {
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* 로고 아이콘 */
+.logoIcon {
+  color: var(--accent-primary);
+  transition: all 0.3s ease;
+}
+
+.logo:hover .logoIcon {
+  color: var(--accent-secondary);
+  transform: scale(1.1);
+}
+
+/* 메뉴 아이콘 스타일 */
+.menuIcon .iconSvg {
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.menuIcon.open .iconSvg {
+  color: var(--text-secondary);
+}
+
+.menuIcon.closed .iconSvg {
+  color: var(--text-tertiary);
+}
+
+/* 활성 상태 아이콘 */
+.menuLink.active .iconSvg,
+.menuButton.active .iconSvg {
+  color: var(--accent-primary);
+}
+
+.menuLink:hover .iconSvg,
+.menuButton:hover .iconSvg {
+  color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+/* 서브메뉴 아이콘 크기 조정 */
+.subItem .iconSvg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 확장 화살표 아이콘 */
+.expandArrow {
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.expandIcon.expanded .expandArrow {
+  transform: rotate(90deg);
+}
+
+.expandIcon.collapsed .expandArrow {
+  transform: rotate(0deg);
+}
+
+.expandIcon.active .expandArrow {
+  color: var(--accent-primary);
+}
+
+.expandIcon.inactive .expandArrow {
+  color: var(--text-tertiary);
+}
+
+/* 하단 정보 아이콘 */
+.version,
+.lastUpdate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.version .iconSvg,
+.lastUpdate .iconSvg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+/* 배지 스타일 개선 */
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.badge.active {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.badge.inactive {
+  background-color: var(--text-tertiary);
+  color: white;
+}
+
+/* 반응형 아이콘 크기 */
+@media (max-width: 768px) {
+  .iconSvg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .logoIcon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .subItem .iconSvg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 모바일에서 메뉴 버튼과 링크 스타일 조정 */
+  .menuButton,
+  .menuLink {
+    padding: 12px 16px;
+    min-height: 48px; /* 터치 친화적인 높이 */
+  }
+
+  /* 모바일에서 서브메뉴 스타일 */
+  .subMenu {
+    background-color: var(--bg-tertiary);
+    border-left: 2px solid var(--accent-primary);
+    margin-left: 16px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .subItem {
+    padding-left: 0;
+  }
+
+  .subItem .menuLink {
+    padding: 10px 16px;
+    margin: 2px 0;
+    border-radius: 6px;
+  }
+
+  /* 모바일에서 확장 아이콘 크기 증가 */
+  .expandIcon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .expandArrow {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* 모바일에서 배지 크기 조정 */
+  .badge {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+  }
+}
+
+/* 다크모드 아이콘 조정 */
+.dark .logoIcon {
+  color: var(--accent-primary);
+}
+
+.dark .menuIcon .iconSvg {
+  color: var(--text-secondary);
+}
+
+.dark .menuIcon.closed .iconSvg {
+  color: var(--text-tertiary);
+}
+
+.dark .menuLink.active .iconSvg,
+.dark .menuButton.active .iconSvg {
+  color: var(--accent-primary);
+}
+
+.dark .expandIcon.active .expandArrow {
+  color: var(--accent-primary);
+}
+
+.dark .expandIcon.inactive .expandArrow {
+  color: var(--text-tertiary);
+}
+
+.dark .version .iconSvg,
+.dark .lastUpdate .iconSvg {
+  color: var(--text-tertiary);
+}
+
+/* 호버 효과 개선 */
+.menuLink:hover,
+.menuButton:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.menuLink.active,
+.menuButton.active {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.menuLink.active .iconSvg,
+.menuButton.active .iconSvg {
+  color: white;
+}
+
+.menuLink.active:hover .iconSvg,
+.menuButton.active:hover .iconSvg {
+  color: white;
+  transform: scale(1.05);
+}
+
+/* 포커스 상태 */
+.menuLink:focus,
+.menuButton:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+.menuLink:focus .iconSvg,
+.menuButton:focus .iconSvg {
+  color: var(--accent-primary);
+}
+
+/* 로딩 애니메이션 */
+@keyframes iconPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.menuIcon.loading .iconSvg {
+  animation: iconPulse 1.5s ease-in-out infinite;
+}
+
+/* 아이콘 크기별 스타일 */
+.iconSvg[data-size="small"] {
+  width: 16px;
+  height: 16px;
+}
+
+.iconSvg[data-size="medium"] {
+  width: 20px;
+  height: 20px;
+}
+
+.iconSvg[data-size="large"] {
+  width: 24px;
+  height: 24px;
+}
+
+/* 반응형 아이콘 크기 */
+@media (max-width: 768px) {
+  .iconSvg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .logoIcon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .subItem .iconSvg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* 다크모드 아이콘 조정 */
+.dark .logoIcon {
+  color: var(--accent-primary);
+}
+
+.dark .menuIcon .iconSvg {
+  color: var(--text-secondary);
+}
+
+.dark .menuIcon.closed .iconSvg {
+  color: var(--text-tertiary);
+}
+
+.dark .menuLink.active .iconSvg,
+.dark .menuButton.active .iconSvg {
+  color: var(--accent-primary);
+}
+
+.dark .expandIcon.active .expandArrow {
+  color: var(--accent-primary);
+}
+
+.dark .expandIcon.inactive .expandArrow {
+  color: var(--text-tertiary);
+}
+
+.dark .version .iconSvg,
+.dark .lastUpdate .iconSvg {
+  color: var(--text-tertiary);
+}
+
+/* 호버 효과 개선 */
+.menuLink:hover,
+.menuButton:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.menuLink.active,
+.menuButton.active {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.menuLink.active .iconSvg,
+.menuButton.active .iconSvg {
+  color: white;
+}
+
+.menuLink.active:hover .iconSvg,
+.menuButton.active:hover .iconSvg {
+  color: white;
+  transform: scale(1.05);
+}
+
+/* 포커스 상태 */
+.menuLink:focus,
+.menuButton:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+.menuLink:focus .iconSvg,
+.menuButton:focus .iconSvg {
+  color: var(--accent-primary);
+}
+
+/* 로딩 애니메이션 */
+@keyframes iconPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.menuIcon.loading .iconSvg {
+  animation: iconPulse 1.5s ease-in-out infinite;
+}
+
+/* 아이콘 크기별 스타일 */
+.iconSvg[data-size="small"] {
+  width: 16px;
+  height: 16px;
+}
+
+.iconSvg[data-size="medium"] {
+  width: 20px;
+  height: 20px;
+}
+
+.iconSvg[data-size="large"] {
+  width: 24px;
+  height: 24px;
+}
+
 /* 모바일 스타일 */
 @media (max-width: 768px) {
   .sidebar {

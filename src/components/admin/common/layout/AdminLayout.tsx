@@ -5,29 +5,13 @@ import { useSidebar } from '@/hooks/useSidebar';
 
 import Sidebar from './Sidebar';
 import ThemeToggle from '../ui/theme/ThemeToggle';
+import { Icons } from '../ui/icons';
 import styles from './adminLayout.module.css';
-import { LeftArrowIcon, RightArrowIcon } from '../ui/icons';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   title: string | null;
 }
-
-interface IconComponentProps {
-  children: React.ReactNode;
-  isMobile?: boolean;
-}
-
-// 컴포넌트를 렌더링 외부로 이동
-const IconComponent: React.FC<IconComponentProps> = ({ children, isMobile = false }) => (
-  <svg
-    className={isMobile ? styles.menuIconMobile : styles.menuIcon}
-    viewBox='0 0 24 24'
-    fill='currentColor'
-  >
-    {children}
-  </svg>
-);
 
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
   // 사이드바 상태 관리 (로컬 스토리지 포함)
@@ -52,10 +36,11 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   useEffect(() => {
     const checkMobile = () => {
       const isMobileView = window.innerWidth < 768;
+      const wasMobile = isMobile;
       setIsMobile(isMobileView);
 
-      // 모바일에서는 기본적으로 사이드바 닫기
-      if (isMobileView) {
+      // 데스크톱에서 모바일로 전환될 때만 사이드바 닫기
+      if (!wasMobile && isMobileView && sidebarOpen) {
         setSidebarOpen(false);
       }
     };
@@ -63,10 +48,16 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, [setSidebarOpen]);
+  }, [isMobile, sidebarOpen, setSidebarOpen]);
 
   // 사이드바 토글 (모바일과 데스크톱 구분 처리)
-  const handleSidebarToggle = () => {
+  const handleSidebarToggle = (e?: React.MouseEvent) => {
+    // 이벤트 버블링 방지
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     if (isMobile) {
       // 모바일에서는 임시로만 열고 닫기 (로컬 스토리지에 저장하지 않음)
       setSidebarOpen(!sidebarOpen);
@@ -87,72 +78,65 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     if (isMobile) {
       return (
         <button
+          type='button'
           onClick={handleSidebarToggle}
           className={styles.menuButtonMobile}
           aria-label='메뉴 열기'
         >
-          <IconComponent isMobile>
-            {/* 햄버거 메뉴 아이콘 */}
-            <path
-              d='M4 6h16M4 12h16M4 18h16'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              fill='none'
-            />
-          </IconComponent>
+          <Icons.MoreVertical className={styles.menuIconMobile} />
         </button>
       );
     }
 
     return (
       <button
+        type='button'
         onClick={handleSidebarToggle}
         className={styles.menuButtonDesktop}
         title={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
         aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
       >
-        <IconComponent isMobile={false}>
-          {sidebarOpen ? (
-            // 왼쪽 화살표 (닫기)
-            <LeftArrowIcon />
-          ) : (
-            // 오른쪽 화살표 (열기)
-            <RightArrowIcon />
-          )}
-        </IconComponent>
+        {sidebarOpen ? (
+          <Icons.ArrowLeft className={styles.menuIcon} />
+        ) : (
+          <Icons.ArrowRight className={styles.menuIcon} />
+        )}
       </button>
     );
   };
+
+  const renderUserMenu = () => (
+    <button
+      type='button'
+      className={styles.userMenu}
+      title='사용자 메뉴'
+      aria-label='사용자 메뉴'
+    >
+      <Icons.User size={isMobile ? 14 : 16} />
+    </button>
+  );
 
   // localStorage 로딩이 완료되지 않은 경우 깜빡임 방지
   if (!isLoaded) {
     return (
       <div className={styles.container}>
-        <div
-          style={{
-            width: '280px',
-            height: '100vh',
-            backgroundColor: 'var(--bg-primary)',
-            borderRight: '1px solid var(--border-primary)',
-          }}
-        />
+        <div className={styles.loadingSidebar} />
         <main className={`${styles.main} ${styles.desktop}`}>
           <header className={styles.header}>
             <div className={styles.headerLeft}>
-              <div style={{ width: '24px', height: '24px' }} />
+              <div className={styles.loadingButton} />
               <h1 className={styles.title}>{title}</h1>
             </div>
             <div className={styles.headerRight}>
-              <ThemeToggle size='small' showLabel={!isMobile} />
-              <button className={styles.userMenu} aria-label='사용자 메뉴'>
-                👤
-              </button>
+              <div className={styles.loadingToggle} />
+              <div className={styles.loadingUser} />
             </div>
           </header>
-          <div className={isMobile ? styles.contentMobile : styles.content}>
-            {children}
+          <div className={styles.content}>
+            <div className={styles.loadingContent}>
+              <Icons.Loading className={styles.loadingIcon} />
+              <span>로딩 중...</span>
+            </div>
           </div>
         </main>
       </div>
@@ -167,7 +151,20 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
       {isMobile && sidebarOpen && (
         <div
           className={styles.overlay}
-          onClick={handleSidebarToggle}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSidebarOpen(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              e.stopPropagation();
+              setSidebarOpen(false);
+            }
+          }}
+          role='button'
+          tabIndex={0}
           aria-label='사이드바 닫기'
         />
       )}
@@ -177,7 +174,6 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             {renderMenuButton()}
-
             <h1 className={styles.title}>{title}</h1>
           </div>
 
@@ -187,13 +183,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
             <ThemeToggle size='small' showLabel={!isMobile} />
 
             {/* 사용자 메뉴 */}
-            <button
-              className={styles.userMenu}
-              title='사용자 메뉴'
-              aria-label='사용자 메뉴'
-            >
-              👤
-            </button>
+            {renderUserMenu()}
           </div>
         </header>
 

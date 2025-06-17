@@ -1,32 +1,34 @@
-import React from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
 
+import { Icons } from '@/components/admin/common/ui/icons';
 import styles from './dashboard.module.css';
-import {
-  EventStatsIcon,
-  RevenueIcon,
-  SmallArrowRightIcon,
-  TrendDownIcon,
-  TrendUpIcon,
-  VenueStatsIcon,
-  VisitorIcon,
-} from '../common/ui/icons';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  change?: string;
-  changeType?: 'positive' | 'negative' | 'neutral';
-  icon: React.ReactNode;
+interface DashboardStats {
+  totalVenues: number;
+  totalConcerts: number;
+  totalPerformers: number;
+  totalTicketsSold: number;
+  totalRevenue: number;
+  activeEvents: number;
 }
 
-interface RecentActivityItem {
+interface RecentActivity {
   id: string;
-  type: 'venue_created' | 'venue_updated' | 'concert_scheduled';
+  type: 'venue' | 'concert' | 'performer' | 'ticket';
   title: string;
   description: string;
   timestamp: string;
-  status?: 'success' | 'warning' | 'info';
+  status: 'success' | 'warning' | 'info';
+}
+
+interface TopVenue {
+  id: string;
+  name: string;
+  totalEvents: number;
+  totalTickets: number;
+  revenue: number;
+  occupancyRate: number;
 }
 
 interface UpcomingEvent {
@@ -35,293 +37,543 @@ interface UpcomingEvent {
   venue: string;
   date: string;
   time: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  attendees: number;
+  ticketsSold: number;
+  totalTickets: number;
+  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
 }
 
-const StatCard: React.FC<StatCardProps> = ({
-  title,
-  value,
-  change,
-  changeType,
-  icon,
-}) => (
-  <div className={styles.statCard}>
-    <div className={styles.statCardHeader}>
-      <div className={styles.statCardIcon}>{icon}</div>
-      <div className={styles.statCardInfo}>
-        <h3 className={styles.statCardTitle}>{title}</h3>
-        <div className={styles.statCardValue}>{value}</div>
-      </div>
-    </div>
-    {change && (
-      <div className={`${styles.statCardChange} ${styles[changeType || 'neutral']}`}>
-        {changeType === 'positive' && <TrendUpIcon />}
-        {changeType === 'negative' && <TrendDownIcon />}
-        <span>{change}</span>
-      </div>
-    )}
-  </div>
-);
-
 export default function Dashboard() {
-  // 더미 데이터
-  const statsData = [
-    {
-      title: '총 콘서트장',
-      value: 12,
-      change: '+2 이번 달',
-      changeType: 'positive' as const,
-      icon: <VenueStatsIcon />,
-    },
-    {
-      title: '예정된 이벤트',
-      value: 28,
-      change: '+5 이번 주',
-      changeType: 'positive' as const,
-      icon: <EventStatsIcon />,
-    },
-    {
-      title: '이번 달 수익',
-      value: '₩45,200,000',
-      change: '+12.5%',
-      changeType: 'positive' as const,
-      icon: <RevenueIcon />,
-    },
-    {
-      title: '총 방문객',
-      value: '156,847',
-      change: '+8.2%',
-      changeType: 'positive' as const,
-      icon: <VisitorIcon />,
-    },
-  ];
+  const router = useRouter();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [topVenues, setTopVenues] = useState<TopVenue[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
-  const recentActivities: RecentActivityItem[] = [
-    {
-      id: '1',
-      type: 'venue_created',
-      title: '새 콘서트장 등록',
-      description: '올림픽공원 콘서트홀이 등록되었습니다.',
-      timestamp: '2시간 전',
-      status: 'success',
-    },
-    {
-      id: '2',
-      type: 'concert_scheduled',
-      title: '콘서트 일정 등록',
-      description: 'IU 콘서트가 잠실종합운동장에 예약되었습니다.',
-      timestamp: '4시간 전',
-      status: 'info',
-    },
-    {
-      id: '3',
-      type: 'venue_updated',
-      title: '콘서트장 정보 업데이트',
-      description: '코엑스 홀 D의 좌석 배치가 수정되었습니다.',
-      timestamp: '6시간 전',
-      status: 'warning',
-    },
-    {
-      id: '4',
-      type: 'venue_created',
-      title: '새 콘서트장 등록',
-      description: '롯데콘서트홀이 등록되었습니다.',
-      timestamp: '1일 전',
-      status: 'success',
-    },
-  ];
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const upcomingEvents: UpcomingEvent[] = [
-    {
-      id: '1',
-      title: 'BTS 월드투어',
-      venue: '잠실종합운동장',
-      date: '2025-06-15',
-      time: '19:00',
-      status: 'confirmed',
-      attendees: 50000,
-    },
-    {
-      id: '2',
-      title: 'IU 골든아워 콘서트',
-      venue: '올림픽공원 체조경기장',
-      date: '2025-06-18',
-      time: '18:00',
-      status: 'confirmed',
-      attendees: 15000,
-    },
-    {
-      id: '3',
-      title: 'NewJeans 팬미팅',
-      venue: '코엑스 홀 D',
-      date: '2025-06-20',
-      time: '16:00',
-      status: 'pending',
-      attendees: 8000,
-    },
-    {
-      id: '4',
-      title: 'SEVENTEEN 콘서트',
-      venue: 'KSPO DOME',
-      date: '2025-06-25',
-      time: '19:30',
-      status: 'confirmed',
-      attendees: 12000,
-    },
-  ];
+      // 실제 구현시에는 API 호출
+      // const [statsData, activitiesData, venuesData, eventsData] = await Promise.all([
+      //   fetch('/api/admin/dashboard/stats').then(res => res.json()),
+      //   fetch('/api/admin/dashboard/activities').then(res => res.json()),
+      //   fetch('/api/admin/dashboard/top-venues').then(res => res.json()),
+      //   fetch('/api/admin/dashboard/upcoming-events').then(res => res.json()),
+      // ]);
 
-  const getStatusBadge = (status: string) => {
-    const statusMap = {
-      confirmed: { text: '확정', className: styles.statusConfirmed },
-      pending: { text: '대기', className: styles.statusPending },
-      cancelled: { text: '취소', className: styles.statusCancelled },
-      success: { text: '성공', className: styles.statusSuccess },
-      warning: { text: '주의', className: styles.statusWarning },
-      info: { text: '정보', className: styles.statusInfo },
-    };
+      // 임시 더미 데이터
+      const statsData: DashboardStats = {
+        totalVenues: 12,
+        totalConcerts: 89,
+        totalPerformers: 156,
+        totalTicketsSold: 24567,
+        totalRevenue: 1234567890,
+        activeEvents: 8,
+      };
 
-    const statusInfo = statusMap[status as keyof typeof statusMap];
-    return (
-      <span className={`${styles.statusBadge} ${statusInfo.className}`}>
-        {statusInfo.text}
-      </span>
-    );
+      const activitiesData: RecentActivity[] = [
+        {
+          id: '1',
+          type: 'concert',
+          title: '새로운 콘서트 등록',
+          description: 'IU 콘서트 - 올림픽공원 체조경기장',
+          timestamp: '2025-06-17T10:30:00Z',
+          status: 'success',
+        },
+        {
+          id: '2',
+          type: 'venue',
+          title: '공연장 정보 수정',
+          description: '잠실종합운동장 좌석 배치 업데이트',
+          timestamp: '2025-06-17T09:15:00Z',
+          status: 'info',
+        },
+        {
+          id: '3',
+          type: 'ticket',
+          title: '티켓 판매 완료',
+          description: 'BTS 콘서트 VIP석 매진',
+          timestamp: '2025-06-17T08:45:00Z',
+          status: 'warning',
+        },
+        {
+          id: '4',
+          type: 'performer',
+          title: '출연진 정보 등록',
+          description: '새로운 아티스트 프로필 추가',
+          timestamp: '2025-06-16T16:20:00Z',
+          status: 'success',
+        },
+      ];
+
+      const venuesData: TopVenue[] = [
+        {
+          id: '1',
+          name: '올림픽공원 체조경기장',
+          totalEvents: 24,
+          totalTickets: 12000,
+          revenue: 240000000,
+          occupancyRate: 95.5,
+        },
+        {
+          id: '2',
+          name: '잠실종합운동장',
+          totalEvents: 18,
+          totalTickets: 45000,
+          revenue: 450000000,
+          occupancyRate: 88.2,
+        },
+        {
+          id: '3',
+          name: 'KSPO DOME',
+          totalEvents: 15,
+          totalTickets: 8000,
+          revenue: 160000000,
+          occupancyRate: 92.8,
+        },
+      ];
+
+      const eventsData: UpcomingEvent[] = [
+        {
+          id: '1',
+          title: 'IU 콘서트 2025',
+          venue: '올림픽공원 체조경기장',
+          date: '2025-07-15',
+          time: '19:00',
+          ticketsSold: 8500,
+          totalTickets: 10000,
+          status: 'upcoming',
+        },
+        {
+          id: '2',
+          title: 'BTS 월드투어',
+          venue: '잠실종합운동장',
+          date: '2025-08-20',
+          time: '18:00',
+          ticketsSold: 42000,
+          totalTickets: 45000,
+          status: 'upcoming',
+        },
+        {
+          id: '3',
+          title: '뉴진스 팬미팅',
+          venue: 'KSPO DOME',
+          date: '2025-06-25',
+          time: '20:00',
+          ticketsSold: 7800,
+          totalTickets: 8000,
+          status: 'ongoing',
+        },
+      ];
+
+      setStats(statsData);
+      setRecentActivities(activitiesData);
+      setTopVenues(venuesData);
+      setUpcomingEvents(eventsData);
+    } catch (err) {
+      setError('대시보드 데이터를 불러오는 중 오류가 발생했습니다.');
+      console.error('Error loading dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [timeRange]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
+  const formatNumber = (num: number): string => {
+    return new Intl.NumberFormat('ko-KR').format(num);
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(dateString));
+  };
+
+  const getActivityIcon = (type: RecentActivity['type']) => {
+    switch (type) {
+      case 'venue':
+        return <Icons.MapPin className={styles.activityIcon} />;
+      case 'concert':
+        return <Icons.Music className={styles.activityIcon} />;
+      case 'performer':
+        return <Icons.User className={styles.activityIcon} />;
+      case 'ticket':
+        return <Icons.Seat className={styles.activityIcon} />;
+      default:
+        return <Icons.CheckCircle className={styles.activityIcon} />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'success':
+        return styles.statusSuccess;
+      case 'warning':
+        return styles.statusWarning;
+      case 'info':
+        return styles.statusInfo;
+      case 'upcoming':
+        return styles.statusUpcoming;
+      case 'ongoing':
+        return styles.statusOngoing;
+      case 'completed':
+        return styles.statusCompleted;
+      case 'cancelled':
+        return styles.statusCancelled;
+      default:
+        return styles.statusDefault;
+    }
+  };
+
+  const getProgressPercentage = (sold: number, total: number): number => {
+    return Math.round((sold / total) * 100);
+  };
+
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'create-venue':
+        router.push('/admin/venues/create');
+        break;
+      case 'create-concert':
+        router.push('/admin/concerts/create');
+        break;
+      case 'create-performer':
+        router.push('/admin/performers/create');
+        break;
+      case 'view-venues':
+        router.push('/admin/venues');
+        break;
+      default:
+        break;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingContainer}>
+          <Icons.Loading className={styles.loadingIcon} />
+          <span>대시보드를 불러오는 중...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorContainer}>
+          <Icons.AlertCircle className={styles.errorIcon} />
+          <span>{error || '데이터를 불러올 수 없습니다.'}</span>
+          <button
+            type='button'
+            onClick={loadDashboardData}
+            className={styles.retryButton}
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.dashboard}>
+    <div className={styles.container}>
       {/* 헤더 */}
-      <div className={styles.dashboardHeader}>
-        <div>
-          <h1 className={styles.dashboardTitle}>대시보드</h1>
-          <p className={styles.dashboardSubtitle}>
-            콘서트장 관리 현황을 한눈에 확인하세요
-          </p>
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>관리자 대시보드</h1>
+          <p className={styles.subtitle}>콘서트 관리 시스템 현황</p>
+        </div>
+        <div className={styles.headerRight}>
+          <div className={styles.timeRangeSelector}>
+            <button
+              type='button'
+              className={`${styles.timeButton} ${timeRange === 'week' ? styles.active : ''}`}
+              onClick={() => setTimeRange('week')}
+            >
+              주간
+            </button>
+            <button
+              type='button'
+              className={`${styles.timeButton} ${timeRange === 'month' ? styles.active : ''}`}
+              onClick={() => setTimeRange('month')}
+            >
+              월간
+            </button>
+            <button
+              type='button'
+              className={`${styles.timeButton} ${timeRange === 'year' ? styles.active : ''}`}
+              onClick={() => setTimeRange('year')}
+            >
+              연간
+            </button>
+          </div>
+          <button
+            type='button'
+            onClick={loadDashboardData}
+            className={styles.refreshButton}
+          >
+            <Icons.RefreshCw className={styles.refreshIcon} />
+          </button>
         </div>
       </div>
 
       {/* 통계 카드 */}
       <div className={styles.statsGrid}>
-        {statsData.map((stat) => (
-          <StatCard
-            key={stat.value}
-            title={stat.title}
-            value={stat.value}
-            change={stat.change}
-            changeType={stat.changeType}
-            icon={stat.icon}
-          />
-        ))}
-      </div>
-
-      {/* 메인 컨텐츠 그리드 */}
-      <div className={styles.contentGrid}>
-        {/* 최근 활동 */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>최근 활동</h2>
-            <Link href='/admin/activities' className={styles.cardAction}>
-              전체 보기 <SmallArrowRightIcon />
-            </Link>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Icons.MapPin />
           </div>
-          <div className={styles.cardContent}>
-            <div className={styles.activityList}>
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    {activity.status && getStatusBadge(activity.status)}
-                  </div>
-                  <div className={styles.activityContent}>
-                    <h4 className={styles.activityTitle}>{activity.title}</h4>
-                    <p className={styles.activityDescription}>{activity.description}</p>
-                    <span className={styles.activityTimestamp}>{activity.timestamp}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>{formatNumber(stats.totalVenues)}</span>
+            <span className={styles.statLabel}>등록된 공연장</span>
           </div>
         </div>
 
-        {/* 예정된 이벤트 */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>예정된 이벤트</h2>
-            <Link href='/admin/events' className={styles.cardAction}>
-              전체 보기 <SmallArrowRightIcon />
-            </Link>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Icons.Music />
           </div>
-          <div className={styles.cardContent}>
-            <div className={styles.eventList}>
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className={styles.eventItem}>
-                  <div className={styles.eventDate}>
-                    <div className={styles.eventDay}>
-                      {new Date(event.date).getDate()}
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>{formatNumber(stats.totalConcerts)}</span>
+            <span className={styles.statLabel}>총 콘서트 수</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Icons.Users />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>
+              {formatNumber(stats.totalPerformers)}
+            </span>
+            <span className={styles.statLabel}>등록된 출연진</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Icons.Seat />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>
+              {formatNumber(stats.totalTicketsSold)}
+            </span>
+            <span className={styles.statLabel}>총 판매 티켓</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Icons.BarChart />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>{formatCurrency(stats.totalRevenue)}</span>
+            <span className={styles.statLabel}>총 매출</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Icons.Calendar />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>{formatNumber(stats.activeEvents)}</span>
+            <span className={styles.statLabel}>진행 중인 이벤트</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 메인 콘텐츠 */}
+      <div className={styles.mainContent}>
+        {/* 왼쪽 컬럼 */}
+        <div className={styles.leftColumn}>
+          {/* 최근 활동 */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>최근 활동</h3>
+              <button type='button' className={styles.viewAllButton}>
+                <span>전체 보기</span>
+                <Icons.ArrowRight size={16} />
+              </button>
+            </div>
+            <div className={styles.cardContent}>
+              <div className={styles.activityList}>
+                {recentActivities.map((activity) => (
+                  <div key={activity.id} className={styles.activityItem}>
+                    <div
+                      className={`${styles.activityIconWrapper} ${getStatusColor(activity.status)}`}
+                    >
+                      {getActivityIcon(activity.type)}
                     </div>
-                    <div className={styles.eventMonth}>
-                      {new Date(event.date).toLocaleDateString('ko-KR', {
-                        month: 'short',
-                      })}
-                    </div>
-                  </div>
-                  <div className={styles.eventDetails}>
-                    <div className={styles.eventHeader}>
-                      <h4 className={styles.eventTitle}>{event.title}</h4>
-                      {getStatusBadge(event.status)}
-                    </div>
-                    <p className={styles.eventVenue}>{event.venue}</p>
-                    <div className={styles.eventMeta}>
-                      <span className={styles.eventTime}>{event.time}</span>
-                      <span className={styles.eventAttendees}>
-                        {event.attendees.toLocaleString()}명
+                    <div className={styles.activityContent}>
+                      <h4 className={styles.activityTitle}>{activity.title}</h4>
+                      <p className={styles.activityDescription}>{activity.description}</p>
+                      <span className={styles.activityTime}>
+                        {formatDate(activity.timestamp)}
                       </span>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 빠른 작업 */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>빠른 작업</h3>
+            </div>
+            <div className={styles.cardContent}>
+              <div className={styles.quickActions}>
+                <button
+                  type='button'
+                  onClick={() => handleQuickAction('create-venue')}
+                  className={styles.quickActionButton}
+                >
+                  <Icons.Plus />
+                  <span>새 공연장</span>
+                </button>
+                <button
+                  type='button'
+                  onClick={() => handleQuickAction('create-concert')}
+                  className={styles.quickActionButton}
+                >
+                  <Icons.Music />
+                  <span>새 콘서트</span>
+                </button>
+                <button
+                  type='button'
+                  onClick={() => handleQuickAction('create-performer')}
+                  className={styles.quickActionButton}
+                >
+                  <Icons.User />
+                  <span>새 출연진</span>
+                </button>
+                <button
+                  type='button'
+                  onClick={() => handleQuickAction('view-venues')}
+                  className={styles.quickActionButton}
+                >
+                  <Icons.Eye />
+                  <span>공연장 보기</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 빠른 액션 */}
-      <div className={styles.quickActions}>
-        <h2 className={styles.sectionTitle}>빠른 작업</h2>
-        <div className={styles.actionGrid}>
-          <Link href='/admin/venues/create' className={styles.actionCard}>
-            <div className={styles.actionIcon}>
-              <VenueStatsIcon />
+        {/* 오른쪽 컬럼 */}
+        <div className={styles.rightColumn}>
+          {/* 인기 공연장 */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>인기 공연장</h3>
             </div>
-            <h3 className={styles.actionTitle}>새 콘서트장</h3>
-            <p className={styles.actionDescription}>새로운 콘서트장을 등록하세요</p>
-          </Link>
+            <div className={styles.cardContent}>
+              <div className={styles.venueList}>
+                {topVenues.map((venue, index) => (
+                  <div key={venue.id} className={styles.venueItem}>
+                    <div className={styles.venueRank}>#{index + 1}</div>
+                    <div className={styles.venueInfo}>
+                      <h4 className={styles.venueName}>{venue.name}</h4>
+                      <div className={styles.venueStats}>
+                        <span>{venue.totalEvents}개 이벤트</span>
+                        <span>{formatNumber(venue.totalTickets)}석</span>
+                        <span>{venue.occupancyRate}% 점유율</span>
+                      </div>
+                      <div className={styles.venueRevenue}>
+                        {formatCurrency(venue.revenue)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-          <Link href='/admin/venues' className={styles.actionCard}>
-            <div className={styles.actionIcon}>
-              <EventStatsIcon />
+          {/* 예정된 이벤트 */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>예정된 이벤트</h3>
             </div>
-            <h3 className={styles.actionTitle}>콘서트장 관리</h3>
-            <p className={styles.actionDescription}>기존 콘서트장을 관리하세요</p>
-          </Link>
-
-          <Link href='/admin/editor' className={styles.actionCard}>
-            <div className={styles.actionIcon}>
-              <svg
-                width='24'
-                height='24'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-              >
-                <path d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' />
-                <path d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' />
-              </svg>
+            <div className={styles.cardContent}>
+              <div className={styles.eventList}>
+                {upcomingEvents.map((event) => (
+                  <div key={event.id} className={styles.eventItem}>
+                    <div className={styles.eventInfo}>
+                      <h4 className={styles.eventTitle}>{event.title}</h4>
+                      <p className={styles.eventVenue}>
+                        <Icons.MapPin size={14} />
+                        {event.venue}
+                      </p>
+                      <p className={styles.eventDateTime}>
+                        <Icons.Calendar size={14} />
+                        {event.date} {event.time}
+                      </p>
+                    </div>
+                    <div className={styles.eventProgress}>
+                      <div className={styles.eventStatus}>
+                        <span
+                          className={`${styles.statusBadge} ${getStatusColor(event.status)}`}
+                        >
+                          {(() => {
+                            switch (event.status) {
+                              case 'upcoming':
+                                return '예정';
+                              case 'ongoing':
+                                return '진행중';
+                              case 'completed':
+                                return '완료';
+                              case 'cancelled':
+                                return '취소';
+                              default:
+                                return '';
+                            }
+                          })()}
+                        </span>
+                      </div>
+                      <div className={styles.ticketProgress}>
+                        <div className={styles.progressBar}>
+                          <div
+                            className={styles.progressFill}
+                            style={{
+                              width: `${getProgressPercentage(event.ticketsSold, event.totalTickets)}%`,
+                            }}
+                          />
+                        </div>
+                        <span className={styles.progressText}>
+                          {formatNumber(event.ticketsSold)} /{' '}
+                          {formatNumber(event.totalTickets)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h3 className={styles.actionTitle}>에디터</h3>
-            <p className={styles.actionDescription}>콘서트장 레이아웃을 편집하세요</p>
-          </Link>
+          </div>
         </div>
       </div>
     </div>

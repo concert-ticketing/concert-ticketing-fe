@@ -5,6 +5,7 @@
   transition: background-color 0.2s ease;
 }
 
+/* 오버레이 */
 .overlay {
   position: fixed;
   top: 0;
@@ -13,15 +14,28 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 40;
-  transition: opacity 0.3s ease;
+  opacity: 1;
+  animation: fadeIn 0.2s ease-out;
   backdrop-filter: blur(2px);
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 메인 콘텐츠 영역 */
 .main {
   flex: 1;
   transition: margin-left 0.3s ease;
   background-color: var(--bg-secondary);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .main.desktop {
@@ -36,6 +50,7 @@
   margin-left: 0;
 }
 
+/* 헤더 */
 .header {
   height: 64px;
   background-color: var(--bg-primary);
@@ -49,6 +64,7 @@
   z-index: 30;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .headerLeft {
@@ -63,6 +79,7 @@
   gap: 16px;
 }
 
+/* 메뉴 버튼 */
 .menuButton {
   padding: 8px;
   border: none;
@@ -75,6 +92,10 @@
   color: var(--text-primary);
   transition: all 0.2s ease;
   outline: none;
+  min-width: 40px;
+  min-height: 40px;
+  position: relative;
+  z-index: 50; /* 오버레이보다 높은 z-index */
 }
 
 .menuButton:hover {
@@ -83,7 +104,8 @@
 }
 
 .menuButton:focus-visible {
-  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.2);
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .menuButton:active {
@@ -92,28 +114,35 @@
 
 .menuButtonMobile {
   composes: menuButton;
+  min-width: 44px;
+  min-height: 44px;
+  z-index: 60; /* 모바일에서 더 높은 z-index */
 }
 
 .menuButtonDesktop {
   composes: menuButton;
 }
 
+/* 메뉴 아이콘 */
 .menuIcon {
   width: 20px;
   height: 20px;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
 }
 
 .menuIconMobile {
   width: 24px;
   height: 24px;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
 }
 
 /* 아이콘 호버 애니메이션 */
 .menuButton:hover .menuIcon,
 .menuButton:hover .menuIconMobile {
   transform: scale(1.1);
+  color: var(--accent-primary);
 }
 
 .menuButton:active .menuIcon,
@@ -121,6 +150,12 @@
   transform: scale(0.9);
 }
 
+.menuButton:focus .menuIcon,
+.menuButton:focus .menuIconMobile {
+  color: var(--accent-primary);
+}
+
+/* 제목 */
 .title {
   font-size: 18px;
   font-weight: 600;
@@ -128,23 +163,24 @@
   margin: 0;
   transition: color 0.2s ease;
   user-select: none;
+  line-height: 1.2;
 }
 
+/* 사용자 메뉴 */
 .userMenu {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
   border: 2px solid transparent;
+  outline: none;
 }
 
 .userMenu:hover {
@@ -153,20 +189,95 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.userMenu:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
 .userMenu:active {
   transform: scale(0.95);
 }
 
+/* 콘텐츠 영역 */
 .content {
+  flex: 1;
   padding: 24px;
   transition: padding 0.2s ease;
+  overflow-y: auto;
 }
 
 .contentMobile {
+  flex: 1;
   padding: 16px;
+  overflow-y: auto;
 }
 
-/* 다크모드 특별 스타일 */
+/* 로딩 상태 */
+.loadingSidebar {
+  width: 280px;
+  height: 100vh;
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.loadingButton {
+  width: 24px;
+  height: 24px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loadingToggle {
+  width: 48px;
+  height: 24px;
+  background-color: var(--bg-tertiary);
+  border-radius: 12px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loadingUser {
+  width: 36px;
+  height: 36px;
+  background-color: var(--bg-tertiary);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 16px;
+  color: var(--text-secondary);
+}
+
+.loadingIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 다크모드 스타일 */
 :global(.dark) .header {
   box-shadow: 
     var(--shadow-sm),
@@ -216,11 +327,20 @@
   .userMenu {
     width: 32px;
     height: 32px;
-    font-size: 12px;
   }
   
   .content {
     padding: 16px;
+  }
+  
+  .contentMobile {
+    padding: 16px;
+  }
+  
+  /* 모바일에서 터치 친화적 크기 */
+  .menuButton {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
@@ -228,6 +348,7 @@
 @media (max-width: 480px) {
   .header {
     padding: 0 12px;
+    height: 52px;
   }
   
   .headerLeft {
@@ -242,7 +363,13 @@
     font-size: 15px;
   }
   
-  .content {
+  .userMenu {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .content,
+  .contentMobile {
     padding: 12px;
   }
 }
@@ -258,22 +385,6 @@
   }
 }
 
-/* 애니메이션 */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.header {
-  animation: slideIn 0.3s ease-out;
-}
-
 /* 고대비 모드 */
 @media (prefers-contrast: high) {
   .header {
@@ -287,6 +398,10 @@
   .userMenu {
     border: 2px solid currentColor;
   }
+  
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
 }
 
 /* 움직임 감소 설정 */
@@ -297,7 +412,10 @@
   .menuButton,
   .userMenu,
   .content,
-  .overlay {
+  .contentMobile,
+  .overlay,
+  .menuIcon,
+  .menuIconMobile {
     transition: none;
   }
   
@@ -306,16 +424,15 @@
     transform: none;
   }
   
-  .header {
+  .loadingIcon {
     animation: none;
   }
-}
-
-/* 포커스 스타일 개선 */
-.menuButton:focus-visible,
-.userMenu:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+  
+  .loadingButton,
+  .loadingToggle,
+  .loadingUser {
+    animation: none;
+  }
 }
 
 /* 터치 디바이스 최적화 */
@@ -329,5 +446,48 @@
   .menuButton:hover,
   .userMenu:hover {
     transform: none;
+  }
+}
+
+/* 포커스 트랩 방지 */
+.overlay:focus {
+  outline: none;
+}
+
+/* 스크롤바 스타일링 */
+.content::-webkit-scrollbar,
+.contentMobile::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content::-webkit-scrollbar-track,
+.contentMobile::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.content::-webkit-scrollbar-thumb,
+.contentMobile::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover,
+.contentMobile::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* 레이아웃 안정성 */
+.header {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
