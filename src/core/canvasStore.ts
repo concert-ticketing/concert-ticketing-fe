@@ -66,6 +66,7 @@ export const useCanvasStore = create<CanvasState>()(
       disposeCanvas: () => {
         const { canvas } = get();
         if (canvas) {
+          console.log('Disposing canvas'); // 디버그용
           canvas.dispose();
           set({ canvas: null, canvasRef: null });
         }

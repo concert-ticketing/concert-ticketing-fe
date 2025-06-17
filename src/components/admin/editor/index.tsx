@@ -238,11 +238,11 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
           {/* 설정 패널 */}
           {canvas && <Settings canvas={canvas} />}
         </div>
+      </div>
 
-        {/* 캔버스 영역 */}
-        <div className={styles.canvasContainer}>
-          <canvas ref={canvasRef} className={styles.canvas} id='fabric-canvas' />
-        </div>
+      {/* 캔버스 영역 */}
+      <div className={styles.canvasContainer}>
+        <canvas ref={canvasRef} className={styles.canvas} id='fabric-canvas' />
       </div>
     </div>
   );
