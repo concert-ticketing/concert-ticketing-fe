@@ -1,280 +1,282 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import * as fabric from 'fabric';
 
-import { getColorString } from '@/utils/getColorString';
-import {
-  useObjectStore,
-  handleObjectSelection,
-  handleObjectPositionChange,
-  handleSelectionCleared,
-  handleObjectModified,
-  handleObjectScaling,
-  handleDoubleClick,
-} from '@/core/objectStore';
-
+import { Icons } from '../../common/ui/icons';
 import styles from './settings.module.css';
-import {
-  Angle,
-  CircleDiameter,
-  Fill,
-  LockToggle,
-  ObjectId,
-  Opacity,
-  Position,
-  Price,
-  RectSize,
-  StrokeColor,
-  StrokeWidth,
-  TextColor,
-  TextObject,
-} from './field';
 
-interface SettingProps {
+interface SettingsProps {
   canvas: fabric.Canvas;
 }
 
-export default function Settings({ canvas }: SettingProps) {
-  const {
-    selectedObject,
-    width,
-    height,
-    diameter,
-    color,
-    textColor,
-    text,
-    position,
-    angle,
-    opacity,
-    strokeColor,
-    strokeWidth,
-    isLocked,
-    price,
-    setWidth,
-    setHeight,
-    setDiameter,
-    setText,
-    setColor,
-    setTextColor,
-    setStrokeColor,
-    setIsLocked,
-    setPosition,
-    setAngle,
-    setOpacity,
-    setStrokeWidth,
-    setPrice,
-  } = useObjectStore();
+interface SeatObject extends fabric.Rect {
+  id?: string;
+  price?: number;
+}
+
+export default function Settings({ canvas }: SettingsProps) {
+  const [selectedObject, setSelectedObject] = useState<SeatObject | null>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [price, setPrice] = useState<number>(0);
+  const [isLocked, setIsLocked] = useState(false);
+
+  // 선택된 객체 정보 업데이트
+  const updateSelectedObjectInfo = useCallback((obj: fabric.Object | null) => {
+    if (!obj) {
+      setSelectedObject(null);
+      return;
+    }
+
+    const seatObj = obj as SeatObject;
+    setSelectedObject(seatObj);
+    setPosition({
+      x: Math.round(seatObj.left || 0),
+      y: Math.round(seatObj.top || 0),
+    });
+    setPrice(seatObj.price || 0);
+    setIsLocked(!seatObj.selectable);
+  }, []);
 
   // 캔버스 이벤트 리스너 설정
   useEffect(() => {
     if (!canvas) return;
 
-    const selectionCreatedHandler = (e: { selected: fabric.Object[] }) => {
-      handleObjectSelection(e.selected[0], true);
+    const handleSelection = (e: { selected?: fabric.Object[] }) => {
+      const selected = e.selected?.[0] || null;
+      updateSelectedObjectInfo(selected);
     };
-    const selectionUpdatedHandler = (e: { selected: fabric.Object[] }) => {
-      handleObjectSelection(e.selected[0], true);
+
+    const handleSelectionCleared = () => {
+      updateSelectedObjectInfo(null);
     };
-    const objectMovingHandler = (e: { target?: fabric.Object }) => {
-      handleObjectPositionChange(e.target);
-    };
-    const objectRotatingHandler = (e: { target?: fabric.Object }) => {
-      handleObjectPositionChange(e.target);
-    };
-    const objectModifiedHandler = (e: { target?: fabric.Object }) => {
-      handleObjectModified(e);
-    };
-    const objectScalingHandler = (e: { target?: fabric.Object }) => {
-      handleObjectScaling(e, canvas);
-    };
-    const doubleClickHandler = (e: {
-      target?: fabric.Object;
-      subTargets?: fabric.Object[];
-    }) => {
-      handleDoubleClick(e, canvas);
+
+    const handleObjectModified = (e: { target?: fabric.Object }) => {
+      if (e.target === selectedObject) {
+        updateSelectedObjectInfo(e.target);
+      }
     };
 
     // 이벤트 리스너 등록
-    canvas.on('selection:created', selectionCreatedHandler);
-    canvas.on('selection:updated', selectionUpdatedHandler);
+    canvas.on('selection:created', handleSelection);
+    canvas.on('selection:updated', handleSelection);
     canvas.on('selection:cleared', handleSelectionCleared);
-    canvas.on('object:modified', objectModifiedHandler);
-    canvas.on('object:scaling', objectScalingHandler);
-    canvas.on('object:moving', objectMovingHandler);
-    canvas.on('object:rotating', objectRotatingHandler);
-    canvas.on('mouse:dblclick', doubleClickHandler);
+    canvas.on('object:modified', handleObjectModified);
+    canvas.on('object:moving', handleObjectModified);
 
-    // 클린업 함수
     return () => {
-      canvas.off('selection:created', selectionCreatedHandler);
-      canvas.off('selection:updated', selectionUpdatedHandler);
+      canvas.off('selection:created', handleSelection);
+      canvas.off('selection:updated', handleSelection);
       canvas.off('selection:cleared', handleSelectionCleared);
-      canvas.off('object:modified', objectModifiedHandler);
-      canvas.off('object:scaling', objectScalingHandler);
-      canvas.off('object:moving', objectMovingHandler);
-      canvas.off('object:rotating', objectRotatingHandler);
-      canvas.off('mouse:dblclick', doubleClickHandler);
+      canvas.off('object:modified', handleObjectModified);
+      canvas.off('object:moving', handleObjectModified);
     };
-  }, [canvas]);
+  }, [canvas, selectedObject, updateSelectedObjectInfo]);
 
-  // 그룹 내 자식 객체 렌더링
-  const renderGroupChildren = useCallback(() => {
-    if (selectedObject?.type !== 'group') return null;
+  // 가격 변경
+  const handlePriceChange = useCallback(
+    (newPrice: number) => {
+      if (!selectedObject || isLocked) return;
 
-    const group = selectedObject as fabric.Group;
+      const seatObj = selectedObject as SeatObject;
+      seatObj.price = newPrice;
+      setPrice(newPrice);
+    },
+    [selectedObject, isLocked],
+  );
 
-    return group.getObjects().map((child) => (
-      <div className={styles.group} key={child.id}>
-        {child.type === 'rect' && (
-          <RectSize
-            selectedObject={selectedObject}
-            width={width}
-            height={height}
-            setWidth={setWidth}
-            setHeight={setHeight}
-            isLocked={isLocked}
-            canvas={canvas}
-          />
-        )}
-        {child.type === 'circle' && (
-          <CircleDiameter
-            selectedObject={selectedObject}
-            diameter={diameter}
-            setDiameter={setDiameter}
-            isLocked={isLocked}
-            canvas={canvas}
-          />
-        )}
-        {child.type === 'i-text' && (
-          <TextObject
-            selectedObject={selectedObject}
-            text={text}
-            setText={setText}
-            isLocked={isLocked}
-            canvas={canvas}
-          />
-        )}
-      </div>
-    ));
-  }, [
-    selectedObject,
-    width,
-    height,
-    diameter,
-    text,
-    isLocked,
-    canvas,
-    setWidth,
-    setHeight,
-    setDiameter,
-    setText,
-  ]);
+  // 위치 변경
+  const handlePositionChange = useCallback(
+    (axis: 'x' | 'y', value: number) => {
+      if (!selectedObject || isLocked) return;
+
+      const newPosition = { ...position, [axis]: value };
+      setPosition(newPosition);
+
+      selectedObject.set({
+        left: newPosition.x,
+        top: newPosition.y,
+      });
+      canvas.renderAll();
+    },
+    [selectedObject, position, isLocked, canvas],
+  );
+
+  // 잠금 토글
+  const handleLockToggle = useCallback(() => {
+    if (!selectedObject) return;
+
+    const newLocked = !isLocked;
+    setIsLocked(newLocked);
+
+    selectedObject.set({
+      selectable: !newLocked,
+      evented: !newLocked,
+    });
+
+    // 잠금 시 선택 해제
+    if (newLocked) {
+      canvas.discardActiveObject();
+    }
+
+    canvas.renderAll();
+  }, [selectedObject, isLocked, canvas]);
+
+  // 객체 삭제
+  const handleDelete = useCallback(() => {
+    if (!selectedObject || isLocked) return;
+
+    const confirmDelete = window.confirm('선택된 좌석을 삭제하시겠습니까?');
+    if (confirmDelete) {
+      canvas.remove(selectedObject);
+      canvas.renderAll();
+    }
+  }, [selectedObject, isLocked, canvas]);
+
+  // 복제
+  const handleDuplicate = useCallback(() => {
+    if (!selectedObject || isLocked) return;
+
+    selectedObject.clone((cloned: fabric.Object) => {
+      const clonedSeat = cloned as SeatObject;
+      clonedSeat.set({
+        left: (selectedObject.left || 0) + 20,
+        top: (selectedObject.top || 0) + 20,
+      });
+      clonedSeat.id = `seat_${Date.now()}_duplicate`;
+      canvas.add(clonedSeat);
+      canvas.setActiveObject(clonedSeat);
+      canvas.renderAll();
+    });
+  }, [selectedObject, isLocked, canvas]);
 
   if (!selectedObject) {
-    return <div className={styles.settings} />;
+    return (
+      <div className={styles.settings}>
+        <div className={styles.noSelection}>
+          <Icons.Settings size={48} />
+          <h3>객체를 선택해주세요</h3>
+          <p>편집할 좌석을 클릭하면 설정이 표시됩니다.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className={styles.settings}>
-      {/* 잠금 토글 */}
-      <LockToggle
-        selectedObject={selectedObject}
-        isLocked={isLocked}
-        setIsLocked={setIsLocked}
-        canvas={canvas}
-      />
-
-      {/* 공통 정보 */}
-      <ObjectId objectId={selectedObject.id as string} />
-
-      {/* 좌석 가격 */}
-      <Price
-        price={price}
-        setPrice={setPrice}
-        selectedObject={selectedObject}
-        disabled={isLocked}
-        canvas={canvas}
-      />
-
-      {/* 위치 좌표 */}
-      <Position
-        position={position}
-        setPosition={setPosition}
-        selectedObject={selectedObject}
-        disabled={isLocked}
-        canvas={canvas}
-      />
-
-      {/* 각도 */}
-      <Angle
-        angle={angle}
-        selectedObject={selectedObject}
-        setAngle={setAngle}
-        disabled={isLocked}
-        canvas={canvas}
-      />
-
-      {/* 객체 투명도 */}
-      <Opacity
-        opacity={opacity}
-        selectedObject={selectedObject}
-        setOpacity={setOpacity}
-        disabled={isLocked}
-        canvas={canvas}
-      />
-
-      {/* 테두리 두께 */}
-      <StrokeWidth
-        strokeWidth={strokeWidth}
-        setStrokeWidth={setStrokeWidth}
-        selectedObject={selectedObject}
-        disabled={isLocked}
-        canvas={canvas}
-      />
-
-      <div className={styles.flexGroup}>
-        {/* 배경 색상 */}
-        {selectedObject && selectedObject.type !== 'i-text' && (
-          <>
-            <Fill
-              color={getColorString(color)}
-              setColor={setColor}
-              selectedObject={selectedObject}
-              disabled={isLocked}
-              canvas={canvas}
-            />
-            {/* 테두리 색상 */}
-            <StrokeColor
-              strokeColor={getColorString(strokeColor)}
-              setStrokeColor={setStrokeColor}
-              selectedObject={selectedObject}
-              disabled={isLocked}
-              canvas={canvas}
-            />
-          </>
-        )}
-
-        {selectedObject && selectedObject.type === 'i-text' && (
-          <TextColor
-            textColor={getColorString(textColor)}
-            setTextColor={setTextColor}
-            selectedObject={selectedObject}
-            disabled={isLocked}
-            canvas={canvas}
-          />
-        )}
+      {/* 헤더 */}
+      <div className={styles.header}>
+        <h3 className={styles.title}>좌석 설정</h3>
+        <button
+          onClick={handleLockToggle}
+          className={`${styles.lockButton} ${isLocked ? styles.locked : ''}`}
+          title={isLocked ? '잠금 해제' : '잠금'}
+        >
+          {isLocked ? <Icons.EyeOff size={16} /> : <Icons.Eye size={16} />}
+        </button>
       </div>
 
-      {/* 도형별 고유 설정 */}
-      {renderGroupChildren()}
+      {/* 객체 ID */}
+      {selectedObject.id && (
+        <div className={styles.section}>
+          <div className={styles.objectId}>ID: {selectedObject.id}</div>
+        </div>
+      )}
 
-      {/* 단일 텍스트 객체 */}
-      <TextObject
-        selectedObject={selectedObject}
-        text={text}
-        setText={setText}
-        isLocked={isLocked}
-        canvas={canvas}
-      />
+      {/* 가격 설정 */}
+      <div className={styles.section}>
+        <h4 className={styles.sectionTitle}>가격 설정</h4>
+        <div className={styles.inputGroup}>
+          <label className={styles.label}>가격 (원)</label>
+          <input
+            type='number'
+            value={price}
+            onClick={(e) => e.currentTarget.select()}
+            onChange={(e) => handlePriceChange(Number(e.target.value))}
+            disabled={isLocked}
+            className={styles.input}
+            min='0'
+            step='1000'
+          />
+        </div>
+      </div>
+
+      {/* 위치 설정 */}
+      <div className={styles.section}>
+        <h4 className={styles.sectionTitle}>위치</h4>
+        <div className={styles.positionGrid}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>X</label>
+            <input
+              type='number'
+              value={position.x}
+              onClick={(e) => e.currentTarget.select()}
+              onChange={(e) => handlePositionChange('x', Number(e.target.value))}
+              disabled={isLocked}
+              className={styles.input}
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Y</label>
+            <input
+              type='number'
+              value={position.y}
+              onClick={(e) => e.currentTarget.select()}
+              onChange={(e) => handlePositionChange('y', Number(e.target.value))}
+              disabled={isLocked}
+              className={styles.input}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 객체 정보 */}
+      <div className={styles.section}>
+        <h4 className={styles.sectionTitle}>객체 정보</h4>
+        <div className={styles.infoGrid}>
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>크기</span>
+            <span className={styles.infoValue}>
+              {selectedObject.width} × {selectedObject.height}
+            </span>
+          </div>
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>타입</span>
+            <span className={styles.infoValue}>좌석</span>
+          </div>
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>상태</span>
+            <span
+              className={`${styles.infoValue} ${isLocked ? styles.locked : styles.unlocked}`}
+            >
+              {isLocked ? '잠김' : '편집 가능'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 액션 버튼들 */}
+      <div className={styles.section}>
+        <h4 className={styles.sectionTitle}>액션</h4>
+        <div className={styles.actionButtons}>
+          <button
+            onClick={handleDuplicate}
+            disabled={isLocked}
+            className={styles.actionButton}
+            title='복제'
+          >
+            <Icons.Copy size={16} />
+            복제
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={isLocked}
+            className={`${styles.actionButton} ${styles.deleteButton}`}
+            title='삭제'
+          >
+            <Icons.Trash size={16} />
+            삭제
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

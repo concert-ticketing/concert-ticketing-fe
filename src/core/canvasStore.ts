@@ -59,9 +59,9 @@ export const useCanvasStore = create<CanvasState>()(
       canvasRef: null,
       selectedTool: null,
       hasUnsavedChanges: false,
-      canvasWidth: typeof window !== 'undefined' ? window.innerWidth : 1200,
-      canvasHeight: typeof window !== 'undefined' ? window.innerHeight - 60 : 800,
-      backgroundColor: '#dfdfdf',
+      canvasWidth: typeof window !== 'undefined' ? window.innerWidth - 300 : 900,
+      canvasHeight: typeof window !== 'undefined' ? window.innerHeight - 120 : 680,
+      backgroundColor: '#f8f9fa',
 
       // Basic setters
       setCanvas: (canvas) => set({ canvas }),
@@ -81,38 +81,74 @@ export const useCanvasStore = create<CanvasState>()(
 
       // Canvas 초기화
       initializeCanvas: async (canvasElement, initialData) => {
+        console.log('Initializing canvas...'); // 디버그용
+
+        // 기존 캔버스가 있다면 정리
+        const { canvas: existingCanvas } = get();
+        if (existingCanvas) {
+          existingCanvas.dispose();
+        }
+
         const { canvasWidth, canvasHeight, backgroundColor } = get();
 
+        // 새 캔버스 생성
         const initCanvas = new fabric.Canvas(canvasElement, {
           width: canvasWidth,
           height: canvasHeight,
           selection: true,
+          backgroundColor,
         });
 
-        initCanvas.backgroundColor = backgroundColor;
+        console.log('Canvas created with dimensions:', canvasWidth, 'x', canvasHeight); // 디버그용
+
+        // 테스트용 객체 추가 (디버그용)
+        const testRect = new fabric.Rect({
+          left: 100,
+          top: 100,
+          width: 50,
+          height: 50,
+          fill: '#dddddd',
+          stroke: '#000000',
+          strokeWidth: 1,
+        });
+        initCanvas.add(testRect);
 
         // 초기 데이터 로드
         if (initialData) {
-          await new Promise<void>((resolve) => {
-            initCanvas.loadFromJSON(initialData, () => {
-              initCanvas.renderAll();
-              resolve();
+          try {
+            await new Promise<void>((resolve, reject) => {
+              initCanvas.loadFromJSON(initialData, (data, error) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  initCanvas.renderAll();
+                  resolve();
+                }
+              });
             });
-          });
+          } catch (error) {
+            console.error('Failed to load initial data:', error);
+            initCanvas.renderAll();
+          }
         } else {
           initCanvas.renderAll();
         }
 
+        // 상태 업데이트
         set({ canvas: initCanvas, canvasRef: canvasElement });
 
         // 이벤트 설정
         get().setupCanvasEvents();
+
+        console.log('Canvas initialization complete'); // 디버그용
       },
 
       // Canvas 이벤트 설정
       setupCanvasEvents: () => {
         const { canvas } = get();
         if (!canvas) return;
+
+        console.log('Setting up canvas events'); // 디버그용
 
         const handleCanvasChange = () => {
           set({ hasUnsavedChanges: true });
@@ -127,6 +163,7 @@ export const useCanvasStore = create<CanvasState>()(
       disposeCanvas: () => {
         const { canvas } = get();
         if (canvas) {
+          console.log('Disposing canvas'); // 디버그용
           canvas.dispose();
         }
         set({ canvas: null, canvasRef: null });
@@ -178,7 +215,8 @@ export const useCanvasStore = create<CanvasState>()(
           canvas.discardActiveObject();
         }
 
-        canvas.requestRenderAll();
+        canvas.renderAll();
+        set({ hasUnsavedChanges: true });
       },
 
       // 리사이즈 핸들러
@@ -186,8 +224,8 @@ export const useCanvasStore = create<CanvasState>()(
         const { canvas } = get();
         if (!canvas) return;
 
-        const newWidth = window.innerWidth;
-        const newHeight = window.innerHeight - 60;
+        const newWidth = window.innerWidth - 300; // 좌측 패널 너비 제외
+        const newHeight = window.innerHeight - 120; // 헤더/푸터 높이 제외
 
         canvas.setDimensions({
           width: newWidth,
@@ -195,6 +233,7 @@ export const useCanvasStore = create<CanvasState>()(
         });
 
         set({ canvasWidth: newWidth, canvasHeight: newHeight });
+        console.log('Canvas resized to:', newWidth, 'x', newHeight); // 디버그용
       },
     }),
     {

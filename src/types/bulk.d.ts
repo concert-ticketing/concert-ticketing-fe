@@ -1,4 +1,4 @@
-export type ObjectType = 'rect' | 'circle' | 'text'; // 생성 객체 유형
+export type ObjectType = 'rect'; // 좌석은 사각형으로 통일
 export type PatternType = 'grid' | 'circle' | 'line'; // 생성 패턴 유형
 export type TabType = 'grid' | 'pattern';
 
@@ -7,17 +7,14 @@ export interface ObjectConfig {
   fill: string;
   stroke: string;
   strokeWidth: number;
-  width?: number;
-  height?: number;
-  radius?: number;
-  borderRadius?: number;
-  text?: string;
-  fontSize?: number;
-  // 도형 내 텍스트 관련 설정
+  width: number;
+  height: number;
+  borderRadius: number;
+  // 도형 내 텍스트 관련 설정 (필요시 추가)
   includeText: boolean;
   textContent?: string;
-  textColor: string;
-  textFontSize: number;
+  textColor?: string;
+  textFontSize?: number;
 }
 
 export interface GridConfig {
@@ -25,18 +22,12 @@ export interface GridConfig {
   cols: number;
   spacingX: number;
   spacingY: number;
-  startX: number;
-  startY: number;
 }
 
 export interface PatternConfig {
-  pattern: PatternType;
+  pattern: 'circle' | 'line';
   count: number;
-  centerX: number;
-  centerY: number;
-  radius?: number;
-  angle?: number;
-  spacing?: number;
-  areaWidth?: number;
-  areaHeight?: number;
+  radius?: number; // 원형 패턴용
+  angle?: number; // 직선 패턴용 (각도)
+  spacing?: number; // 직선 패턴용 (간격)
 }
