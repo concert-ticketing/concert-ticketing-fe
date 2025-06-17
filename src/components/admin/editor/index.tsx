@@ -1,17 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import * as fabric from 'fabric';
 
 import { useCanvasStore } from '@/core/canvasStore';
 import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
 
-import Toolbar from './toolbar';
 import Settings from './settings';
 import BulkObjectCreator from './bulkCreator';
-import { addRectangleFn } from './shapes/Rect';
-import { addCircleFn } from './shapes/Circle';
-import { addTextFn } from './shapes/Text';
-import { addPolygonFn, cancelPolygonDrawing, isPolygonDrawing } from './shapes/Polygon';
 import { Icons } from '../common/ui/icons';
 import styles from './editor.module.css';
 
@@ -20,6 +15,17 @@ interface EditorProps {
   onExit?: () => void;
   initialData?: string;
 }
+
+// 통일된 좌석 설정
+const SEAT_CONFIG = {
+  width: 40,
+  height: 40,
+  fill: '#dddddd',
+  stroke: '',
+  strokeWidth: 0,
+  rx: 4,
+  ry: 4,
+};
 
 export default function CanvasEditor({ onSave, onExit, initialData }: EditorProps) {
   const router = useRouter();
@@ -30,9 +36,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
   // Zustand store
   const {
     canvas,
-    selectedTool,
     hasUnsavedChanges,
-    setSelectedTool,
     setHasUnsavedChanges,
     initializeCanvas,
     disposeCanvas,
@@ -43,9 +47,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
 
   // 라이트모드, 다크모드 감지 클린업 함수
   useEffect(() => {
-    // 테마 초기화
     initializeTheme();
-
     return initializeSystemThemeListener();
   }, [initializeTheme]);
 
@@ -53,8 +55,6 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
   useEffect(() => {
     if (canvasRef.current) {
       initializeCanvas(canvasRef.current, initialData);
-
-      // 리사이즈 이벤트 등록
       window.addEventListener('resize', handleResize);
 
       return () => {
@@ -64,222 +64,225 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
     }
   }, [initialData, initializeCanvas, handleResize, disposeCanvas]);
 
-  // 캔버스 마우스 이벤트 처리
+  // 단일 객체 생성 함수
+  const createSingleSeat = () => {
+    if (!canvas) return;
+
+    const canvasCenter = canvas.getCenter();
+
+    const seat = new fabric.Rect({
+      left: canvasCenter.left,
+      top: canvasCenter.top,
+      width: SEAT_CONFIG.width,
+      height: SEAT_CONFIG.height,
+      fill: SEAT_CONFIG.fill,
+      stroke: SEAT_CONFIG.stroke,
+      strokeWidth: SEAT_CONFIG.strokeWidth,
+      rx: SEAT_CONFIG.rx,
+      ry: SEAT_CONFIG.ry,
+      originX: 'center',
+      originY: 'center',
+      strokeUniform: true,
+    });
+
+    canvas.add(seat);
+    canvas.setActiveObject(seat);
+    canvas.renderAll();
+    setHasUnsavedChanges(true);
+  };
+
+  // 캔버스 이벤트 처리
   useEffect(() => {
     if (!canvas) return;
 
-    const handleMouseDown = (opt: fabric.TEvent) => {
-      const pointer = canvas.getPointer(opt.e);
-      if (!pointer) return;
-
-      const { x, y } = pointer;
-
-      switch (selectedTool) {
-        case 'rect':
-          addRectangleFn(canvas, x, y, setSelectedTool);
-          break;
-        case 'circle':
-          addCircleFn(canvas, x, y, setSelectedTool);
-          break;
-        case 'text':
-          addTextFn(canvas, x, y, '텍스트', setSelectedTool);
-          break;
-        case 'polygon':
-          addPolygonFn(canvas, x, y, setSelectedTool);
-          break;
-        default:
-          break;
-      }
+    const handleObjectModified = () => {
+      setHasUnsavedChanges(true);
     };
 
-    canvas.on('mouse:down', handleMouseDown);
+    const handleObjectAdded = () => {
+      setHasUnsavedChanges(true);
+    };
+
+    const handleObjectRemoved = () => {
+      setHasUnsavedChanges(true);
+    };
+
+    canvas.on('object:modified', handleObjectModified);
+    canvas.on('object:added', handleObjectAdded);
+    canvas.on('object:removed', handleObjectRemoved);
 
     return () => {
-      canvas.off('mouse:down', handleMouseDown);
+      canvas.off('object:modified', handleObjectModified);
+      canvas.off('object:added', handleObjectAdded);
+      canvas.off('object:removed', handleObjectRemoved);
     };
-  }, [canvas, selectedTool, setSelectedTool]);
+  }, [canvas, setHasUnsavedChanges]);
+
+  // 저장 함수
+  const handleSave = useCallback(() => {
+    if (canvas) {
+      const canvasData = saveCanvasData();
+      if (onSave) {
+        onSave(canvasData);
+      }
+      setHasUnsavedChanges(false);
+    }
+  }, [canvas, saveCanvasData, onSave, setHasUnsavedChanges]);
+
+  // 나가기 함수
+  const handleExit = () => {
+    if (hasUnsavedChanges) {
+      const confirmExit = window.confirm(
+        '저장하지 않은 변경사항이 있습니다. 정말 나가시겠습니까?',
+      );
+      if (!confirmExit) return;
+    }
+
+    if (onExit) {
+      onExit();
+    } else {
+      router.back();
+    }
+  };
+
+  // 삭제 함수
+  const handleDelete = useCallback(() => {
+    if (!canvas) return;
+
+    const activeObjects = canvas.getActiveObjects();
+    if (activeObjects.length === 0) {
+      alert('삭제할 객체를 선택해주세요.');
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `선택된 ${activeObjects.length}개의 객체를 삭제하시겠습니까?`,
+    );
+    if (confirmDelete) {
+      deleteSelectedObjects();
+    }
+  }, [canvas, deleteSelectedObjects]);
 
   // 키보드 이벤트 처리
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Delete' && canvas) {
-        deleteSelectedObjects();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Delete 키 또는 Backspace 키로 객체 삭제
+      if ((e.key === 'Delete' || e.key === 'Backspace') && canvas) {
+        const activeObjects = canvas.getActiveObjects();
+        if (activeObjects.length > 0) {
+          e.preventDefault();
+          handleDelete();
+        }
       }
 
-      if (event.key === 'Escape' && canvas) {
-        if (isPolygonDrawing()) {
-          cancelPolygonDrawing(canvas, setSelectedTool);
-        } else if (isMobileMenuOpen) {
-          setIsMobileMenuOpen(false);
-        }
+      // Ctrl+S로 저장
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+
+      // ESC로 선택 해제
+      if (e.key === 'Escape' && canvas) {
+        canvas.discardActiveObject();
+        canvas.renderAll();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canvas, deleteSelectedObjects, setSelectedTool, isMobileMenuOpen]);
-
-  // 페이지 떠날 때 확인
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
-
-  // 저장 핸들러
-  const handleSave = async () => {
-    if (!canvas) return;
-
-    const canvasData = saveCanvasData();
-
-    if (onSave) {
-      await onSave(canvasData);
-      setHasUnsavedChanges(false);
-    }
-    setIsMobileMenuOpen(false);
-  };
-
-  // 나가기 핸들러
-  const handleExit = () => {
-    if (hasUnsavedChanges) {
-      const confirmed = window.confirm(
-        '저장하지 않은 변경사항이 있습니다. 정말 나가시겠습니까?',
-      );
-      if (!confirmed) return;
-    }
-
-    if (onExit) {
-      onExit();
-    } else {
-      router.back();
-    }
-  };
-
-  // 저장 후 나가기 핸들러
-  const handleSaveAndExit = async () => {
-    await handleSave();
-    if (onExit) {
-      onExit();
-    } else {
-      router.back();
-    }
-  };
-
-  // 모바일 메뉴 토글
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  // 오버레이 클릭시 메뉴 닫기
-  const handleOverlayClick = () => {
-    setIsMobileMenuOpen(false);
-  };
+  }, [canvas, handleDelete, handleSave]);
 
   return (
-    <div className={styles.editor}>
-      {/* 모바일 메뉴 오버레이 */}
-      <div
-        className={`${styles.mobileMenuOverlay} ${isMobileMenuOpen ? styles.open : ''}`}
-        onClick={handleOverlayClick}
-      />
-
-      {/* 상단 헤더 */}
-      <header className={styles.header}>
+    <div className={styles.editorContainer}>
+      {/* 헤더 */}
+      <div className={styles.header}>
         <div className={styles.headerLeft}>
           <button onClick={handleExit} className={styles.exitButton}>
-            ← 나가기
+            <Icons.ArrowLeft />
+            나가기
           </button>
-          <h1 className={styles.title}>콘서트장 에디터</h1>
-          {hasUnsavedChanges && (
-            <span className={styles.unsavedIndicator}>● 저장되지 않음</span>
-          )}
-        </div>
-
-        <div className={styles.headerCenter}>
-          <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
-          {canvas && !(canvas instanceof HTMLCanvasElement) && (
-            <BulkObjectCreator canvas={canvas} />
-          )}
+          <h1 className={styles.title}>좌석 배치 에디터</h1>
         </div>
 
         <div className={styles.headerRight}>
+          {hasUnsavedChanges && (
+            <span className={styles.unsavedIndicator}>변경사항 있음</span>
+          )}
           <button onClick={handleSave} className={styles.saveButton}>
+            <Icons.Save />
             저장
           </button>
-          <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
-            저장 후 나가기
-          </button>
-          <button
-            className={`${styles.hamburgerButton} ${isMobileMenuOpen ? styles.active : ''}`}
-            onClick={toggleMobileMenu}
-            aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
-          </button>
         </div>
+      </div>
 
-        {/* 모바일 메뉴 */}
-        <div className={`${styles.mobileMenu} ${isMobileMenuOpen ? styles.open : ''}`}>
-          <div className={styles.mobileMenuSection}>
-            <div className={styles.mobileMenuTitle}>도구</div>
-            <div className={styles.mobileToolbar}>
-              <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+      {/* 메인 컨테이너 */}
+      <div className={styles.mainContainer}>
+        {/* 좌측 컨트롤 패널 */}
+        <div className={styles.leftPanel}>
+          {/* 객체 생성 버튼들 */}
+          <div className={styles.controlSection}>
+            <div className={styles.buttonGroup}>
+              <button onClick={createSingleSeat} className={styles.primaryButton}>
+                <Icons.Plus />
+                좌석 생성
+              </button>
+              <BulkObjectCreator seatConfig={SEAT_CONFIG} />
             </div>
           </div>
 
-          {canvas && !(canvas instanceof HTMLCanvasElement) && (
-            <div className={styles.mobileMenuSection}>
-              <div className={styles.mobileMenuTitle}>대량 생성</div>
-              <div className={styles.mobileBulkCreator}>
-                <BulkObjectCreator canvas={canvas} />
+          {/* 객체 조작 버튼들 */}
+          <div className={styles.controlSection}>
+            <div className={styles.buttonGroup}>
+              <button onClick={handleDelete} className={styles.dangerButton}>
+                <Icons.Trash />
+                선택 삭제
+              </button>
+            </div>
+          </div>
+
+          {/* 설정 패널 */}
+          {canvas && <Settings canvas={canvas} />}
+        </div>
+
+        {/* 캔버스 영역 */}
+        <div className={styles.canvasContainer}>
+          <canvas ref={canvasRef} className={styles.canvas} />
+
+          {/* 모바일 메뉴 토글 */}
+          <button
+            className={styles.mobileMenuToggle}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Icons.Menu />
+          </button>
+
+          {/* 모바일 패널 */}
+          {isMobileMenuOpen && (
+            <div className={styles.mobilePanel}>
+              <div className={styles.mobileHeader}>
+                <h3>도구</h3>
+                <button onClick={() => setIsMobileMenuOpen(false)}>
+                  <Icons.X />
+                </button>
+              </div>
+
+              <div className={styles.mobileControls}>
+                <button onClick={createSingleSeat} className={styles.mobileButton}>
+                  객체 생성
+                </button>
+                <BulkObjectCreator seatConfig={SEAT_CONFIG} />
+                <button onClick={handleDelete} className={styles.mobileButton}>
+                  선택 삭제
+                </button>
               </div>
             </div>
           )}
-
-          <div className={styles.mobileMenuSection}>
-            <div className={styles.mobileMenuTitle}>작업</div>
-            <div className={styles.mobileActions}>
-              <button onClick={handleSave} className={styles.saveButton}>
-                저장
-              </button>
-              <button onClick={handleSaveAndExit} className={styles.saveExitButton}>
-                저장 후 나가기
-              </button>
-            </div>
-          </div>
         </div>
-      </header>
+      </div>
 
-      {/* 캔버스 영역 */}
-      <div className={styles.canvasContainer}>
-        <canvas
-          id='canvas'
-          ref={canvasRef}
-          tabIndex={0}
-          onClick={() => canvasRef.current?.focus()}
-          className={styles.canvas}
-        />
-
-        {/* 사이드 패널 */}
-        {canvas && !(canvas instanceof HTMLCanvasElement) && (
-          <div className={styles.sidePanels}>
-            <Settings canvas={canvas} />
-          </div>
-        )}
-
-        {/* 폴리곤 그리기 안내 */}
-        {selectedTool === 'polygon' && (
-          <div className={styles.polygonGuide}>
-            폴리곤 그리기: 클릭으로 점 추가, 첫 점 근처 클릭으로 완성, ESC로 취소
-          </div>
-        )}
+      {/* 도움말 */}
+      <div className={styles.helpText}>
+        단축키: Delete/Backspace(삭제), Ctrl+S(저장), ESC(선택해제)
       </div>
     </div>
   );
