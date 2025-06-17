@@ -3,15 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import styles from './sidebar.module.css';
-import {
-  DashboardIcon,
-  EditorIcon,
-  ExpandIcon,
-  ListIcon,
-  LogoIcon,
-  PlusIcon,
-  VenueIcon,
-} from '../ui/icons';
+import { Icons } from '../ui/icons';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -37,32 +29,72 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
       id: 'dashboard',
       label: '대시보드',
       href: '/admin',
-      icon: <DashboardIcon />,
-    },
-    {
-      id: 'editor',
-      label: '에디터',
-      href: '/admin/editor',
-      icon: <EditorIcon />,
+      icon: <Icons.BarChart className={styles.iconSvg} />,
     },
     {
       id: 'venues',
-      label: '콘서트장 관리',
+      label: '공연장 관리',
       href: '',
-      icon: <VenueIcon />,
+      icon: <Icons.MapPin className={styles.iconSvg} />,
       badge: 2,
       subItems: [
         {
           id: 'venues-create',
-          label: '새 콘서트장 생성',
-          href: '/admin/create',
-          icon: <PlusIcon />,
+          label: '새 공연장 생성',
+          href: '/admin/venues/create',
+          icon: <Icons.Plus className={styles.iconSvg} />,
         },
         {
           id: 'venues-list',
-          label: '콘서트장 목록',
+          label: '공연장 목록',
           href: '/admin/venues',
-          icon: <ListIcon />,
+          icon: <Icons.Grid className={styles.iconSvg} />,
+        },
+        {
+          id: 'venues-upload',
+          label: 'SVG 업로드',
+          href: '/admin/venues/upload',
+          icon: <Icons.Upload className={styles.iconSvg} />,
+        },
+      ],
+    },
+    {
+      id: 'performers',
+      label: '출연진 관리',
+      href: '',
+      icon: <Icons.Users className={styles.iconSvg} />,
+      subItems: [
+        {
+          id: 'performers-create',
+          label: '새 출연진 등록',
+          href: '/admin/performers/create',
+          icon: <Icons.Plus className={styles.iconSvg} />,
+        },
+        {
+          id: 'performers-list',
+          label: '출연진 목록',
+          href: '/admin/performers',
+          icon: <Icons.User className={styles.iconSvg} />,
+        },
+      ],
+    },
+    {
+      id: 'concerts',
+      label: '콘서트 관리',
+      href: '',
+      icon: <Icons.Music className={styles.iconSvg} />,
+      subItems: [
+        {
+          id: 'concerts-create',
+          label: '새 콘서트 생성',
+          href: '/admin/concerts/create',
+          icon: <Icons.Plus className={styles.iconSvg} />,
+        },
+        {
+          id: 'concerts-list',
+          label: '콘서트 목록',
+          href: '/admin/concerts',
+          icon: <Icons.Calendar className={styles.iconSvg} />,
         },
       ],
     },
@@ -183,7 +215,7 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
                       isExpanded ? styles.expanded : styles.collapsed
                     }`}
                   >
-                    <ExpandIcon />
+                    <Icons.ArrowRight />
                   </div>
                 </div>
               </>
@@ -251,7 +283,7 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
       {/* 로고 영역 */}
       <div className={headerClasses}>
         <div className={logoClasses}>
-          <LogoIcon />
+          <Icons.Music size={32} />
         </div>
 
         {isOpen && (

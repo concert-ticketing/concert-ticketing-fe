@@ -94,13 +94,6 @@
     pointer-events: none;
   }
 
-  /* 다크모드에서 가격 프리뷰 스타일 */
-  .dark .pricePreview {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-    border-color: rgba(16, 185, 129, 0.3);
-  }
-
   /* 가격 입력 필드 포커스 스타일 */
   .priceInput:focus {
     border-color: var(--success-color);

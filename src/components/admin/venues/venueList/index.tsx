@@ -157,7 +157,7 @@ export default function VenueList({ initialVenues }: VenueListProps = {}) {
             </p>
           </div>
 
-          <Link href='/admin/create' className={styles.createButton}>
+          <Link href='/admin/venues/create' className={styles.createButton}>
             ➕ 새 콘서트장 만들기
           </Link>
         </div>

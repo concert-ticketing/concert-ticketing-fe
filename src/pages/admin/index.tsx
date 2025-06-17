@@ -1,12 +1,12 @@
-import React from 'react';
+import { withAdminLayout } from '@/utils/withAdminLayout';
+import type { NextPageWithLayout } from '@/types/layout';
 
-import AdminLayout from '@/components/admin/common/layout/AdminLayout';
 import Dashboard from '@/components/admin/dashboard';
 
-export default function AdminDashboardPage() {
-  return (
-    <AdminLayout title='관리 시스템 홈'>
-      <Dashboard />
-    </AdminLayout>
-  );
-}
+const DashboardPage: NextPageWithLayout = () => {
+  return <Dashboard />;
+};
+
+DashboardPage.getLayout = withAdminLayout({ title: '대시보드' });
+
+export default DashboardPage;

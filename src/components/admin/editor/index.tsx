@@ -12,7 +12,7 @@ import { addRectangleFn } from './shapes/Rect';
 import { addCircleFn } from './shapes/Circle';
 import { addTextFn } from './shapes/Text';
 import { addPolygonFn, cancelPolygonDrawing, isPolygonDrawing } from './shapes/Polygon';
-import { CloseIcon, HamburgerIcon } from '../common/ui/icons';
+import { Icons } from '../common/ui/icons';
 import styles from './editor.module.css';
 
 interface EditorProps {
@@ -221,7 +221,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
             aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
             aria-expanded={isMobileMenuOpen}
           >
-            {isMobileMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
+            {isMobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
           </button>
         </div>
 

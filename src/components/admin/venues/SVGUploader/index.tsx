@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from 'react';
 
 type Zone = {
   id: string;
@@ -25,16 +25,16 @@ export default function UploadSVGPage() {
 
     svgContainerRef.current.innerHTML = svgContent;
 
-    const svgEl = svgContainerRef.current.querySelector("svg");
+    const svgEl = svgContainerRef.current.querySelector('svg');
     if (svgEl) {
-      svgEl.querySelectorAll("polygon, rect, path, circle").forEach((el) => {
-        el.addEventListener("click", () => {
-          const id = el.getAttribute("id") || crypto.randomUUID();
-          const name = prompt("구역 이름을 입력하세요 (예: A구역)");
+      svgEl.querySelectorAll('polygon, rect, path, circle').forEach((el) => {
+        el.addEventListener('click', () => {
+          const id = el.getAttribute('id') || crypto.randomUUID();
+          const name = prompt('구역 이름을 입력하세요 (예: A구역)');
           if (name) {
-            el.setAttribute("fill", "blue");
-            el.setAttribute("id", id);
-            el.setAttribute("data-name", name);
+            el.setAttribute('fill', 'blue');
+            el.setAttribute('id', id);
+            el.setAttribute('data-name', name);
 
             setZones((prev) => [...prev, { id, name }]);
           }
@@ -44,25 +44,21 @@ export default function UploadSVGPage() {
   }, [svgContent]);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">공연장 SVG 구역 설정</h1>
+    <div>
+      <h1>공연장 SVG 구역 설정</h1>
 
       <input
-        type="file"
-        accept=".svg"
-        title="SVG 공연장 파일 업로드"
+        type='file'
+        accept='.svg'
+        title='SVG 공연장 파일 업로드'
         onChange={handleUpload}
-        className="mb-4"
       />
 
-      <div
-        ref={svgContainerRef}
-        className="border w-full max-w-4xl h-[500px] overflow-auto"
-      />
+      <div ref={svgContainerRef} />
 
-      <div className="mt-4">
-        <h2 className="text-lg font-semibold mb-2">설정된 구역</h2>
-        <ul className="list-disc list-inside">
+      <div>
+        <h2>설정된 구역</h2>
+        <ul>
           {zones.map((zone) => (
             <li key={zone.id}>
               ID: {zone.id} - 이름: {zone.name}

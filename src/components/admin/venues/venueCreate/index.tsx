@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { THUMBNAIL_COLORS, PREDEFINED_ICONS, PREDEFINED_TAGS } from './options';
-import styles from './create.module.css';
+import styles from './venueCreate.module.css';
 
 interface VenueFormData {
   name: string;
@@ -28,7 +28,7 @@ interface FormErrors {
   estimatedSeats?: string;
 }
 
-export default function CreateForm() {
+export default function VenueCreate() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
