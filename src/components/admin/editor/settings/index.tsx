@@ -112,11 +112,6 @@ export default function Settings({ canvas }: SettingsProps) {
       evented: !newLocked,
     });
 
-    // 잠금 시 선택 해제
-    if (newLocked) {
-      canvas.discardActiveObject();
-    }
-
     canvas.renderAll();
   }, [selectedObject, isLocked, canvas]);
 
@@ -141,7 +136,7 @@ export default function Settings({ canvas }: SettingsProps) {
         left: (selectedObject.left || 0) + 20,
         top: (selectedObject.top || 0) + 20,
       });
-      clonedSeat.id = `seat_${Date.now()}_duplicate`;
+      clonedSeat.id = `seat_${Date.now()}_copy`;
       canvas.add(clonedSeat);
       canvas.setActiveObject(clonedSeat);
       canvas.renderAll();
@@ -154,7 +149,10 @@ export default function Settings({ canvas }: SettingsProps) {
         <div className={styles.noSelection}>
           <Icons.Settings size={48} />
           <h3>객체를 선택해주세요</h3>
-          <p>편집할 좌석을 클릭하면 설정이 표시됩니다.</p>
+          <p>
+            편집할 좌석을 클릭하면 <br />
+            설정 패널이 표시됩니다.
+          </p>
         </div>
       </div>
     );
@@ -183,9 +181,9 @@ export default function Settings({ canvas }: SettingsProps) {
 
       {/* 가격 설정 */}
       <div className={styles.section}>
-        <h4 className={styles.sectionTitle}>가격 설정</h4>
+        <h4 className={styles.sectionTitle}>좌석 가격 설정</h4>
         <div className={styles.inputGroup}>
-          <label className={styles.label}>가격 (원)</label>
+          <label className={styles.label}>좌석 가격 (원)</label>
           <input
             type='number'
             value={price}

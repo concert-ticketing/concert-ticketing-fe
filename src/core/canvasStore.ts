@@ -29,10 +29,7 @@ interface CanvasState {
   setBackgroundColor: (color: string) => void;
 
   // Canvas 초기화
-  initializeCanvas: (
-    canvasElement: HTMLCanvasElement,
-    initialData?: string,
-  ) => Promise<void>;
+  initializeCanvas: (canvasElement: HTMLCanvasElement, initialData?: string) => void;
 
   // Canvas 이벤트 핸들러 등록
   setupCanvasEvents: () => void;
@@ -79,9 +76,9 @@ export const useCanvasStore = create<CanvasState>()(
         set({ backgroundColor });
       },
 
-      // Canvas 초기화
-      initializeCanvas: async (canvasElement, initialData) => {
-        console.log('Initializing canvas...'); // 디버그용
+      // Canvas 초기화 - async 제거하고 동기적으로 처리
+      initializeCanvas: (canvasElement, initialData) => {
+        console.log('Initializing canvas...');
 
         // 기존 캔버스가 있다면 정리
         const { canvas: existingCanvas } = get();
@@ -99,32 +96,25 @@ export const useCanvasStore = create<CanvasState>()(
           backgroundColor,
         });
 
-        console.log('Canvas created with dimensions:', canvasWidth, 'x', canvasHeight); // 디버그용
+        console.log('Canvas created with dimensions:', canvasWidth, 'x', canvasHeight);
 
-        // 테스트용 객체 추가 (디버그용)
+        // 테스트용 객체 추가
         const testRect = new fabric.Rect({
           left: 100,
           top: 100,
           width: 50,
           height: 50,
-          fill: '#dddddd',
-          stroke: '#000000',
-          strokeWidth: 1,
+          fill: 'red',
+          stroke: 'black',
+          strokeWidth: 2,
         });
         initCanvas.add(testRect);
 
-        // 초기 데이터 로드
+        // 초기 데이터 로드 (동기적으로 처리)
         if (initialData) {
           try {
-            await new Promise<void>((resolve, reject) => {
-              initCanvas.loadFromJSON(initialData, (data, error) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  initCanvas.renderAll();
-                  resolve();
-                }
-              });
+            initCanvas.loadFromJSON(initialData, () => {
+              initCanvas.renderAll();
             });
           } catch (error) {
             console.error('Failed to load initial data:', error);
@@ -140,7 +130,8 @@ export const useCanvasStore = create<CanvasState>()(
         // 이벤트 설정
         get().setupCanvasEvents();
 
-        console.log('Canvas initialization complete'); // 디버그용
+        console.log('Canvas initialization complete');
+        console.log('Objects in canvas:', initCanvas.getObjects().length);
       },
 
       // Canvas 이벤트 설정
@@ -148,7 +139,7 @@ export const useCanvasStore = create<CanvasState>()(
         const { canvas } = get();
         if (!canvas) return;
 
-        console.log('Setting up canvas events'); // 디버그용
+        console.log('Setting up canvas events');
 
         const handleCanvasChange = () => {
           set({ hasUnsavedChanges: true });
@@ -163,7 +154,7 @@ export const useCanvasStore = create<CanvasState>()(
       disposeCanvas: () => {
         const { canvas } = get();
         if (canvas) {
-          console.log('Disposing canvas'); // 디버그용
+          console.log('Disposing canvas');
           canvas.dispose();
         }
         set({ canvas: null, canvasRef: null });
@@ -224,8 +215,8 @@ export const useCanvasStore = create<CanvasState>()(
         const { canvas } = get();
         if (!canvas) return;
 
-        const newWidth = window.innerWidth - 300; // 좌측 패널 너비 제외
-        const newHeight = window.innerHeight - 120; // 헤더/푸터 높이 제외
+        const newWidth = window.innerWidth - 300;
+        const newHeight = window.innerHeight - 120;
 
         canvas.setDimensions({
           width: newWidth,
@@ -233,7 +224,7 @@ export const useCanvasStore = create<CanvasState>()(
         });
 
         set({ canvasWidth: newWidth, canvasHeight: newHeight });
-        console.log('Canvas resized to:', newWidth, 'x', newHeight); // 디버그용
+        console.log('Canvas resized to:', newWidth, 'x', newHeight);
       },
     }),
     {
