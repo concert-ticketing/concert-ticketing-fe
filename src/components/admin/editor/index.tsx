@@ -170,7 +170,6 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
       if ((e.key === 'Delete' || e.key === 'Backspace') && canvas) {
         const activeObjects = canvas.getActiveObjects();
         if (activeObjects.length > 0) {
-          e.preventDefault();
           handleDelete();
         }
       }
@@ -230,16 +229,6 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
             </div>
           </div>
 
-          {/* 객체 조작 버튼들 */}
-          <div className={styles.controlSection}>
-            <div className={styles.buttonGroup}>
-              <button onClick={handleDelete} className={styles.dangerButton}>
-                <Icons.Trash />
-                선택 삭제
-              </button>
-            </div>
-          </div>
-
           {/* 설정 패널 */}
           {canvas && <Settings canvas={canvas} />}
         </div>
@@ -271,9 +260,6 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
                   객체 생성
                 </button>
                 <BulkObjectCreator seatConfig={SEAT_CONFIG} />
-                <button onClick={handleDelete} className={styles.mobileButton}>
-                  선택 삭제
-                </button>
               </div>
             </div>
           )}
