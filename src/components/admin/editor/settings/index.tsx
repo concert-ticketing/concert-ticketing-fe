@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import * as fabric from 'fabric';
 
-import { Icons } from '../../common/ui/icons';
+import { Icons } from '../../common/ui/Icons';
 import styles from './settings.module.css';
 
 interface SettingsProps {

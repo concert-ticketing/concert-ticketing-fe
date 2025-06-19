@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import styles from './sidebar.module.css';
-import { Icons } from '../ui/icons';
+import { Icons } from '../ui/Icons';
 
 interface SidebarProps {
   isOpen: boolean;

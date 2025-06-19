@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { withAdminLayout } from '@/utils/withAdminLayout';
 import type { NextPageWithLayout } from '@/types/layout';
 
-import CanvasEditor from '@/components/admin/editor';
+import ZoneEditor from '@/components/admin/zones/zoneEditor';
 
 const ZoneEditorPage: NextPageWithLayout = () => {
   const router = useRouter();
@@ -14,7 +14,7 @@ const ZoneEditorPage: NextPageWithLayout = () => {
     return <div>Loading...</div>;
   }
 
-  return <CanvasEditor />;
+  return <ZoneEditor />;
 };
 
 ZoneEditorPage.getLayout = withAdminLayout({ title: '좌석 에디터' });
