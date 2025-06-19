@@ -1,0 +1,324 @@
+
+/* 기본 버튼 스타일 */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+  
+  .button:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+  
+  .button:active {
+    transform: translateY(1px);
+  }
+  
+  /* 사이즈 변형 */
+  .small {
+    padding: 6px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    border-radius: 4px;
+  }
+  
+  .medium {
+    padding: 8px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .large {
+    padding: 12px 24px;
+    font-size: 16px;
+    line-height: 1.5;
+    border-radius: 8px;
+  }
+  
+  /* 컬러 변형 */
+  .primary {
+    background-color: var(--accent-primary);
+    color: var(--success-color);
+    border: 1px solid var(--accent-primary);
+  }
+  
+  .primary:hover:not(:disabled) {
+    background-color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+  }
+  
+  .secondary:hover:not(:disabled) {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .success {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+    border: 1px solid var(--success-bg);
+  }
+  
+  .success:hover:not(:disabled) {
+    background-color: #059669;
+    border-color: #059669;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-color);
+    border: 1px solid var(--warning-bg);
+  }
+  
+  .warning:hover:not(:disabled) {
+    background-color: #d97706;
+    border-color: #d97706;
+    color: var(--success-color);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .danger {
+    background-color: var(--danger-primary);
+    color: var(--success-color);
+    border: 1px solid var(--danger-primary);
+  }
+  
+  .danger:hover:not(:disabled) {
+    background-color: var(--danger-secondary);
+    border-color: var(--danger-secondary);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .neutral {
+    background-color: var(--neutral-bg);
+    color: var(--neutral-color);
+    border: 1px solid var(--neutral-bg);
+  }
+  
+  .neutral:hover:not(:disabled) {
+    background-color: var(--text-tertiary);
+    border-color: var(--text-tertiary);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* 전체 너비 */
+  .fullWidth {
+    width: 100%;
+  }
+  
+  /* 비활성화 상태 */
+  .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  .disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* 로딩 상태 */
+  .loading {
+    cursor: wait;
+    pointer-events: none;
+  }
+  
+  .loading .content {
+    opacity: 0.7;
+  }
+  
+  /* 아이콘 스타일 */
+  .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .small .icon {
+    width: 14px;
+    height: 14px;
+    font-size: 12px;
+  }
+  
+  .medium .icon {
+    width: 16px;
+    height: 16px;
+    font-size: 14px;
+  }
+  
+  .large .icon {
+    width: 18px;
+    height: 18px;
+    font-size: 16px;
+  }
+  
+  /* 콘텐츠 */
+  .content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+  }
+  
+  /* 로딩 스피너 */
+  .loadingSpinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .small .loadingSpinner {
+    width: 12px;
+    height: 12px;
+    border-width: 1.5px;
+  }
+  
+  .large .loadingSpinner {
+    width: 16px;
+    height: 16px;
+    border-width: 2.5px;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* 다크모드 특별 스타일 */
+  :global(.dark) .secondary {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+  }
+  
+  :global(.dark) .secondary:hover:not(:disabled) {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-primary);
+  }
+  
+  :global(.dark) .neutral {
+    background-color: var(--text-tertiary);
+    color: var(--text-primary);
+  }
+  
+  :global(.dark) .neutral:hover:not(:disabled) {
+    background-color: var(--text-secondary);
+  }
+  
+  /* 리플 효과 */
+  .button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+  }
+  
+  .button:active::after {
+    width: 200px;
+    height: 200px;
+  }
+  
+  /* 접근성 - 움직임 감소 설정 */
+  @media (prefers-reduced-motion: reduce) {
+    .button,
+    .icon,
+    .content,
+    .loadingSpinner {
+      transition: none;
+    }
+    
+    .button:active {
+      transform: none;
+    }
+    
+    .loadingSpinner {
+      animation: none;
+    }
+    
+    .button::before,
+    .button::after {
+      display: none;
+    }
+  }
+  
+  /* 고대비 모드 지원 */
+  @media (prefers-contrast: high) {
+    .button {
+      border-width: 2px;
+    }
+    
+    .button:focus-visible {
+      outline-width: 3px;
+    }
+  }
+  
+  /* 모바일 최적화 */
+  @media (max-width: 768px) {
+    .button {
+      min-height: 44px; /* 터치 타겟 최소 크기 */
+    }
+    
+    .small {
+      min-height: 36px;
+      padding: 8px 12px;
+    }
+    
+    .large {
+      min-height: 52px;
+    }
+  }
+  
+  /* 터치 디바이스 최적화 */
+  @media (hover: none) and (pointer: coarse) {
+    .button:hover {
+      transform: none;
+    }
+    
+    .button:active {
+      transform: scale(0.98);
+    }
+  }

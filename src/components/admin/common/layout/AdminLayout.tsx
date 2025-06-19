@@ -5,7 +5,7 @@ import { useSidebar } from '@/hooks/useSidebar';
 
 import Sidebar from './Sidebar';
 import ThemeToggle from '../ui/theme/ThemeToggle';
-import { Icons } from '../ui/icons';
+import { Icons } from '../ui/Icons';
 import styles from './adminLayout.module.css';
 
 interface AdminLayoutProps {

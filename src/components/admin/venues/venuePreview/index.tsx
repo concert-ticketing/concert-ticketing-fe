@@ -5,7 +5,7 @@ import { useVenueStore } from '@/stores/venue';
 import { useZoneStore } from '@/stores/zone';
 import { useSeatStore } from '@/stores/seat';
 
-import { Icons } from '@/components/admin/common/ui/icons';
+import { Icons } from '@/components/admin/common/ui/Icons';
 import styles from './venuePreview.module.css';
 
 interface VenuePreviewProps {

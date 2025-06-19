@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 
-import { Icons } from '@/components/admin/common/ui/icons';
+import { Icons } from '@/components/admin/common/ui/Icons';
 import styles from './dashboard.module.css';
 
 interface DashboardStats {

@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import * as fabric from 'fabric';
 
 import { useCanvasStore } from '@/core/canvasStore';
 import { useThemeStore, initializeSystemThemeListener } from '@/core/themeStore';
+import { SeatConfig } from '@/types/seat';
 
+import { Icons } from '@/components/admin/common/ui/Icons';
 import Settings from './settings';
 import BulkObjectCreator from './bulkCreator';
-import { Icons } from '../common/ui/icons';
 import styles from './editor.module.css';
 
 interface EditorProps {
@@ -17,21 +18,23 @@ interface EditorProps {
 }
 
 // 통일된 좌석 설정
-const SEAT_CONFIG = {
+const SEAT_CONFIG: SeatConfig = {
+  type: 'rect',
   width: 40,
   height: 40,
+  borderRadius: 4,
   fill: '#dddddd',
-  stroke: '',
-  strokeWidth: 0,
-  rx: 4,
-  ry: 4,
+  stroke: '#ff0000',
+  strokeWidth: 2,
+  textFontSize: 12,
+  rx: 8,
+  ry: 8,
 };
 
 export default function CanvasEditor({ onSave, onExit, initialData }: EditorProps) {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { initializeTheme } = useThemeStore();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Zustand store
   const {
@@ -64,7 +67,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
     }
   }, [initialData, initializeCanvas, handleResize, disposeCanvas]);
 
-  // 단일 객체 생성 함수
+  // 단일 좌석 생성 함수
   const createSingleSeat = () => {
     if (!canvas) return;
 
@@ -82,8 +85,11 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
       ry: SEAT_CONFIG.ry,
       originX: 'center',
       originY: 'center',
-      strokeUniform: true,
+      visible: true,
+      selectable: true,
     });
+
+    console.log('객체:', seat);
 
     canvas.add(seat);
     canvas.setActiveObject(seat);
@@ -223,7 +229,7 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
             <div className={styles.buttonGroup}>
               <button onClick={createSingleSeat} className={styles.primaryButton}>
                 <Icons.Plus />
-                좌석 생성
+                객체 생성
               </button>
               <BulkObjectCreator seatConfig={SEAT_CONFIG} />
             </div>
@@ -235,40 +241,8 @@ export default function CanvasEditor({ onSave, onExit, initialData }: EditorProp
 
         {/* 캔버스 영역 */}
         <div className={styles.canvasContainer}>
-          <canvas ref={canvasRef} className={styles.canvas} />
-
-          {/* 모바일 메뉴 토글 */}
-          <button
-            className={styles.mobileMenuToggle}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <Icons.Menu />
-          </button>
-
-          {/* 모바일 패널 */}
-          {isMobileMenuOpen && (
-            <div className={styles.mobilePanel}>
-              <div className={styles.mobileHeader}>
-                <h3>도구</h3>
-                <button onClick={() => setIsMobileMenuOpen(false)}>
-                  <Icons.X />
-                </button>
-              </div>
-
-              <div className={styles.mobileControls}>
-                <button onClick={createSingleSeat} className={styles.mobileButton}>
-                  객체 생성
-                </button>
-                <BulkObjectCreator seatConfig={SEAT_CONFIG} />
-              </div>
-            </div>
-          )}
+          <canvas ref={canvasRef} className={styles.canvas} id='fabric-canvas' />
         </div>
-      </div>
-
-      {/* 도움말 */}
-      <div className={styles.helpText}>
-        단축키: Delete/Backspace(삭제), Ctrl+S(저장), ESC(선택해제)
       </div>
     </div>
   );
