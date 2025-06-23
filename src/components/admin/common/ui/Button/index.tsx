@@ -3,7 +3,7 @@ import React, { JSX } from 'react';
 import styles from './button.module.css';
 
 interface ButtonProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'neutral';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
@@ -13,7 +13,7 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: 'left' | 'right' | 'center';
 }
 
 export default function Button({
@@ -29,6 +29,10 @@ export default function Button({
   icon,
   iconPosition = 'left',
 }: ButtonProps): JSX.Element {
+  // children가 없고 icon만 있는 경우 iconOnly 클래스 추가
+  const hasChildren = children && React.Children.count(children) > 0;
+  const iconOnly = !hasChildren && icon;
+
   const buttonClasses = [
     styles.button,
     styles[variant],
@@ -36,6 +40,7 @@ export default function Button({
     fullWidth && styles.fullWidth,
     loading && styles.loading,
     disabled && styles.disabled,
+    iconOnly && styles.iconOnly,
     className,
   ]
     .filter(Boolean)
@@ -61,6 +66,22 @@ export default function Button({
     return null;
   };
 
+  // icon만 있는 경우 중앙에 배치
+  if (iconOnly) {
+    return (
+      <button
+        type={type}
+        className={buttonClasses}
+        onClick={handleClick}
+        disabled={disabled || loading}
+        aria-disabled={disabled || loading}
+      >
+        {renderIcon()}
+      </button>
+    );
+  }
+
+  // children이 있는 경우 기존 로직
   return (
     <button
       type={type}
@@ -70,7 +91,7 @@ export default function Button({
       aria-disabled={disabled || loading}
     >
       {iconPosition === 'left' && renderIcon()}
-      <span className={styles.content}>{children}</span>
+      {hasChildren && <span className={styles.content}>{children}</span>}
       {iconPosition === 'right' && renderIcon()}
     </button>
   );

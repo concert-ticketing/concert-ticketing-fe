@@ -1,0 +1,585 @@
+/* BulkCreatorModal.module.css */
+
+/* 모달 오버레이 */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  /* 메인 모달 */
+  .modal {
+    background-color: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* 모달 헤더 */
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border-primary);
+    background-color: var(--bg-secondary);
+  }
+  
+  .modalTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+  }
+  
+  .closeButton:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  /* 단계 표시 */
+  .stepIndicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 32px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+    gap: 32px;
+  }
+  
+  .stepItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+  
+  .stepItem:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: calc(100% + 16px);
+    width: 32px;
+    height: 2px;
+    background-color: var(--border-secondary);
+    transition: background-color 0.3s ease;
+  }
+  
+  .stepItem.completed:not(:last-child)::after {
+    background-color: var(--success-bg);
+  }
+  
+  .stepNumber {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    border: 2px solid var(--border-secondary);
+    background-color: var(--bg-primary);
+    color: var(--text-secondary);
+  }
+  
+  .stepItem.active .stepNumber {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+  }
+  
+  .stepItem.completed .stepNumber {
+    background-color: var(--success-bg);
+    border-color: var(--success-bg);
+    color: white;
+  }
+  
+  .stepLabel {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+  }
+  
+  .stepItem.active .stepLabel {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  /* 모달 바디 */
+  .modalBody {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+  }
+  
+  /* 단계별 컨테이너 */
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .stepTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-primary);
+  }
+  
+  /* 1단계: 배치 유형 선택 */
+  .venueTypes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .venueTypeCard {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .venueTypeCard:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .venueTypeCard.selected {
+    border-color: var(--accent-primary);
+    background-color: rgba(59, 130, 246, 0.05);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .venueTypeIcon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  
+  .venueTypeName {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+  }
+  
+  .venueTypeDesc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+  }
+  
+  .venueTypePreview {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 2-4단계: 설정 */
+  .settingGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .settingSection {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .settingLabel {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  
+  /* 행 선택 */
+  .rowSelection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    transition: all 0.2s ease;
+  }
+  
+  .checkboxLabel:hover {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .checkboxLabel input:checked + .checkboxText {
+    color: var(--accent-primary);
+    font-weight: 600;
+  }
+  
+  .checkboxText {
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+  
+  /* 범위 입력 */
+  .rangeInput {
+    width: 100%;
+    margin: 8px 0;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--border-primary);
+    outline: none;
+    cursor: pointer;
+  }
+  
+  .rangeInput::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--accent-primary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+  }
+  
+  .rangeInput::-webkit-slider-thumb:hover {
+    background-color: var(--accent-secondary);
+    transform: scale(1.1);
+  }
+  
+  .rangeInput::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--accent-primary);
+    cursor: pointer;
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .rangeLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  
+  /* 간격 컨트롤 */
+  .spacingControls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .spacingItem {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .spacingItem label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  
+  /* 라디오 그룹 */
+  .radioGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .radioLabel {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 16px;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    background-color: var(--bg-primary);
+    transition: all 0.2s ease;
+  }
+  
+  .radioLabel:hover {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .radioLabel input:checked + .radioContent {
+    color: var(--accent-primary);
+  }
+  
+  .radioContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .radioTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.2s ease;
+  }
+  
+  .radioDesc {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  
+  /* 가격 입력 */
+  .priceInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .priceInput:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* 미리보기 */
+  .previewSection {
+    margin-top: 16px;
+  }
+  
+  .previewTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  
+  .layoutPreview {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px;
+  }
+  
+  .previewContainer {
+    width: 100%;
+    max-width: 300px;
+    height: 120px;
+  }
+  
+  .previewSvg {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--border-secondary);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+  }
+  
+  /* 요약 */
+  .summary {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+  
+  .summaryTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+  }
+  
+  .summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .summaryItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-primary);
+  }
+  
+  .summaryLabel {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  
+  .summaryValue {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  /* 모달 푸터 */
+  .modalFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    border-top: 1px solid var(--border-primary);
+    background-color: var(--bg-secondary);
+  }
+  
+  .footerLeft,
+  .footerRight {
+    display: flex;
+    gap: 12px;
+  }
+  
+  /* 다크모드 특별 스타일 */
+  :global(.dark) .modalOverlay {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  :global(.dark) .venueTypeCard.selected {
+    background-color: rgba(96, 165, 250, 0.1);
+  }
+  
+  :global(.dark) .previewSvg {
+    background-color: var(--bg-primary);
+  }
+  
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .modal {
+      margin: 10px;
+      max-height: 95vh;
+    }
+  
+    .modalHeader,
+    .modalFooter {
+      padding: 16px 20px;
+    }
+  
+    .modalBody {
+      padding: 20px;
+    }
+  
+    .stepIndicator {
+      padding: 16px 20px;
+      gap: 16px;
+    }
+  
+    .stepIndicator::after {
+      width: 16px;
+    }
+  
+    .venueTypes {
+      grid-template-columns: 1fr;
+    }
+  
+    .summaryGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .modalFooter {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+  
+    .footerLeft,
+    .footerRight {
+      justify-content: center;
+    }
+  }
+  
+  /* 접근성 */
+  @media (prefers-reduced-motion: reduce) {
+    .venueTypeCard,
+    .stepNumber,
+    .checkboxLabel,
+    .radioLabel {
+      transition: none;
+    }
+  }
+  
+  /* 스크롤바 스타일링 */
+  .modalBody::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .modalBody::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+  
+  .modalBody::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 3px;
+  }
+  
+  .modalBody::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+  }

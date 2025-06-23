@@ -3,6 +3,10 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import styles from './zoneEditor.module.css';
 import Button from '../../common/ui/Button';
 import { Icons } from '../../common/ui/Icons';
+import SeatGrid from './seatGrid';
+import ControlPanel from './controlPanel';
+import RowManager from './rowManager';
+import BulkModal from './bulkModal';
 
 interface Seat {
   id: string;
@@ -21,11 +25,25 @@ interface ZoneEditorProps {
   onSeatUpdate?: (seats: Seat[]) => void;
 }
 
-interface BulkCreateModal {
-  isOpen: boolean;
+interface BulkCreationConfig {
+  type: 'traditional' | 'theater' | 'stadium' | 'arena' | 'custom';
   rows: string[];
-  seatsPerRow: number;
-  startPrice: number;
+  baseSeatsPerRow: number;
+  spacing: {
+    seatSpacing: number;
+    rowSpacing: number;
+    blockSpacing?: number;
+  };
+  layout: {
+    curve: number; // 0 = 직선, 0.5 = 약간 곡선, 1 = 강한 곡선
+    angle: number; // 각도
+    centerGap?: number; // 중앙 통로 간격
+  };
+  pricing: {
+    basePrice: number;
+    priceGradient: 'none' | 'distance' | 'row' | 'zone';
+    priceMultiplier: number;
+  };
 }
 
 export default function ZoneEditor({
@@ -35,33 +53,15 @@ export default function ZoneEditor({
 }: ZoneEditorProps) {
   const [seats, setSeats] = useState<Seat[]>(initialSeats);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const [gridRows, setGridRows] = useState(5);
-  const [gridCols, setGridCols] = useState(10);
-  const [availableRows, setAvailableRows] = useState<string[]>([
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-  ]);
-  const [selectedRow, setSelectedRow] = useState<string>('A'); // 선택된 열
-  const [newRowName, setNewRowName] = useState('');
+  const [gridRows, setGridRows] = useState(8);
+  const [gridCols, setGridCols] = useState(12);
+  const [availableRows, setAvailableRows] = useState<string[]>(['A', 'B', 'C', 'D', 'E']);
+  const [selectedRow, setSelectedRow] = useState<string>('A');
   const [draggedSeat, setDraggedSeat] = useState<string | null>(null);
   const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(
     null,
   );
-
-  const [bulkModal, setBulkModal] = useState<BulkCreateModal>({
-    isOpen: false,
-    rows: [],
-    seatsPerRow: 10,
-    startPrice: 50000,
-  });
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const dragImageRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +75,23 @@ export default function ZoneEditor({
 
     return { total, available, occupied, disabled, selected };
   }, [seats, selectedSeats]);
+
+  // 그리드 확장 함수들
+  const expandGridRight = useCallback(() => {
+    setGridCols((prev) => Math.min(prev + 1, 50));
+  }, []);
+
+  const expandGridBottom = useCallback(() => {
+    setGridRows((prev) => Math.min(prev + 1, 30));
+  }, []);
+
+  const shrinkGridRight = useCallback(() => {
+    setGridCols((prev) => Math.max(prev - 1, 5));
+  }, []);
+
+  const shrinkGridBottom = useCallback(() => {
+    setGridRows((prev) => Math.max(prev - 1, 5));
+  }, []);
 
   // 좌석 클릭 처리
   const handleSeatClick = useCallback((seatId: string) => {
@@ -92,11 +109,9 @@ export default function ZoneEditor({
   // 그리드 셀 클릭 처리 (좌석 추가)
   const handleGridCellClick = useCallback(
     (row: number, col: number) => {
-      // 해당 위치에 이미 좌석이 있는지 확인
       const existingSeat = seats.find((seat) => seat.x === col && seat.y === row);
       if (existingSeat) return;
 
-      // 선택된 열의 기존 좌석 번호 중 가장 큰 번호 찾기
       const existingSeatsInRow = seats.filter((seat) => seat.row === selectedRow);
       const maxNumber =
         existingSeatsInRow.length > 0
@@ -167,93 +182,9 @@ export default function ZoneEditor({
     setSelectedSeats([]);
   }, []);
 
-  // 새 열 추가
-  const handleAddRow = useCallback(() => {
-    if (!newRowName.trim()) return;
-    if (availableRows.includes(newRowName.trim())) {
-      alert('이미 존재하는 열 이름입니다.');
-      return;
-    }
-
-    const newRow = newRowName.trim();
-    setAvailableRows((prev) => [...prev, newRow]);
-    setSelectedRow(newRow); // 새로 추가된 열을 선택
-    setNewRowName('');
-  }, [newRowName, availableRows]);
-
-  // 열 삭제
-  const handleRemoveRow = useCallback(
-    (rowName: string) => {
-      // 해당 열에 좌석이 있는지 확인
-      const hasSeats = seats.some((seat) => seat.row === rowName);
-      if (hasSeats) {
-        const confirmDelete = window.confirm(
-          `${rowName}열에 좌석이 있습니다. 열과 좌석을 모두 삭제하시겠습니까?`,
-        );
-        if (!confirmDelete) return;
-
-        // 해당 열의 좌석들도 삭제
-        setSeats((prev) => prev.filter((seat) => seat.row !== rowName));
-      }
-
-      setAvailableRows((prev) => prev.filter((row) => row !== rowName));
-    },
-    [seats],
-  );
-
-  // 대량 생성 모달 열기
-  const handleOpenBulkModal = useCallback(() => {
-    setBulkModal((prev) => ({
-      ...prev,
-      isOpen: true,
-      rows: availableRows.slice(0, 3), // 기본적으로 처음 3개 열 선택
-    }));
-  }, [availableRows]);
-
-  // 대량 생성 실행
-  const handleBulkCreate = useCallback(() => {
-    const bulkSeats: Seat[] = [];
-
-    // 그리드 방식으로 배치 (각 열별로 연속된 영역에 배치)
-    bulkModal.rows.forEach((rowName, rowIndex) => {
-      let seatsCreated = 0;
-
-      // 각 열마다 연속된 영역에 좌석 배치
-      for (
-        let row = rowIndex * 2;
-        row < gridRows && seatsCreated < bulkModal.seatsPerRow;
-        row++
-      ) {
-        for (let col = 0; col < gridCols && seatsCreated < bulkModal.seatsPerRow; col++) {
-          const existingSeat =
-            seats.find((seat) => seat.x === col && seat.y === row) ||
-            bulkSeats.find((seat) => seat.x === col && seat.y === row);
-
-          if (!existingSeat) {
-            bulkSeats.push({
-              id: `bulk-seat-${rowName}-${seatsCreated + 1}`,
-              row: rowName,
-              number: seatsCreated + 1,
-              x: col,
-              y: row,
-              status: 'available',
-              price: bulkModal.startPrice,
-            });
-            seatsCreated++;
-          }
-        }
-      }
-    });
-
-    setSeats((prev) => [...prev, ...bulkSeats]);
-    setBulkModal((prev) => ({ ...prev, isOpen: false }));
-  }, [bulkModal, seats, gridRows, gridCols]);
-
   // 드래그 앤 드롭 처리
   const handleDragStart = useCallback((e: React.DragEvent, seatId: string) => {
     setDraggedSeat(seatId);
-
-    // 투명한 드래그 이미지 설정
     if (dragImageRef.current) {
       e.dataTransfer.setDragImage(dragImageRef.current, 0, 0);
     }
@@ -272,11 +203,9 @@ export default function ZoneEditor({
 
       if (!draggedSeat) return;
 
-      // 해당 위치에 다른 좌석이 있는지 확인
       const existingSeat = seats.find((seat) => seat.x === col && seat.y === row);
       if (existingSeat && existingSeat.id !== draggedSeat) return;
 
-      // 좌석 위치 업데이트
       setSeats((prev) =>
         prev.map((seat) =>
           seat.id === draggedSeat ? { ...seat, x: col, y: row } : seat,
@@ -302,16 +231,211 @@ export default function ZoneEditor({
     [seats],
   );
 
-  // 그리드 생성
-  const gridCells = useMemo(() => {
-    const cells = [];
-    for (let row = 0; row < gridRows; row++) {
-      for (let col = 0; col < gridCols; col++) {
-        cells.push({ row, col });
+  // 획기적인 대량 좌석 생성 함수
+  const handleAdvancedBulkCreate = useCallback(
+    (config: BulkCreationConfig) => {
+      const newSeats: Seat[] = [];
+      const { type, rows, baseSeatsPerRow, spacing, layout, pricing } = config;
+
+      switch (type) {
+        case 'theater': {
+          // 극장식 배치: 앞열일수록 적고, 뒷열일수록 많음
+          rows.forEach((rowName, rowIndex) => {
+            const seatsInRow = baseSeatsPerRow + Math.floor(rowIndex * 0.5);
+            const rowY = Math.floor(gridRows * 0.2) + rowIndex * spacing.rowSpacing;
+
+            // 중앙 정렬을 위한 시작 X 계산
+            const totalRowWidth = (seatsInRow - 1) * spacing.seatSpacing;
+            const startX = Math.floor(
+              (gridCols - totalRowWidth / spacing.seatSpacing) / 2,
+            );
+
+            for (let seatNum = 1; seatNum <= seatsInRow; seatNum++) {
+              const seatX = startX + (seatNum - 1) * spacing.seatSpacing;
+
+              // 곡선 효과 적용
+              let adjustedY = rowY;
+              if (layout.curve > 0) {
+                const centerOffset = Math.abs(seatNum - (seatsInRow + 1) / 2);
+                const maxOffset = seatsInRow / 2;
+                const curveOffset = (centerOffset / maxOffset) * layout.curve * 2;
+                adjustedY = Math.max(0, rowY - curveOffset);
+              }
+
+              // 가격 계산
+              let price = pricing.basePrice;
+              if (pricing.priceGradient === 'row') {
+                price =
+                  pricing.basePrice *
+                  (1 + (rows.length - rowIndex - 1) * pricing.priceMultiplier);
+              } else if (pricing.priceGradient === 'distance') {
+                const distanceFromCenter = Math.abs(seatNum - (seatsInRow + 1) / 2);
+                price =
+                  pricing.basePrice *
+                  (1 - (distanceFromCenter / seatsInRow) * pricing.priceMultiplier);
+              }
+
+              if (
+                seatX >= 0 &&
+                seatX < gridCols &&
+                adjustedY >= 0 &&
+                adjustedY < gridRows
+              ) {
+                newSeats.push({
+                  id: `bulk-${type}-${rowName}-${seatNum}`,
+                  row: rowName,
+                  number: seatNum,
+                  x: seatX,
+                  y: Math.floor(adjustedY),
+                  status: 'available',
+                  price: Math.round(price),
+                });
+              }
+            }
+          });
+          break;
+        }
+
+        case 'stadium': {
+          // 경기장식 배치: 곡선형, 블록 단위
+          const blocksPerRow = 3; // 좌측, 중앙, 우측 블록
+
+          rows.forEach((rowName, rowIndex) => {
+            const rowY = Math.floor(gridRows * 0.15) + rowIndex * spacing.rowSpacing;
+
+            for (let blockIndex = 0; blockIndex < blocksPerRow; blockIndex++) {
+              const seatsInBlock = Math.floor(baseSeatsPerRow / blocksPerRow);
+              const blockStartX =
+                blockIndex *
+                (Math.floor(gridCols / blocksPerRow) + (spacing.blockSpacing || 2));
+
+              for (let seatNum = 1; seatNum <= seatsInBlock; seatNum++) {
+                const globalSeatNum = blockIndex * seatsInBlock + seatNum;
+                const seatX = blockStartX + (seatNum - 1) * spacing.seatSpacing;
+
+                // 경기장 곡선 효과
+                let adjustedY = rowY;
+                if (layout.curve > 0) {
+                  const totalWidth = gridCols;
+                  const relativeX = seatX / totalWidth;
+                  const curveHeight = layout.curve * 4;
+                  adjustedY = rowY + curveHeight * 4 * relativeX * (1 - relativeX);
+                }
+
+                // 블록별 가격 차등
+                let price = pricing.basePrice;
+                if (blockIndex === 1) {
+                  // 중앙 블록
+                  price *= 1.3;
+                } else {
+                  // 측면 블록
+                  price *= 0.9;
+                }
+
+                if (
+                  seatX >= 0 &&
+                  seatX < gridCols &&
+                  adjustedY >= 0 &&
+                  adjustedY < gridRows
+                ) {
+                  newSeats.push({
+                    id: `bulk-${type}-${rowName}-${globalSeatNum}`,
+                    row: rowName,
+                    number: globalSeatNum,
+                    x: seatX,
+                    y: Math.floor(adjustedY),
+                    status: 'available',
+                    price: Math.round(price),
+                  });
+                }
+              }
+            }
+          });
+          break;
+        }
+
+        case 'arena': {
+          // 아레나식 배치: 원형 또는 타원형
+          const centerX = gridCols / 2;
+          const centerY = gridRows / 2;
+          const radiusX = Math.min(gridCols, gridCols) * 0.4;
+          const radiusY = Math.min(gridRows, gridRows) * 0.35;
+
+          rows.forEach((rowName, rowIndex) => {
+            const rowRadius = radiusX + rowIndex * spacing.rowSpacing * 0.5;
+            const circumference = 2 * Math.PI * rowRadius;
+            const seatsInRow = Math.floor(circumference / (spacing.seatSpacing * 2));
+            const angleStep = (2 * Math.PI) / seatsInRow;
+
+            for (let seatNum = 1; seatNum <= seatsInRow; seatNum++) {
+              const angle = (seatNum - 1) * angleStep + (layout.angle * Math.PI) / 180;
+              const seatX = Math.round(centerX + Math.cos(angle) * rowRadius);
+              const seatY = Math.round(
+                centerY + Math.sin(angle) * radiusY * (1 + rowIndex * 0.1),
+              );
+
+              let price = pricing.basePrice;
+              if (pricing.priceGradient === 'row') {
+                price *= 1 + (rows.length - rowIndex - 1) * pricing.priceMultiplier;
+              }
+
+              if (seatX >= 0 && seatX < gridCols && seatY >= 0 && seatY < gridRows) {
+                newSeats.push({
+                  id: `bulk-${type}-${rowName}-${seatNum}`,
+                  row: rowName,
+                  number: seatNum,
+                  x: seatX,
+                  y: seatY,
+                  status: 'available',
+                  price: Math.round(price),
+                });
+              }
+            }
+          });
+          break;
+        }
+
+        default: {
+          // 기존 traditional 방식
+          rows.forEach((rowName, rowIndex) => {
+            const rowY = Math.floor(gridRows * 0.2) + rowIndex * spacing.rowSpacing;
+            const startX = Math.floor(
+              (gridCols - baseSeatsPerRow * spacing.seatSpacing) / 2,
+            );
+
+            for (let seatNum = 1; seatNum <= baseSeatsPerRow; seatNum++) {
+              const seatX = startX + (seatNum - 1) * spacing.seatSpacing;
+
+              if (seatX >= 0 && seatX < gridCols && rowY >= 0 && rowY < gridRows) {
+                newSeats.push({
+                  id: `bulk-${type}-${rowName}-${seatNum}`,
+                  row: rowName,
+                  number: seatNum,
+                  x: seatX,
+                  y: rowY,
+                  status: 'available',
+                  price: pricing.basePrice,
+                });
+              }
+            }
+          });
+        }
       }
-    }
-    return cells;
-  }, [gridRows, gridCols]);
+
+      // 기존 좌석과 겹치지 않는 좌석만 추가
+      const filteredNewSeats = newSeats.filter(
+        (newSeat) =>
+          !seats.some(
+            (existingSeat) =>
+              existingSeat.x === newSeat.x && existingSeat.y === newSeat.y,
+          ),
+      );
+
+      setSeats((prev) => [...prev, ...filteredNewSeats]);
+      setIsBulkModalOpen(false);
+    },
+    [seats, gridRows, gridCols],
+  );
 
   return (
     <div className={styles.container}>
@@ -336,264 +460,51 @@ export default function ZoneEditor({
         </div>
       </div>
 
-      {/* 툴바 */}
-      <div className={styles.toolbar}>
-        <div className={styles.toolSection}>
-          <span className={styles.toolLabel}>그리드 크기:</span>
-          <input
-            type='number'
-            value={gridRows}
-            onChange={(e) => setGridRows(Number(e.target.value))}
-            className={styles.gridInput}
-            min='5'
-            max='30'
-            placeholder='행'
-          />
-          <span>×</span>
-          <input
-            type='number'
-            value={gridCols}
-            onChange={(e) => setGridCols(Number(e.target.value))}
-            className={styles.gridInput}
-            min='5'
-            max='50'
-            placeholder='열'
-          />
-        </div>
-
-        <div className={styles.toolSection}>
-          <span className={styles.toolLabel}>열 관리:</span>
-          <input
-            type='text'
-            value={newRowName}
-            onChange={(e) => setNewRowName(e.target.value)}
-            placeholder='새 열 이름'
-            className={styles.rowInput}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleAddRow();
-              }
-            }}
-          />
-          <Button type='button' size='small' onClick={handleAddRow}>
-            열 추가
-          </Button>
-        </div>
-
-        <div className={styles.toolSection}>
-          <Button
-            type='button'
-            size='small'
-            variant='secondary'
-            onClick={handleOpenBulkModal}
-          >
-            대량 생성
-          </Button>
-        </div>
-      </div>
-
-      {/* 열 목록 */}
-      <div className={styles.rowList}>
-        <span className={styles.rowListLabel}>
-          사용 가능한 열 (선택된 열: {selectedRow}):
-        </span>
-        <div className={styles.rowTags}>
-          {availableRows.map((row) => (
-            <div
-              key={row}
-              className={`${styles.rowTag} ${selectedRow === row ? styles.selectedRowTag : ''}`}
-              onClick={() => setSelectedRow(row)}
-            >
-              <span>{row}열</span>
-              <button
-                type='button'
-                className={styles.removeRowButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveRow(row);
-                }}
-                title={`${row}열 삭제`}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* 행 관리 컴포넌트 */}
+      <RowManager
+        availableRows={availableRows}
+        selectedRow={selectedRow}
+        seats={seats}
+        onRowsChange={setAvailableRows}
+        onSelectedRowChange={setSelectedRow}
+        onSeatsChange={setSeats}
+      />
 
       {/* 메인 에디터 영역 */}
       <div className={styles.editorArea}>
         {/* 좌측 컨트롤 패널 */}
-        <div className={styles.controlPanel}>
-          <div className={styles.controlSection}>
-            <h4 className={styles.controlTitle}>선택 작업</h4>
-            <div className={styles.controlButtons}>
-              <button
-                type='button'
-                className={styles.controlButton}
-                onClick={handleSelectAll}
-              >
-                전체 선택 ({seats.length})
-              </button>
-              <button
-                type='button'
-                className={styles.controlButton}
-                onClick={handleDeselectAll}
-              >
-                선택 해제
-              </button>
-              <button
-                type='button'
-                className={styles.controlButton}
-                onClick={handleDeleteSelected}
-                disabled={selectedSeats.length === 0}
-              >
-                선택 삭제 ({selectedSeats.length})
-              </button>
-            </div>
-          </div>
-
-          {selectedSeats.length > 0 && (
-            <div className={styles.controlSection}>
-              <h4 className={styles.controlTitle}>선택 좌석 설정</h4>
-              <div className={styles.statusButtons}>
-                <button
-                  type='button'
-                  className={`${styles.statusButton} ${styles.available}`}
-                  onClick={() => handleChangeSelectedStatus('available')}
-                >
-                  사용 가능
-                </button>
-                <button
-                  type='button'
-                  className={`${styles.statusButton} ${styles.occupied}`}
-                  onClick={() => handleChangeSelectedStatus('occupied')}
-                >
-                  예약됨
-                </button>
-                <button
-                  type='button'
-                  className={`${styles.statusButton} ${styles.disabled}`}
-                  onClick={() => handleChangeSelectedStatus('disabled')}
-                >
-                  사용 불가
-                </button>
-              </div>
-
-              <div className={styles.priceControl}>
-                <input
-                  type='number'
-                  placeholder='가격 설정'
-                  className={styles.priceInput}
-                  min='0'
-                  step='1000'
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleChangeSelectedPrice(Number(e.currentTarget.value));
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-                <span className={styles.priceHint}>Enter로 적용</span>
-              </div>
-            </div>
-          )}
-
-          <div className={styles.controlSection}>
-            <h4 className={styles.controlTitle}>통계</h4>
-            <div className={styles.stats}>
-              <div className={styles.statItem}>
-                <span className={styles.statLabel}>총 좌석</span>
-                <span className={styles.statValue}>{seatStats.total}</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statLabel}>선택됨</span>
-                <span className={styles.statValue}>{seatStats.selected}</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statLabel}>사용 가능</span>
-                <span className={styles.statValue}>{seatStats.available}</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statLabel}>예약됨</span>
-                <span className={styles.statValue}>{seatStats.occupied}</span>
-              </div>
-              <div className={styles.statItem}>
-                <span className={styles.statLabel}>사용 불가</span>
-                <span className={styles.statValue}>{seatStats.disabled}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ControlPanel
+          seatStats={seatStats}
+          selectedSeats={selectedSeats}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          onDeleteSelected={handleDeleteSelected}
+          onChangeSelectedStatus={handleChangeSelectedStatus}
+          onChangeSelectedPrice={handleChangeSelectedPrice}
+          onOpenBulkModal={() => setIsBulkModalOpen(true)}
+        />
 
         {/* 좌석 그리드 */}
-        <div className={styles.seatGrid}>
-          <div
-            className={styles.grid}
-            style={{
-              gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-              gridTemplateRows: `repeat(${gridRows}, 1fr)`,
-            }}
-          >
-            {gridCells.map(({ row, col }) => {
-              const seat = getSeatAtPosition(col, row);
-              const isSelected = seat && selectedSeats.includes(seat.id);
-              const isHovered = hoveredCell?.row === row && hoveredCell?.col === col;
-              const isDragTarget = draggedSeat && isHovered && !seat;
-
-              return (
-                <div
-                  key={`${row}-${col}`}
-                  className={`${styles.gridCell} ${
-                    seat ? styles.hasSeat : styles.emptySeat
-                  } ${isDragTarget ? styles.dragTarget : ''}`}
-                  onClick={() => {
-                    if (!seat) {
-                      handleGridCellClick(row, col);
-                    }
-                  }}
-                  onDragOver={(e) => handleDragOver(e, row, col)}
-                  onDrop={(e) => handleDrop(e, row, col)}
-                  onDragLeave={() => setHoveredCell(null)}
-                >
-                  {seat && (
-                    <div
-                      className={`${styles.seat} ${styles[seat.status]} ${
-                        isSelected ? styles.selected : ''
-                      } ${draggedSeat === seat.id ? styles.dragging : ''}`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, seat.id)}
-                      onDragEnd={handleDragEnd}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSeatClick(seat.id);
-                      }}
-                    >
-                      <button
-                        type='button'
-                        className={styles.deleteButton}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSeatDelete(seat.id);
-                        }}
-                        title='좌석 삭제'
-                      >
-                        ×
-                      </button>
-                      <span className={styles.seatLabel}>
-                        {seat.row}
-                        {seat.number}
-                      </span>
-                      <span className={styles.seatPrice}>
-                        {seat.price.toLocaleString()}원
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <SeatGrid
+          gridRows={gridRows}
+          gridCols={gridCols}
+          seats={seats}
+          selectedSeats={selectedSeats}
+          draggedSeat={draggedSeat}
+          hoveredCell={hoveredCell}
+          onGridCellClick={handleGridCellClick}
+          onSeatClick={handleSeatClick}
+          onSeatDelete={handleSeatDelete}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          onExpandRight={expandGridRight}
+          onExpandBottom={expandGridBottom}
+          onShrinkRight={shrinkGridRight}
+          onShrinkBottom={shrinkGridBottom}
+          getSeatAtPosition={getSeatAtPosition}
+        />
       </div>
 
       {/* 범례 */}
@@ -620,101 +531,13 @@ export default function ZoneEditor({
         </div>
       </div>
 
-      {/* 대량 생성 모달 */}
-      {bulkModal.isOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>대량 좌석 생성</h3>
-              <button
-                type='button'
-                className={styles.modalCloseButton}
-                onClick={() => setBulkModal((prev) => ({ ...prev, isOpen: false }))}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className={styles.modalBody}>
-              <div className={styles.modalSection}>
-                <label className={styles.modalLabel}>생성할 열 선택:</label>
-                <div className={styles.rowSelection}>
-                  {availableRows.map((row) => (
-                    <label key={row} className={styles.checkboxLabel}>
-                      <input
-                        type='checkbox'
-                        checked={bulkModal.rows.includes(row)}
-                        onChange={(e) => {
-                          setBulkModal((prev) => ({
-                            ...prev,
-                            rows: e.target.checked
-                              ? [...prev.rows, row]
-                              : prev.rows.filter((r) => r !== row),
-                          }));
-                        }}
-                      />
-                      <span>{row}열</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.modalSection}>
-                <label className={styles.modalLabel}>
-                  열당 좌석 수: {bulkModal.seatsPerRow}개
-                </label>
-                <input
-                  type='range'
-                  min='5'
-                  max='30'
-                  value={bulkModal.seatsPerRow}
-                  onChange={(e) =>
-                    setBulkModal((prev) => ({
-                      ...prev,
-                      seatsPerRow: Number(e.target.value),
-                    }))
-                  }
-                  className={styles.rangeInput}
-                />
-              </div>
-
-              <div className={styles.modalSection}>
-                <label className={styles.modalLabel}>기본 가격:</label>
-                <input
-                  type='number'
-                  value={bulkModal.startPrice}
-                  onChange={(e) =>
-                    setBulkModal((prev) => ({
-                      ...prev,
-                      startPrice: Number(e.target.value),
-                    }))
-                  }
-                  className={styles.priceInput}
-                  min='0'
-                  step='1000'
-                />
-              </div>
-            </div>
-
-            <div className={styles.modalFooter}>
-              <button
-                type='button'
-                className={styles.modalCancelButton}
-                onClick={() => setBulkModal((prev) => ({ ...prev, isOpen: false }))}
-              >
-                취소
-              </button>
-              <button
-                type='button'
-                className={styles.modalCreateButton}
-                onClick={handleBulkCreate}
-                disabled={bulkModal.rows.length === 0}
-              >
-                생성 ({bulkModal.rows.length}열 × {bulkModal.seatsPerRow}석)
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* 획기적인 대량 생성 모달 */}
+      {isBulkModalOpen && (
+        <BulkModal
+          availableRows={availableRows}
+          onClose={() => setIsBulkModalOpen(false)}
+          onBulkCreate={handleAdvancedBulkCreate}
+        />
       )}
     </div>
   );

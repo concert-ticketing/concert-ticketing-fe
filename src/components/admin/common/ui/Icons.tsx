@@ -138,6 +138,23 @@ export const Icons = {
       </svg>
     ) as React.JSX.Element,
 
+  Check: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='m9 12 2 2 4-4' />
+      </svg>
+    ) as React.JSX.Element,
+
   // 뷰 모드
   Grid: ({ className, size = 20 }: IconProps) =>
     (
@@ -660,6 +677,278 @@ export const Icons = {
         <line x1='4' y1='6' x2='20' y2='6' />
         <line x1='4' y1='12' x2='20' y2='12' />
         <line x1='4' y1='18' x2='20' y2='18' />
+      </svg>
+    ) as React.JSX.Element,
+
+  // 추가된 아이콘들 - RowManager용
+  Layers: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.9a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z' />
+        <path d='m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65' />
+        <path d='m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Zap: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='M4 14a1 1 0 0 1-.78-1.63L9.9 5.24a1 1 0 0 1 1.56 0l6.68 7.13A1 1 0 0 1 17.36 14Z' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Info: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <circle cx='12' cy='12' r='10' />
+        <path d='m9 12 2 2 4-4' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Target: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <circle cx='12' cy='12' r='10' />
+        <circle cx='12' cy='12' r='6' />
+        <circle cx='12' cy='12' r='2' />
+      </svg>
+    ) as React.JSX.Element,
+
+  // ControlPanel용 추가 아이콘들
+  BarChart3: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='M3 3v18h18' />
+        <path d='m19 9-5 5-4-4-3 3' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Grid3x3: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <rect width='18' height='18' x='3' y='3' rx='2' />
+        <path d='M9 3v18' />
+        <path d='M15 3v18' />
+        <path d='M3 9h18' />
+        <path d='M3 15h18' />
+      </svg>
+    ) as React.JSX.Element,
+
+  MousePointer: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z' />
+        <path d='m13 13 6 6' />
+      </svg>
+    ) as React.JSX.Element,
+
+  CheckSquare: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <polyline points='9,11 12,14 22,4' />
+        <path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Square: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <rect width='18' height='18' x='3' y='3' rx='2' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Trash2: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='M3 6h18' />
+        <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
+        <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
+        <line x1='10' y1='11' x2='10' y2='17' />
+        <line x1='14' y1='11' x2='14' y2='17' />
+      </svg>
+    ) as React.JSX.Element,
+
+  HelpCircle: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <circle cx='12' cy='12' r='10' />
+        <path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' />
+        <path d='M12 17h.01' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Move: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <polyline points='5,9 2,12 5,15' />
+        <polyline points='9,5 12,2 15,5' />
+        <polyline points='15,19 12,22 9,19' />
+        <polyline points='19,9 22,12 19,15' />
+        <line x1='2' y1='12' x2='22' y2='12' />
+        <line x1='12' y1='2' x2='12' y2='22' />
+      </svg>
+    ) as React.JSX.Element,
+
+  RotateCcw: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <path d='M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8' />
+        <path d='M3 3v5h5' />
+      </svg>
+    ) as React.JSX.Element,
+
+  Keyboard: ({ className, size = 20 }: IconProps) =>
+    (
+      <svg
+        width={size}
+        height={size}
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        className={className}
+      >
+        <rect width='20' height='16' x='2' y='4' rx='2' />
+        <path d='M6 8h.01' />
+        <path d='M10 8h.01' />
+        <path d='M14 8h.01' />
+        <path d='M18 8h.01' />
+        <path d='M8 12h.01' />
+        <path d='M12 12h.01' />
+        <path d='M16 12h.01' />
+        <path d='M7 16h10' />
       </svg>
     ) as React.JSX.Element,
 };
