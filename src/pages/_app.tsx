@@ -20,7 +20,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   );
 
   // Admin 페이지에서 getLayout이 있으면 사용
-  if (isAdminRoute && Component.getLayout) {
+  if (isHiddenLayoutRoute && Component.getLayout) {
     return Component.getLayout(<Component {...pageProps} />);
   }
 
