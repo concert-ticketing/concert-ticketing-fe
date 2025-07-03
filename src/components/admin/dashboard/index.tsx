@@ -71,7 +71,7 @@ export default function Dashboard() {
         totalConcerts: 89,
         totalPerformers: 156,
         totalTicketsSold: 24567,
-        totalRevenue: 1234567890,
+        totalRevenue: 1234567,
         activeEvents: 8,
       };
 

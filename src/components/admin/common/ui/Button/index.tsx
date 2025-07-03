@@ -81,7 +81,7 @@ export default function Button({
     );
   }
 
-  // children이 있는 경우 기존 로직
+  // children이 있는 경우
   return (
     <button
       type={type}
