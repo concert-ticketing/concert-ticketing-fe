@@ -1,109 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
-import styles from './venueDetail.module.css';
+import { ConcertDetail as ConcertDetailType } from '@/types/concert';
+import { mockConcertDetails } from '@/lib/mockData';
+import styles from './concertDetail.module.css';
 
-interface Zone {
-  id: string;
-  name: string;
-  svgElementId: string;
-  seatCount: number;
-  priceRange: {
-    min: number;
-    max: number;
-  };
+interface ConcertDetailProps {
+  concertId: string;
 }
 
-interface Venue {
-  id: string;
-  name: string;
-  location: string;
-  description: string;
-  floorCount: number;
-  totalSeats: number;
-  status: 'active' | 'draft' | 'archived';
-  thumbnail: string;
-  createdAt: string;
-  lastModified: string;
-  tags: string[];
-  svgContent: string | null;
-  zones: Zone[];
-}
-
-interface VenueDetailProps {
-  venueId: string;
-}
-
-// VenueList와 동일한 목업 데이터
-const getVenuesData = (): Venue[] => [
-  {
-    id: 'seoul-arena',
-    name: '서울 아레나',
-    location: '서울 송파구',
-    description: '올림픽공원 내 대형 콘서트홀로 최대 2만명 수용 가능',
-    floorCount: 3,
-    totalSeats: 18500,
-    status: 'active',
-    thumbnail: '#3b82f6',
-    createdAt: '2024-03-15',
-    lastModified: '2024-06-05 14:30',
-    tags: ['대형', '실내', '서울'],
-    svgContent: null,
-    zones: [],
-  },
-  {
-    id: 'busan-center',
-    name: '부산 문화회관',
-    location: '부산 해운대구',
-    description: '부산 대표 문화공간으로 클래식부터 팝까지 다양한 공연',
-    floorCount: 2,
-    totalSeats: 1200,
-    status: 'active',
-    thumbnail: '#10b981',
-    createdAt: '2024-04-20',
-    lastModified: '2024-06-01 09:15',
-    tags: ['중형', '실내', '부산'],
-    svgContent: null,
-    zones: [],
-  },
-  {
-    id: 'olympic-hall',
-    name: '올림픽공원 체조경기장',
-    location: '서울 송파구',
-    description: '1988 올림픽 체조경기장을 콘서트홀로 리모델링',
-    floorCount: 4,
-    totalSeats: 15000,
-    status: 'draft',
-    thumbnail: '#f59e0b',
-    createdAt: '2024-05-10',
-    lastModified: '2024-05-25 16:45',
-    tags: ['대형', '실내', '역사적'],
-    svgContent: null,
-    zones: [],
-  },
-  {
-    id: 'jeju-arena',
-    name: '제주 야외극장',
-    location: '제주 제주시',
-    description: '자연과 함께하는 야외 콘서트 공간',
-    floorCount: 1,
-    totalSeats: 8000,
-    status: 'archived',
-    thumbnail: '#8b5cf6',
-    createdAt: '2024-02-05',
-    lastModified: '2024-04-10 11:20',
-    tags: ['야외', '자연', '제주'],
-    svgContent: null,
-    zones: [],
-  },
-];
-
-export default function VenueDetail({ venueId }: VenueDetailProps) {
-  const [venue, setVenue] = useState<Venue | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedZone, setSelectedZone] = useState<string | null>(null);
+export default function ConcertDetail({ concertId }: ConcertDetailProps) {
+  const [concert, setConcert] = useState<ConcertDetailType | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [tempZones, setTempZones] = useState<Zone[]>([]);
+  const [tempZones, setTempZones] = useState<any[]>([]);
+  const [selectedZone, setSelectedZone] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'schedules' | 'analytics' | 'settings'
+  >('overview');
 
   // SVG 확대/축소 상태
   const [svgTransform, setSvgTransform] = useState({ x: 0, y: 0, scale: 1 });
@@ -120,15 +34,15 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
         // const response = await fetch(`/api/venues/${venueId}`);
         // const venueData = await response.json();
 
-        // 현재는 목업 데이터에서 해당 ID로 찾기
-        const venuesData = getVenuesData();
-        const foundVenue = venuesData.find((v) => v.id === venueId);
+        // 목업 데이터에서 해당 ID로 찾기
+        const foundConcert =
+          mockConcertDetails.find((c) => c.id === parseInt(concertId)) || null;
 
         setTimeout(() => {
-          if (foundVenue) {
-            setVenue(foundVenue);
+          if (foundConcert) {
+            setConcert(foundConcert);
           } else {
-            setVenue(null);
+            setConcert(null);
           }
           setLoading(false);
         }, 1000);
@@ -139,7 +53,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
     };
 
     fetchVenue();
-  }, [venueId]);
+  }, [concertId]);
 
   // SVG 확대/축소 기능
   const handleZoom = (delta: number, centerX?: number, centerY?: number) => {
@@ -209,10 +123,15 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.type !== 'image/svg+xml') {
+      alert('SVG 파일만 업로드 가능합니다.');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
-      const svgContent = reader.result as string;
-      setVenue((prev) => (prev ? { ...prev, svgContent } : null));
+      const svg_content = reader.result as string;
+      setConcert((prev) => (prev ? { ...prev, svg_content } : null));
       setIsEditMode(true);
       setTempZones([]);
     };
@@ -269,17 +188,17 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
 
   // 구역 설정 저장
   const handleSaveZones = async () => {
-    if (!venue) return;
+    if (!concert) return;
 
     try {
       // TODO: API 호출로 구역 정보 저장
-      const updatedVenue = {
-        ...venue,
+      const updatedConcert = {
+        ...concert,
         zones: tempZones,
         lastModified: new Date().toISOString().split('T')[0],
       };
 
-      setVenue(updatedVenue);
+      setConcert(updatedConcert);
       setIsEditMode(false);
       setTempZones([]);
 
@@ -296,7 +215,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
     setTempZones([]);
     setSelectedZone(null);
     // SVG 다시 렌더링하여 기존 구역 복원
-    if (venue?.svgContent && svgContainerRef.current) {
+    if (concert?.svg_content && svgContainerRef.current) {
       // 모든 data-zone-configured 속성 제거
       const svgEl = svgContainerRef.current.querySelector('svg');
       if (svgEl) {
@@ -315,9 +234,9 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
 
   // SVG 렌더링 및 이벤트 설정
   const renderSVG = () => {
-    if (!venue?.svgContent || !svgContainerRef.current) return;
+    if (!concert?.svg_content || !svgContainerRef.current) return;
 
-    svgContainerRef.current.innerHTML = venue.svgContent;
+    svgContainerRef.current.innerHTML = concert.svg_content;
     const svgEl = svgContainerRef.current.querySelector('svg');
 
     if (svgEl) {
@@ -382,7 +301,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
           });
       } else {
         // 일반 모드일 때 - 기존 구역들만 클릭 가능
-        venue.zones.forEach((zone) => {
+        concert.zones?.forEach((zone) => {
           const element = newSvgEl.querySelector(`#${zone.svgElementId}`);
           if (element) {
             const clickHandler = () => {
@@ -419,7 +338,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
 
   useEffect(() => {
     renderSVG();
-  }, [venue, selectedZone, isEditMode]);
+  }, [concert, selectedZone, isEditMode]);
 
   if (loading) {
     return (
@@ -432,53 +351,49 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
     );
   }
 
-  if (!venue) {
+  if (!concert) {
     return (
       <div className={styles.container}>
         <div className={styles.error}>
           <p>공연장을 찾을 수 없습니다.</p>
-          <Link href='/admin/venues' className={styles.backButton}>
-            공연장 목록으로 돌아가기
+          <Link href='/admin/concerts' className={styles.backButton}>
+            콘서트 목록으로 돌아가기
           </Link>
         </div>
       </div>
     );
   }
 
-  const selectedZoneData = venue.zones.find((zone) => zone.id === selectedZone);
-  const displayZones = isEditMode ? tempZones : venue.zones;
+  const selectedZoneData = concert.zones?.find((zone) => zone.id === selectedZone);
+  const displayZones = isEditMode ? tempZones : concert.zones || [];
 
   return (
     <div className={styles.container}>
       {/* 헤더 */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <Link href='/admin/venues' className={styles.backButton}>
+          <Link href='/admin/concerts' className={styles.backButton}>
             ← 목록으로
           </Link>
           <div>
-            <h1 className={styles.title}>{venue.name}</h1>
-            <p className={styles.subtitle}>{venue.location}</p>
-            {venue.description && (
-              <p className={styles.description}>{venue.description}</p>
+            <h1 className={styles.title}>{concert.title}</h1>
+            <p className={styles.subtitle}>{concert.location}</p>
+            {concert.description && (
+              <p className={styles.description}>{concert.description}</p>
             )}
           </div>
         </div>
         <div className={styles.headerRight}>
-          <div className={styles.statusBadge} data-status={venue.status}>
-            {venue.status === 'active'
-              ? '활성'
-              : venue.status === 'draft'
-                ? '임시저장'
-                : '보관됨'}
-          </div>
           <Link
-            href={`/admin/venues/${venueId}/preview`}
+            href={`/admin/concerts/${concertId}/preview`}
             className={styles.previewButton}
           >
             전체 미리보기
           </Link>
-          <Link href={`/admin/venues/${venueId}/zones`} className={styles.manageButton}>
+          <Link
+            href={`/admin/concerts/${concertId}/zones`}
+            className={styles.manageButton}
+          >
             구역 관리
           </Link>
         </div>
@@ -492,7 +407,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
               <h2>공연장 레이아웃</h2>
               {isEditMode ? (
                 <p>SVG 도형 요소를 클릭하여 구역을 설정하세요 (텍스트 제외)</p>
-              ) : venue.svgContent ? (
+              ) : concert.svg_content ? (
                 <p>Shift + 마우스휠로 확대/축소, 드래그로 이동 가능합니다</p>
               ) : (
                 <p>SVG 파일을 업로드하여 공연장 레이아웃을 설정하세요</p>
@@ -500,7 +415,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
             </div>
 
             <div className={styles.svgActions}>
-              {!venue.svgContent ? (
+              {!concert.svg_content ? (
                 // SVG 업로드
                 <label className={styles.uploadButton}>
                   📁 SVG 업로드
@@ -567,7 +482,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
             </div>
           </div>
 
-          {venue.svgContent ? (
+          {concert.svg_content ? (
             <div className={styles.svgWrapper}>
               <div
                 ref={svgWrapperRef}
@@ -606,7 +521,7 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
                 </div>
               )}
 
-              {!isEditMode && venue.svgContent && (
+              {!isEditMode && concert.svg_content && (
                 <div className={styles.controlHints}>
                   <div className={styles.zoomInfo}>
                     확대/축소: {Math.round(svgTransform.scale * 100)}%
@@ -636,13 +551,13 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
                 <h3>{selectedZoneData.name}</h3>
                 <div className={styles.zoneActions}>
                   <Link
-                    href={`/admin/venues/${venueId}/zones/${selectedZoneData.id}`}
+                    href={`/admin/concerts/${concertId}/zones/${selectedZoneData.id}`}
                     className={styles.detailButton}
                   >
                     상세보기
                   </Link>
                   <Link
-                    href={`/admin/venues/${venueId}/zones/${selectedZoneData.id}/editor`}
+                    href={`/admin/concerts/${concertId}/zones/${selectedZoneData.id}/editor`}
                     className={styles.editButton}
                   >
                     좌석 편집
@@ -722,33 +637,27 @@ export default function VenueDetail({ venueId }: VenueDetailProps) {
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>생성일</span>
-                <span className={styles.infoValue}>{venue.createdAt}</span>
+                <span className={styles.infoValue}>{concert.created_at}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>수정일</span>
-                <span className={styles.infoValue}>{venue.lastModified}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>층수</span>
-                <span className={styles.infoValue}>{venue.floorCount}층</span>
+                <span className={styles.infoValue}>{concert.updated_at}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>총 좌석 수</span>
-                <span className={styles.infoValue}>{venue.totalSeats}석</span>
+                <span className={styles.infoValue}>{concert.total_seats}석</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>총 구역 수</span>
-                <span className={styles.infoValue}>{venue.zones.length}개</span>
+                <span className={styles.infoValue}>{concert.zones?.length || 0}개</span>
               </div>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>태그</span>
-                <span className={styles.infoValue}>
-                  {venue.tags.map((tag, index) => (
-                    <span key={index} className={styles.tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </span>
+                <span className={styles.infoLabel}>평점</span>
+                <span className={styles.infoValue}>{concert.rating}/5</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>리뷰 수</span>
+                <span className={styles.infoValue}>{concert.review_count}개</span>
               </div>
             </div>
           </div>

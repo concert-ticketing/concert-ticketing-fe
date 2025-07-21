@@ -17,10 +17,10 @@ interface Zone {
 }
 
 interface ZoneListProps {
-  venueId: string;
+  concertId: string;
 }
 
-export default function ZoneList({ venueId }: ZoneListProps) {
+export default function ZoneList({ concertId }: ZoneListProps) {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'name' | 'seatCount' | 'lastModified'>('name');
@@ -83,7 +83,7 @@ export default function ZoneList({ venueId }: ZoneListProps) {
     };
 
     fetchZones();
-  }, [venueId]);
+  }, [concertId]);
 
   const getStatusColor = (status: Zone['status']) => {
     switch (status) {
@@ -142,8 +142,8 @@ export default function ZoneList({ venueId }: ZoneListProps) {
       {/* 헤더 */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <Link href={`/admin/venues/${venueId}`} className={styles.backButton}>
-            ← 공연장으로 돌아가기
+          <Link href={`/admin/concerts/${concertId}`} className={styles.backButton}>
+            ← 콘서트로 돌아가기
           </Link>
           <div>
             <h1 className={styles.title}>구역 관리</h1>
@@ -152,7 +152,7 @@ export default function ZoneList({ venueId }: ZoneListProps) {
         </div>
         <div className={styles.headerRight}>
           <Link
-            href={`/admin/venues/${venueId}/preview`}
+            href={`/admin/concerts/${concertId}/preview`}
             className={styles.previewButton}
           >
             전체 미리보기
@@ -238,13 +238,13 @@ export default function ZoneList({ venueId }: ZoneListProps) {
 
             <div className={styles.zoneActions}>
               <Link
-                href={`/admin/venues/${venueId}/zones/${zone.id}`}
+                href={`/admin/concerts/${concertId}/zones/${zone.id}`}
                 className={styles.detailButton}
               >
                 상세보기
               </Link>
               <Link
-                href={`/admin/venues/${venueId}/zones/${zone.id}/editor`}
+                href={`/admin/concerts/${concertId}/zones/${zone.id}/editor`}
                 className={styles.editButton}
               >
                 좌석 편집

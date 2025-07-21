@@ -16,9 +16,7 @@ import { CreateConcertRequest, CreateConcertScheduleRequest } from './concert';
 
 export * from './common';
 
-// 기존 타입들
-export * from './venues';
-export * from './seat';
+// 기존 타입들 (venues 모듈이 없으므로 제거)
 
 // 새로 추가된 ERD 기반 타입들
 export * from './user';

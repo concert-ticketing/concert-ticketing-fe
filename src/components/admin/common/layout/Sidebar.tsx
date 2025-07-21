@@ -22,7 +22,7 @@ interface MenuItem {
 
 export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarProps) {
   const router = useRouter();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['venues']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['concerts']);
 
   const menuItems: MenuItem[] = [
     {
@@ -32,22 +32,22 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
       icon: <Icons.BarChart className={styles.iconSvg} />,
     },
     {
-      id: 'venues',
+      id: 'concerts',
       label: '공연장 관리',
       href: '',
       icon: <Icons.MapPin className={styles.iconSvg} />,
       badge: 2,
       subItems: [
         {
-          id: 'venues-create',
+          id: 'concerts-create',
           label: '새 공연장 생성',
-          href: '/admin/venues/create',
+          href: '/admin/concerts/create',
           icon: <Icons.Plus className={styles.iconSvg} />,
         },
         {
-          id: 'venues-list',
+          id: 'concerts-list',
           label: '공연장 목록',
-          href: '/admin/venues',
+          href: '/admin/concerts',
           icon: <Icons.Grid className={styles.iconSvg} />,
         },
       ],

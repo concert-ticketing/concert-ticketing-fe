@@ -174,6 +174,17 @@ export interface ConcertDetail extends Concert {
   reservation_count: number; // 전체 예약 수
   average_rating: number; // 평균 평점 (리뷰 기반)
   review_count: number; // 리뷰 수
+  svg_content?: string; // SVG 레이아웃 콘텐츠
+  zones?: Array<{
+    id: string;
+    name: string;
+    svgElementId: string;
+    seatCount: number;
+    priceRange: {
+      min: number;
+      max: number;
+    };
+  }>; // 구역 정보
 }
 
 // 출연진 상세 정보

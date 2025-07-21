@@ -4,8 +4,6 @@ import styles from './zoneEditor.module.css';
 import Button from '../../common/ui/Button';
 import { Icons } from '../../common/ui/Icons';
 import SeatGrid from './seatGrid';
-import ControlPanel from './controlPanel';
-import RowManager from './rowManager';
 import BulkModal from './bulkModal';
 
 interface Seat {
@@ -25,25 +23,12 @@ interface ZoneEditorProps {
   onSeatUpdate?: (seats: Seat[]) => void;
 }
 
-interface BulkCreationConfig {
-  type: 'traditional' | 'theater' | 'stadium' | 'arena' | 'custom';
+interface SimpleBulkConfig {
   rows: string[];
-  baseSeatsPerRow: number;
-  spacing: {
-    seatSpacing: number;
-    rowSpacing: number;
-    blockSpacing?: number;
-  };
-  layout: {
-    curve: number; // 0 = 직선, 0.5 = 약간 곡선, 1 = 강한 곡선
-    angle: number; // 각도
-    centerGap?: number; // 중앙 통로 간격
-  };
-  pricing: {
-    basePrice: number;
-    priceGradient: 'none' | 'distance' | 'row' | 'zone';
-    priceMultiplier: number;
-  };
+  seatsPerRow: number;
+  basePrice: number;
+  startRow: number;
+  startCol: number;
 }
 
 export default function ZoneEditor({
@@ -62,6 +47,13 @@ export default function ZoneEditor({
     null,
   );
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+
+  // 가이드 툴팁 상태
+  const [isGuideTooltipVisible, setIsGuideTooltipVisible] = useState(false);
+
+  // 가격 선택 상태
+  const [selectedPriceOption, setSelectedPriceOption] = useState('50000');
+  const [customPrice, setCustomPrice] = useState('');
 
   const dragImageRef = useRef<HTMLDivElement>(null);
 
@@ -173,6 +165,51 @@ export default function ZoneEditor({
     [selectedSeats],
   );
 
+  // 가격 옵션 변경 핸들러
+  const handlePriceOptionChange = useCallback(
+    (option: string) => {
+      setSelectedPriceOption(option);
+
+      if (option !== 'custom') {
+        const price = parseInt(option);
+        handleChangeSelectedPrice(price);
+      }
+    },
+    [handleChangeSelectedPrice],
+  );
+
+  // 커스텀 가격 변경 핸들러
+  const handleCustomPriceChange = useCallback(
+    (value: string) => {
+      setCustomPrice(value);
+      const price = parseInt(value);
+      if (!isNaN(price) && price >= 0) {
+        handleChangeSelectedPrice(price);
+      }
+    },
+    [handleChangeSelectedPrice],
+  );
+
+  // 모든 좌석 가격 저장 (현재 선택된 좌석의 가격을 모든 좌석에 적용)
+  const handleSaveAllPrices = useCallback(() => {
+    if (selectedSeats.length === 0) {
+      alert('가격을 적용할 좌석을 먼저 선택해주세요.');
+      return;
+    }
+
+    const selectedSeat = seats.find((seat) => selectedSeats.includes(seat.id));
+    if (!selectedSeat) return;
+
+    const confirmSave = window.confirm(
+      `모든 좌석의 가격을 ${selectedSeat.price.toLocaleString()}원으로 변경하시겠습니까?`,
+    );
+
+    if (confirmSave) {
+      setSeats((prev) => prev.map((seat) => ({ ...seat, price: selectedSeat.price })));
+      alert('모든 좌석의 가격이 변경되었습니다.');
+    }
+  }, [selectedSeats, seats]);
+
   // 전체 선택/해제
   const handleSelectAll = useCallback(() => {
     setSelectedSeats(seats.map((seat) => seat.id));
@@ -231,196 +268,36 @@ export default function ZoneEditor({
     [seats],
   );
 
-  // 획기적인 대량 좌석 생성 함수
-  const handleAdvancedBulkCreate = useCallback(
-    (config: BulkCreationConfig) => {
+  // 간단한 순차적 대량 좌석 생성 함수
+  const handleSimpleBulkCreate = useCallback(
+    (config: SimpleBulkConfig) => {
       const newSeats: Seat[] = [];
-      const { type, rows, baseSeatsPerRow, spacing, layout, pricing } = config;
+      const { rows, seatsPerRow, basePrice, startRow, startCol } = config;
 
-      switch (type) {
-        case 'theater': {
-          // 극장식 배치: 앞열일수록 적고, 뒷열일수록 많음
-          rows.forEach((rowName, rowIndex) => {
-            const seatsInRow = baseSeatsPerRow + Math.floor(rowIndex * 0.5);
-            const rowY = Math.floor(gridRows * 0.2) + rowIndex * spacing.rowSpacing;
+      // 간단한 순차적 배치: 시작 위치부터 행별로 차례대로 배치
+      rows.forEach((rowName, rowIndex) => {
+        const currentRowY = startRow + rowIndex;
 
-            // 중앙 정렬을 위한 시작 X 계산
-            const totalRowWidth = (seatsInRow - 1) * spacing.seatSpacing;
-            const startX = Math.floor(
-              (gridCols - totalRowWidth / spacing.seatSpacing) / 2,
-            );
+        // 그리드 범위를 벗어나면 건너뛰기
+        if (currentRowY >= gridRows) return;
 
-            for (let seatNum = 1; seatNum <= seatsInRow; seatNum++) {
-              const seatX = startX + (seatNum - 1) * spacing.seatSpacing;
+        for (let seatNum = 1; seatNum <= seatsPerRow; seatNum++) {
+          const currentColX = startCol + (seatNum - 1);
 
-              // 곡선 효과 적용
-              let adjustedY = rowY;
-              if (layout.curve > 0) {
-                const centerOffset = Math.abs(seatNum - (seatsInRow + 1) / 2);
-                const maxOffset = seatsInRow / 2;
-                const curveOffset = (centerOffset / maxOffset) * layout.curve * 2;
-                adjustedY = Math.max(0, rowY - curveOffset);
-              }
+          // 그리드 범위를 벗어나면 건너뛰기
+          if (currentColX >= gridCols) break;
 
-              // 가격 계산
-              let price = pricing.basePrice;
-              if (pricing.priceGradient === 'row') {
-                price =
-                  pricing.basePrice *
-                  (1 + (rows.length - rowIndex - 1) * pricing.priceMultiplier);
-              } else if (pricing.priceGradient === 'distance') {
-                const distanceFromCenter = Math.abs(seatNum - (seatsInRow + 1) / 2);
-                price =
-                  pricing.basePrice *
-                  (1 - (distanceFromCenter / seatsInRow) * pricing.priceMultiplier);
-              }
-
-              if (
-                seatX >= 0 &&
-                seatX < gridCols &&
-                adjustedY >= 0 &&
-                adjustedY < gridRows
-              ) {
-                newSeats.push({
-                  id: `bulk-${type}-${rowName}-${seatNum}`,
-                  row: rowName,
-                  number: seatNum,
-                  x: seatX,
-                  y: Math.floor(adjustedY),
-                  status: 'available',
-                  price: Math.round(price),
-                });
-              }
-            }
-          });
-          break;
-        }
-
-        case 'stadium': {
-          // 경기장식 배치: 곡선형, 블록 단위
-          const blocksPerRow = 3; // 좌측, 중앙, 우측 블록
-
-          rows.forEach((rowName, rowIndex) => {
-            const rowY = Math.floor(gridRows * 0.15) + rowIndex * spacing.rowSpacing;
-
-            for (let blockIndex = 0; blockIndex < blocksPerRow; blockIndex++) {
-              const seatsInBlock = Math.floor(baseSeatsPerRow / blocksPerRow);
-              const blockStartX =
-                blockIndex *
-                (Math.floor(gridCols / blocksPerRow) + (spacing.blockSpacing || 2));
-
-              for (let seatNum = 1; seatNum <= seatsInBlock; seatNum++) {
-                const globalSeatNum = blockIndex * seatsInBlock + seatNum;
-                const seatX = blockStartX + (seatNum - 1) * spacing.seatSpacing;
-
-                // 경기장 곡선 효과
-                let adjustedY = rowY;
-                if (layout.curve > 0) {
-                  const totalWidth = gridCols;
-                  const relativeX = seatX / totalWidth;
-                  const curveHeight = layout.curve * 4;
-                  adjustedY = rowY + curveHeight * 4 * relativeX * (1 - relativeX);
-                }
-
-                // 블록별 가격 차등
-                let price = pricing.basePrice;
-                if (blockIndex === 1) {
-                  // 중앙 블록
-                  price *= 1.3;
-                } else {
-                  // 측면 블록
-                  price *= 0.9;
-                }
-
-                if (
-                  seatX >= 0 &&
-                  seatX < gridCols &&
-                  adjustedY >= 0 &&
-                  adjustedY < gridRows
-                ) {
-                  newSeats.push({
-                    id: `bulk-${type}-${rowName}-${globalSeatNum}`,
-                    row: rowName,
-                    number: globalSeatNum,
-                    x: seatX,
-                    y: Math.floor(adjustedY),
-                    status: 'available',
-                    price: Math.round(price),
-                  });
-                }
-              }
-            }
-          });
-          break;
-        }
-
-        case 'arena': {
-          // 아레나식 배치: 원형 또는 타원형
-          const centerX = gridCols / 2;
-          const centerY = gridRows / 2;
-          const radiusX = Math.min(gridCols, gridCols) * 0.4;
-          const radiusY = Math.min(gridRows, gridRows) * 0.35;
-
-          rows.forEach((rowName, rowIndex) => {
-            const rowRadius = radiusX + rowIndex * spacing.rowSpacing * 0.5;
-            const circumference = 2 * Math.PI * rowRadius;
-            const seatsInRow = Math.floor(circumference / (spacing.seatSpacing * 2));
-            const angleStep = (2 * Math.PI) / seatsInRow;
-
-            for (let seatNum = 1; seatNum <= seatsInRow; seatNum++) {
-              const angle = (seatNum - 1) * angleStep + (layout.angle * Math.PI) / 180;
-              const seatX = Math.round(centerX + Math.cos(angle) * rowRadius);
-              const seatY = Math.round(
-                centerY + Math.sin(angle) * radiusY * (1 + rowIndex * 0.1),
-              );
-
-              let price = pricing.basePrice;
-              if (pricing.priceGradient === 'row') {
-                price *= 1 + (rows.length - rowIndex - 1) * pricing.priceMultiplier;
-              }
-
-              if (seatX >= 0 && seatX < gridCols && seatY >= 0 && seatY < gridRows) {
-                newSeats.push({
-                  id: `bulk-${type}-${rowName}-${seatNum}`,
-                  row: rowName,
-                  number: seatNum,
-                  x: seatX,
-                  y: seatY,
-                  status: 'available',
-                  price: Math.round(price),
-                });
-              }
-            }
-          });
-          break;
-        }
-
-        default: {
-          // 기존 traditional 방식
-          rows.forEach((rowName, rowIndex) => {
-            const rowY = Math.floor(gridRows * 0.2) + rowIndex * spacing.rowSpacing;
-            const startX = Math.floor(
-              (gridCols - baseSeatsPerRow * spacing.seatSpacing) / 2,
-            );
-
-            for (let seatNum = 1; seatNum <= baseSeatsPerRow; seatNum++) {
-              const seatX = startX + (seatNum - 1) * spacing.seatSpacing;
-
-              if (seatX >= 0 && seatX < gridCols && rowY >= 0 && rowY < gridRows) {
-                newSeats.push({
-                  id: `bulk-${type}-${rowName}-${seatNum}`,
-                  row: rowName,
-                  number: seatNum,
-                  x: seatX,
-                  y: rowY,
-                  status: 'available',
-                  price: pricing.basePrice,
-                });
-              }
-            }
+          newSeats.push({
+            id: `bulk-simple-${rowName}-${seatNum}-${Date.now()}`,
+            row: rowName,
+            number: seatNum,
+            x: currentColX,
+            y: currentRowY,
+            status: 'available',
+            price: basePrice,
           });
         }
-      }
+      });
 
       // 기존 좌석과 겹치지 않는 좌석만 추가
       const filteredNewSeats = newSeats.filter(
@@ -438,96 +315,315 @@ export default function ZoneEditor({
   );
 
   return (
-    <div className={styles.container}>
+    <div className={styles.compactContainer}>
       {/* 투명 드래그 이미지 */}
       <div ref={dragImageRef} className={styles.dragImage} />
 
-      {/* 상단 헤더 */}
-      <div className={styles.header}>
+      {/* 컴팩트 헤더 */}
+      <div className={styles.compactHeader}>
         <div className={styles.headerLeft}>
-          <h2 className={styles.title}>좌석 배치 에디터</h2>
+          <h2 className={styles.compactTitle}>좌석 에디터</h2>
           {zoneId && <span className={styles.zoneId}>Zone: {zoneId}</span>}
         </div>
 
-        <div className={styles.headerRight}>
+        <div className={styles.compactHeaderControls}>
+          <button
+            className={`${styles.guideTooltipBtn} ${isGuideTooltipVisible ? styles.active : ''}`}
+            onClick={() => setIsGuideTooltipVisible(!isGuideTooltipVisible)}
+            title='사용 가이드'
+          >
+            ❓ 가이드
+          </button>
+
           <Button
             variant='success'
             icon={<Icons.Save />}
             onClick={() => onSeatUpdate?.(seats)}
+            size='small'
           >
             저장
           </Button>
         </div>
       </div>
 
-      {/* 행 관리 컴포넌트 */}
-      <RowManager
-        availableRows={availableRows}
-        selectedRow={selectedRow}
-        seats={seats}
-        onRowsChange={setAvailableRows}
-        onSelectedRowChange={setSelectedRow}
-        onSeatsChange={setSeats}
-      />
+      {/* 가이드 툴팁 */}
+      {isGuideTooltipVisible && (
+        <div className={styles.guideTooltip}>
+          <div className={styles.tooltipHeader}>
+            <h3>사용 가이드</h3>
+            <button onClick={() => setIsGuideTooltipVisible(false)}>×</button>
+          </div>
+          <div className={styles.tooltipContent}>
+            <div className={styles.guideItem}>
+              <strong>좌석 추가:</strong> 빈 셀 클릭
+            </div>
+            <div className={styles.guideItem}>
+              <strong>좌석 이동:</strong> 드래그 & 드롭
+            </div>
+            <div className={styles.guideItem}>
+              <strong>좌석 선택:</strong> 좌석 클릭
+            </div>
+            <div className={styles.guideItem}>
+              <strong>좌석 삭제:</strong> 호버 시 X 버튼
+            </div>
+            <div className={styles.guideItem}>
+              <strong>그리드 확장:</strong> 그리드 가장자리 + 버튼
+            </div>
+            <div className={styles.guideItem}>
+              <strong>대량 작업:</strong> 왼쪽 패널 사용
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* 메인 에디터 영역 */}
-      <div className={styles.editorArea}>
-        {/* 좌측 컨트롤 패널 */}
-        <ControlPanel
-          seatStats={seatStats}
-          selectedSeats={selectedSeats}
-          onSelectAll={handleSelectAll}
-          onDeselectAll={handleDeselectAll}
-          onDeleteSelected={handleDeleteSelected}
-          onChangeSelectedStatus={handleChangeSelectedStatus}
-          onChangeSelectedPrice={handleChangeSelectedPrice}
-          onOpenBulkModal={() => setIsBulkModalOpen(true)}
-        />
+      {/* 컴팩트 행 관리 및 그리드 컨트롤 */}
+      <div className={styles.compactRowManager}>
+        <div className={styles.controlsRow}>
+          {/* 행 관리 */}
+          <div className={styles.rowSection}>
+            <span className={styles.sectionLabel}>행:</span>
+            <select
+              value={selectedRow}
+              onChange={(e) => setSelectedRow(e.target.value)}
+              className={styles.rowSelect}
+            >
+              {availableRows.map((row) => (
+                <option key={row} value={row}>
+                  {row}
+                </option>
+              ))}
+            </select>
+            <input
+              type='text'
+              placeholder='새 행'
+              className={styles.newRowInput}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  const input = e.target as HTMLInputElement;
+                  const newRow = input.value.trim().toUpperCase();
+                  if (newRow && !availableRows.includes(newRow)) {
+                    setAvailableRows([...availableRows, newRow]);
+                    setSelectedRow(newRow);
+                    input.value = '';
+                  }
+                }
+              }}
+            />
+          </div>
 
-        {/* 좌석 그리드 */}
-        <SeatGrid
-          gridRows={gridRows}
-          gridCols={gridCols}
-          seats={seats}
-          selectedSeats={selectedSeats}
-          draggedSeat={draggedSeat}
-          hoveredCell={hoveredCell}
-          onGridCellClick={handleGridCellClick}
-          onSeatClick={handleSeatClick}
-          onSeatDelete={handleSeatDelete}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragEnd={handleDragEnd}
-          onExpandRight={expandGridRight}
-          onExpandBottom={expandGridBottom}
-          onShrinkRight={shrinkGridRight}
-          onShrinkBottom={shrinkGridBottom}
-          getSeatAtPosition={getSeatAtPosition}
-        />
+          {/* 그리드 정보 */}
+          <div className={styles.gridInfoSection}>
+            <span className={styles.gridSize}>
+              그리드: {gridRows} × {gridCols}
+            </span>
+            <span className={styles.seatCount}>좌석: {seats.length}개</span>
+          </div>
+
+          {/* 그리드 크기 조절 */}
+          <div className={styles.gridControls}>
+            <div className={styles.gridControlGroup}>
+              <span className={styles.controlLabel}>가로:</span>
+              <button
+                className={styles.gridButton}
+                onClick={shrinkGridRight}
+                disabled={gridCols <= 5}
+                title='가로 축소'
+              >
+                -
+              </button>
+              <span className={styles.gridValue}>{gridCols}</span>
+              <button
+                className={styles.gridButton}
+                onClick={expandGridRight}
+                disabled={gridCols >= 50}
+                title='가로 확장'
+              >
+                +
+              </button>
+            </div>
+            <div className={styles.gridControlGroup}>
+              <span className={styles.controlLabel}>세로:</span>
+              <button
+                className={styles.gridButton}
+                onClick={shrinkGridBottom}
+                disabled={gridRows <= 5}
+                title='세로 축소'
+              >
+                -
+              </button>
+              <span className={styles.gridValue}>{gridRows}</span>
+              <button
+                className={styles.gridButton}
+                onClick={expandGridBottom}
+                disabled={gridRows >= 30}
+                title='세로 확장'
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* 범례 */}
-      <div className={styles.legend}>
-        <div className={styles.legendItem}>
-          <div className={`${styles.legendColor} ${styles.available}`} />
-          <span>사용 가능</span>
+      {/* 메인 에디터 영역 */}
+      <div className={styles.compactEditorArea}>
+        {/* 좌측 고정 컨트롤 패널 */}
+        <div className={styles.fixedControlPanel}>
+          {/* 통계 */}
+          <div className={styles.statsSection}>
+            <h3 className={styles.sectionTitle}>통계</h3>
+            <div className={styles.compactStats}>
+              <div className={styles.statChip}>
+                <span className={styles.statLabel}>전체</span>
+                <span className={styles.statValue}>{seatStats.total}</span>
+              </div>
+              <div className={styles.statChip}>
+                <span className={styles.statLabel}>선택</span>
+                <span className={styles.statValue}>{seatStats.selected}</span>
+              </div>
+              <div className={styles.statChip}>
+                <span className={styles.statLabel}>가능</span>
+                <span className={styles.statValue}>{seatStats.available}</span>
+              </div>
+              <div className={styles.statChip}>
+                <span className={styles.statLabel}>예약</span>
+                <span className={styles.statValue}>{seatStats.occupied}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 빠른 액션 */}
+          <div className={styles.actionsSection}>
+            <h3 className={styles.sectionTitle}>빠른 액션</h3>
+            {selectedSeats.length > 0 ? (
+              <div className={styles.quickActions}>
+                <div className={styles.quickActionButtons}>
+                  <button
+                    className={`${styles.statusBtn} ${styles.available}`}
+                    onClick={() => handleChangeSelectedStatus('available')}
+                    title='사용 가능으로 만들기'
+                  >
+                    ✓
+                  </button>
+                  <button
+                    className={`${styles.statusBtn} ${styles.occupied}`}
+                    onClick={() => handleChangeSelectedStatus('occupied')}
+                    title='예약됨으로 만들기'
+                  >
+                    ✕
+                  </button>
+                  <button
+                    className={`${styles.statusBtn} ${styles.disabled}`}
+                    onClick={() => handleChangeSelectedStatus('disabled')}
+                    title='사용 불가로 만들기'
+                  >
+                    ⛔
+                  </button>
+                </div>
+                <div className={styles.priceInputGroup}>
+                  <select
+                    className={styles.priceSelect}
+                    value={selectedPriceOption}
+                    onChange={(e) => handlePriceOptionChange(e.target.value)}
+                  >
+                    <option value='30000'>30,000원</option>
+                    <option value='50000'>50,000원</option>
+                    <option value='70000'>70,000원</option>
+                    <option value='100000'>100,000원</option>
+                    <option value='150000'>150,000원</option>
+                    <option value='custom'>직접 입력</option>
+                  </select>
+                  {selectedPriceOption === 'custom' && (
+                    <input
+                      type='number'
+                      className={styles.customPriceInput}
+                      placeholder='가격 입력'
+                      value={customPrice}
+                      min='0'
+                      step='1000'
+                      onChange={(e) => handleCustomPriceChange(e.target.value)}
+                    />
+                  )}
+                  <button
+                    className={`${styles.priceActionBtn} ${styles.saveAllBtn}`}
+                    onClick={handleSaveAllPrices}
+                    title='선택된 좌석 가격을 모든 좌석에 적용'
+                    disabled={selectedSeats.length === 0}
+                  >
+                    💾
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className={styles.noSelection}>좌석을 선택하세요</p>
+            )}
+          </div>
+
+          {/* 대량 작업 */}
+          <div className={styles.bulkSection}>
+            <h3 className={styles.sectionTitle}>대량 작업</h3>
+            <div className={styles.bulkActions}>
+              <button
+                className={styles.bulkButton}
+                onClick={() => setIsBulkModalOpen(true)}
+              >
+                🏢 대량 생성
+              </button>
+              <button className={styles.bulkButton} onClick={handleSelectAll}>
+                ✓ 전체 선택
+              </button>
+              <button className={styles.bulkButton} onClick={handleDeselectAll}>
+                ✕ 선택 해제
+              </button>
+              <button
+                className={styles.bulkButton}
+                onClick={handleDeleteSelected}
+                disabled={selectedSeats.length === 0}
+              >
+                🗑️ 선택 삭제
+              </button>
+            </div>
+          </div>
         </div>
-        <div className={styles.legendItem}>
-          <div className={`${styles.legendColor} ${styles.occupied}`} />
-          <span>예약됨</span>
+
+        {/* 좌석 그리드 */}
+        <div className={styles.compactSeatGridWrapper}>
+          <SeatGrid
+            gridRows={gridRows}
+            gridCols={gridCols}
+            seats={seats}
+            selectedSeats={selectedSeats}
+            draggedSeat={draggedSeat}
+            hoveredCell={hoveredCell}
+            onGridCellClick={handleGridCellClick}
+            onSeatClick={handleSeatClick}
+            onSeatDelete={handleSeatDelete}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
+            getSeatAtPosition={getSeatAtPosition}
+          />
         </div>
-        <div className={styles.legendItem}>
-          <div className={`${styles.legendColor} ${styles.disabled}`} />
-          <span>사용 불가</span>
+      </div>
+
+      {/* 컴팩트 범례 */}
+      <div className={styles.compactLegend}>
+        <div className={styles.legendChip}>
+          <div className={`${styles.legendDot} ${styles.available}`} />
+          <span>가능</span>
         </div>
-        <div className={styles.legendItem}>
-          <div className={`${styles.legendColor} ${styles.selected}`} />
-          <span>선택됨</span>
+        <div className={styles.legendChip}>
+          <div className={`${styles.legendDot} ${styles.occupied}`} />
+          <span>예약</span>
         </div>
-        <div className={styles.legendItem}>
-          <div className={`${styles.legendColor} ${styles.empty}`} />
-          <span>빈 공간</span>
+        <div className={styles.legendChip}>
+          <div className={`${styles.legendDot} ${styles.disabled}`} />
+          <span>불가</span>
+        </div>
+        <div className={styles.legendChip}>
+          <div className={`${styles.legendDot} ${styles.selected}`} />
+          <span>선택</span>
         </div>
       </div>
 
@@ -535,8 +631,10 @@ export default function ZoneEditor({
       {isBulkModalOpen && (
         <BulkModal
           availableRows={availableRows}
+          gridRows={gridRows}
+          gridCols={gridCols}
           onClose={() => setIsBulkModalOpen(false)}
-          onBulkCreate={handleAdvancedBulkCreate}
+          onBulkCreate={handleSimpleBulkCreate}
         />
       )}
     </div>

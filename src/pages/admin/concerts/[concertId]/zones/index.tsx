@@ -8,13 +8,13 @@ import ZoneList from '@/components/admin/zones/zoneList';
 
 const ZoneListPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { venueId } = router.query;
+  const { concertId } = router.query;
 
-  if (!venueId || typeof venueId !== 'string') {
+  if (!concertId || typeof concertId !== 'string') {
     return <div>Loading...</div>;
   }
 
-  return <ZoneList venueId={venueId} />;
+  return <ZoneList concertId={concertId} />;
 };
 
 ZoneListPage.getLayout = withAdminLayout({ title: '구역 관리' });

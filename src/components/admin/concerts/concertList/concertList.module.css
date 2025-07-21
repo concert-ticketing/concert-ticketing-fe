@@ -244,6 +244,22 @@
   opacity: 0.8;
 }
 
+/* Status Badge */
+.statusBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Thumbnail */
 .thumbnail {
   width: 100%;
@@ -337,8 +353,8 @@
 /* Stats Grid */
 .statsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
   margin-bottom: 16px;
   padding: 16px;
   background-color: var(--bg-secondary);
@@ -358,7 +374,7 @@
 }
 
 .statValue {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 2px;

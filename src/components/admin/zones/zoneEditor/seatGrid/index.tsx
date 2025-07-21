@@ -1,7 +1,5 @@
 import React, { useMemo } from 'react';
 
-import Button from '../../../common/ui/Button';
-import { Icons } from '../../../common/ui/Icons';
 import styles from './seatGrid.module.css';
 
 interface Seat {
@@ -29,10 +27,6 @@ interface SeatGridProps {
   onDragOver: (e: React.DragEvent, row: number, col: number) => void;
   onDrop: (e: React.DragEvent, row: number, col: number) => void;
   onDragEnd: () => void;
-  onExpandRight: () => void;
-  onExpandBottom: () => void;
-  onShrinkRight: () => void;
-  onShrinkBottom: () => void;
   getSeatAtPosition: (x: number, y: number) => Seat | undefined;
 }
 
@@ -50,10 +44,6 @@ export default function SeatGrid({
   onDragOver,
   onDrop,
   onDragEnd,
-  onExpandRight,
-  onExpandBottom,
-  onShrinkRight,
-  onShrinkBottom,
   getSeatAtPosition,
 }: SeatGridProps) {
   // 그리드 셀 생성
@@ -73,62 +63,6 @@ export default function SeatGrid({
 
   return (
     <div className={styles.seatGridContainer}>
-      {/* 상단 컨트롤 */}
-      <div className={styles.gridControls}>
-        <div className={styles.gridInfo}>
-          <span className={styles.gridSize}>
-            그리드 크기: {gridRows} × {gridCols}
-          </span>
-          <span className={styles.seatCount}>총 좌석: {seats.length}개</span>
-        </div>
-
-        <div className={styles.gridActions}>
-          <div className={styles.horizontalControls}>
-            <Button
-              size='small'
-              variant='secondary'
-              onClick={onShrinkRight}
-              disabled={gridCols <= 5}
-              icon={<Icons.Minus />}
-            >
-              열 축소
-            </Button>
-            <span className={styles.controlLabel}>가로 {gridCols}</span>
-            <Button
-              size='small'
-              variant='secondary'
-              onClick={onExpandRight}
-              disabled={gridCols >= 50}
-              icon={<Icons.Plus />}
-            >
-              열 확장
-            </Button>
-          </div>
-
-          <div className={styles.verticalControls}>
-            <Button
-              size='small'
-              variant='secondary'
-              onClick={onShrinkBottom}
-              disabled={gridRows <= 5}
-              icon={<Icons.Minus />}
-            >
-              행 축소
-            </Button>
-            <span className={styles.controlLabel}>세로 {gridRows}</span>
-            <Button
-              size='small'
-              variant='secondary'
-              onClick={onExpandBottom}
-              disabled={gridRows >= 30}
-              icon={<Icons.Plus />}
-            >
-              행 확장
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* 그리드 컨테이너 */}
       <div className={styles.gridWrapper}>
         {/* 메인 그리드 */}
@@ -174,61 +108,6 @@ export default function SeatGrid({
               </div>
             );
           })}
-        </div>
-
-        {/* 오른쪽 확장 영역 */}
-        <div className={styles.rightExpandArea}>
-          {Array.from({ length: gridRows }, (_, index) => (
-            <div key={`right-${index}`} className={styles.expandCell}>
-              {index === Math.floor(gridRows / 2) && (
-                <Button
-                  size='small'
-                  variant='neutral'
-                  onClick={onExpandRight}
-                  className={styles.expandButton}
-                  icon={<Icons.Plus />}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* 하단 확장 영역 */}
-        <div
-          className={styles.bottomExpandArea}
-          style={{ gridTemplateColumns: `repeat(${gridCols}, 1fr) auto` }}
-        >
-          {Array.from({ length: gridCols }, (_, index) => (
-            <div key={`bottom-${index}`} className={styles.expandCell}>
-              {index === Math.floor(gridCols / 2) && (
-                <Button
-                  size='small'
-                  variant='neutral'
-                  onClick={onExpandBottom}
-                  className={styles.expandButton}
-                  icon={<Icons.Plus />}
-                />
-              )}
-            </div>
-          ))}
-          {/* 우하단 코너 */}
-          <div className={styles.expandCell} />
-        </div>
-      </div>
-
-      {/* 그리드 안내 */}
-      <div className={styles.gridGuide}>
-        <div className={styles.guideItem}>
-          <span className={styles.guideIcon}>🖱️</span>
-          <span>빈 셀 클릭: 좌석 추가</span>
-        </div>
-        <div className={styles.guideItem}>
-          <span className={styles.guideIcon}>↔️</span>
-          <span>드래그: 좌석 이동</span>
-        </div>
-        <div className={styles.guideItem}>
-          <span className={styles.guideIcon}>✅</span>
-          <span>좌석 클릭: 선택/해제</span>
         </div>
       </div>
     </div>
@@ -299,7 +178,6 @@ function SeatItem({
             : `${seat.price.toLocaleString()}원`}
         </span>
       </div>
-      {isSelected && <div className={styles.selectedIndicator}>✓</div>}
     </div>
   );
 }

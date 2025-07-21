@@ -6,10 +6,10 @@ import { useZoneStore } from '@/stores/zone';
 import { useSeatStore } from '@/stores/seat';
 
 import { Icons } from '@/components/admin/common/ui/Icons';
-import styles from './venuePreview.module.css';
+import styles from './concertPreview.module.css';
 
-interface VenuePreviewProps {
-  venueId: string;
+interface ConcertPreviewProps {
+  concertId: string;
 }
 
 interface Zone {
@@ -40,7 +40,7 @@ interface Venue {
   zones: Zone[];
 }
 
-export default function VenuePreview({ venueId }: VenuePreviewProps) {
+export default function ConcertPreview({ concertId }: ConcertPreviewProps) {
   const router = useRouter();
   const [venue, setVenue] = useState<Venue | null>(null);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -61,7 +61,7 @@ export default function VenuePreview({ venueId }: VenuePreviewProps) {
       setError(null);
 
       // 공연장 정보 로드
-      const venueData = await getVenue(venueId);
+      const venueData = await getVenue(concertId);
       if (!venueData) {
         setError('공연장을 찾을 수 없습니다.');
         return;
@@ -69,7 +69,7 @@ export default function VenuePreview({ venueId }: VenuePreviewProps) {
       setVenue(venueData);
 
       // 구역 정보 로드
-      const zonesData = await getZonesByVenue(venueId);
+      const zonesData = await getZonesByVenue(concertId);
       setZones(zonesData);
 
       // 모든 구역의 좌석 정보 로드
@@ -83,7 +83,7 @@ export default function VenuePreview({ venueId }: VenuePreviewProps) {
     } finally {
       setLoading(false);
     }
-  }, [venueId, getVenue, getZonesByVenue, getSeatsByZone]);
+  }, [concertId, getVenue, getZonesByVenue, getSeatsByZone]);
 
   useEffect(() => {
     loadVenueData();
@@ -119,15 +119,15 @@ export default function VenuePreview({ venueId }: VenuePreviewProps) {
   };
 
   const handleBackToList = () => {
-    router.push('/admin/venues');
+    router.push('/admin/concerts');
   };
 
   const handleEditVenue = () => {
-    router.push(`/admin/venues/${venueId}`);
+    router.push(`/admin/concerts/${concertId}`);
   };
 
   const handleZoneEditor = (zoneId: string) => {
-    router.push(`/admin/venues/${venueId}/zones/${zoneId}/editor`);
+    router.push(`/admin/concerts/${concertId}/zones/${zoneId}/editor`);
   };
 
   if (loading) {

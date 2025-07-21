@@ -8,9 +8,9 @@ import ZoneEditor from '@/components/admin/zones/zoneEditor';
 
 const ZoneEditorPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { venueId, zoneId } = router.query;
+  const { concertId, zoneId } = router.query;
 
-  if (!venueId || typeof venueId !== 'string' || !zoneId || typeof zoneId !== 'string') {
+  if (!concertId || typeof concertId !== 'string' || !zoneId || typeof zoneId !== 'string') {
     return <div>Loading...</div>;
   }
 

@@ -21,7 +21,7 @@
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
     width: 100%;
-    max-width: 900px;
+    max-width: 700px;
     max-height: 90vh;
     overflow: hidden;
     display: flex;
@@ -157,13 +157,13 @@
   }
   
   /* 1단계: 배치 유형 선택 */
-  .venueTypes {
+  .concertTypes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
   }
   
-  .venueTypeCard {
+  .concertTypeCard {
     background-color: var(--bg-secondary);
     border: 2px solid var(--border-primary);
     border-radius: 12px;
@@ -175,39 +175,39 @@
     overflow: hidden;
   }
   
-  .venueTypeCard:hover {
+  .concertTypeCard:hover {
     border-color: var(--accent-primary);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
   }
   
-  .venueTypeCard.selected {
+  .concertTypeCard.selected {
     border-color: var(--accent-primary);
     background-color: rgba(59, 130, 246, 0.05);
     box-shadow: var(--shadow-md);
   }
   
-  .venueTypeIcon {
+  .concertTypeIcon {
     font-size: 32px;
     margin-bottom: 12px;
     line-height: 1;
   }
   
-  .venueTypeName {
+  .concertTypeName {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 8px 0;
   }
   
-  .venueTypeDesc {
+  .concertTypeDesc {
     font-size: 13px;
     color: var(--text-secondary);
     margin: 0 0 16px 0;
     line-height: 1.4;
   }
   
-  .venueTypePreview {
+  .concertTypePreview {
     height: 80px;
     display: flex;
     align-items: center;
@@ -503,7 +503,7 @@
     background-color: rgba(0, 0, 0, 0.7);
   }
   
-  :global(.dark) .venueTypeCard.selected {
+  :global(.dark) .concertTypeCard.selected {
     background-color: rgba(96, 165, 250, 0.1);
   }
   
@@ -536,7 +536,7 @@
       width: 16px;
     }
   
-    .venueTypes {
+    .concertTypes {
       grid-template-columns: 1fr;
     }
   
@@ -558,7 +558,7 @@
   
   /* 접근성 */
   @media (prefers-reduced-motion: reduce) {
-    .venueTypeCard,
+    .concertTypeCard,
     .stepNumber,
     .checkboxLabel,
     .radioLabel {
@@ -582,4 +582,121 @@
   
   .modalBody::-webkit-scrollbar-thumb:hover {
     background: var(--text-tertiary);
+  }
+
+  /* 간단한 폼 스타일 */
+  .simpleForm {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 0;
+  }
+
+  .quickRowActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .quickButton {
+    padding: 4px 12px;
+    font-size: 12px;
+    border: 1px solid var(--border-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .quickButton:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+  }
+
+  .positionControls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .positionItem {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .positionItem label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .pricePresets {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pricePreset {
+    padding: 6px 12px;
+    font-size: 12px;
+    border: 1px solid var(--border-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pricePreset:hover {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+  }
+
+  .gridPreview {
+    border: 1px solid var(--border-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--bg-secondary);
+  }
+
+  .previewGrid {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 8px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .previewCell {
+    aspect-ratio: 1;
+    background: var(--bg-tertiary);
+    border-radius: 2px;
+    min-height: 12px;
+    min-width: 12px;
+  }
+
+  .previewCell.willHaveSeat {
+    background: var(--success-primary);
+  }
+
+  .previewNote {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .footerLeft .gridInfo {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-secondary);
   }

@@ -8,13 +8,13 @@ import ZoneDetail from '@/components/admin/zones/zoneDetail';
 
 const ZoneDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { venueId, zoneId } = router.query;
+  const { concertId, zoneId } = router.query;
 
-  if (!venueId || typeof venueId !== 'string' || !zoneId || typeof zoneId !== 'string') {
+  if (!concertId || typeof concertId !== 'string' || !zoneId || typeof zoneId !== 'string') {
     return <div>Loading...</div>;
   }
 
-  return <ZoneDetail venueId={venueId} zoneId={zoneId} />;
+  return <ZoneDetail concertId={concertId} zoneId={zoneId} />;
 };
 
 ZoneDetailPage.getLayout = withAdminLayout({ title: '구역 상세' });

@@ -32,11 +32,11 @@ interface Zone {
 }
 
 interface ZoneDetailProps {
-  venueId: string;
+  concertId: string;
   zoneId: string;
 }
 
-export default function ZoneDetail({ venueId, zoneId }: ZoneDetailProps) {
+export default function ZoneDetail({ concertId, zoneId }: ZoneDetailProps) {
   const [zone, setZone] = useState<Zone | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
@@ -108,7 +108,7 @@ export default function ZoneDetail({ venueId, zoneId }: ZoneDetailProps) {
     };
 
     fetchZoneDetail();
-  }, [venueId, zoneId]);
+  }, [concertId, zoneId]);
 
   const getStatusColor = (status: Zone['status']) => {
     switch (status) {
@@ -175,7 +175,7 @@ export default function ZoneDetail({ venueId, zoneId }: ZoneDetailProps) {
       <div className={styles.container}>
         <div className={styles.error}>
           <p>구역을 찾을 수 없습니다.</p>
-          <Link href={`/admin/venues/${venueId}/zones`} className={styles.backButton}>
+          <Link href={`/admin/concerts/${concertId}/zones`} className={styles.backButton}>
             구역 목록으로 돌아가기
           </Link>
         </div>
@@ -191,7 +191,7 @@ export default function ZoneDetail({ venueId, zoneId }: ZoneDetailProps) {
       {/* 헤더 */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <Link href={`/admin/venues/${venueId}/zones`} className={styles.backButton}>
+          <Link href={`/admin/concerts/${concertId}/zones`} className={styles.backButton}>
             ← 구역 목록
           </Link>
           <div>
@@ -206,7 +206,7 @@ export default function ZoneDetail({ venueId, zoneId }: ZoneDetailProps) {
         </div>
         <div className={styles.headerRight}>
           <Link
-            href={`/admin/venues/${venueId}/zones/${zoneId}/editor`}
+            href={`/admin/concerts/${concertId}/zones/${zoneId}/editor`}
             className={styles.editButton}
           >
             좌석 편집
