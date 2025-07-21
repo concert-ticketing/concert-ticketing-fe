@@ -51,10 +51,9 @@
 }
 
 .selectBox .calendar{
-    background-color: #ddd;
     width:83%;
     text-align: center;
-    height:200px;
+    height:300px;
 }
 
 .rounds{

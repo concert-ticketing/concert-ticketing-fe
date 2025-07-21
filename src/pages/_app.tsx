@@ -14,7 +14,7 @@ type AppPropsWithLayout = AppProps & {
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
 
-  const hiddenLayoutPaths = ['/admin', '/waitroom', '/reserve'];
+  const hiddenLayoutPaths = ['/admin', '/waitroom', '/reserve', '/manager'];
   const isHiddenLayoutRoute = hiddenLayoutPaths.some((path) =>
     router.pathname.startsWith(path),
   );

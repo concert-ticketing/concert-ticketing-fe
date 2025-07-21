@@ -2,6 +2,7 @@
 import { useRouter } from 'next/router';
 
 import styles from './ConcertInfos.module.css';
+import { useDateStore } from '@/stores/dateStore';
 
 type ConcertInfoProps = {
   showNextButton?: boolean;
@@ -28,13 +29,15 @@ const ConcertInfo = ({
     else router.back(); // 기본값은 뒤로가기
   };
 
+  const { selectedDate } = useDateStore();
+
   return (
     <div className={styles.rightPanel}>
       <div className={styles.concertInfo}>
         <div className={styles.poster}>포스터</div>
         <div className={styles.infoBox}>
           <p>예매정보</p>
-          <p>일시: </p>
+          <p>일시:{selectedDate ? selectedDate.toLocaleDateString('ko-KR') : ''} </p>
           <p>티켓수량: </p>
           <p>총결제: </p>
         </div>

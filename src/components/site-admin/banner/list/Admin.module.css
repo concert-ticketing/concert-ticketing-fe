@@ -1,0 +1,57 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+}
+.body {
+  display: flex;
+  flex: 1;
+}
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.createBtn {
+  background: #0070f3;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table th, .table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+
+.editBtn {
+  margin-right: 8px;
+  color: blue;
+  font-size: 16px;
+  text-decoration: underline;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: red;
+    font-size: 16px;
+
+  cursor: pointer;
+  text-decoration: underline;
+}

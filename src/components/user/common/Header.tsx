@@ -7,6 +7,8 @@ import styles from './Header.module.css';
 
 export default function Header() {
   const router = useRouter();
+
+  const path = router.asPath;
   return (
     <header className={styles.header}>
       <div className={styles.topBar}>
@@ -14,9 +16,11 @@ export default function Header() {
           <Link href='/'>concert-ticketing</Link>
           <div className={styles.searchBox}>
             <input type='text' placeholder='concert-ticketing' />
-            <button aria-label='검색'>
-              <Image src='/search.png' alt='검색' width={20} height={20} />
-            </button>
+            <Link href='/search/result'>
+              <button aria-label='검색'>
+                <Image src='/search.png' alt='검색' width={20} height={20} />
+              </button>
+            </Link>
           </div>
         </div>
         <nav className={styles.navLinks}>
@@ -64,7 +68,7 @@ export default function Header() {
         </Link>
         <Link
           href='/concert'
-          className={router.pathname === '/concert' ? styles.active : ''}
+          className={path.startsWith('/concert') ? styles.active : ''}
         >
           콘서트
         </Link>

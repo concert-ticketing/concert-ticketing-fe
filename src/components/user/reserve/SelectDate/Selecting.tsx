@@ -1,18 +1,33 @@
 import React from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import { useDateStore } from '@/stores/dateStore';
 
 import styles from './Selecting.module.css';
 
-const ConcertDate = () => {
+const SelectDate = () => {
+  const { selectedDate, setSelectedDate } = useDateStore();
+
   return (
     <div className={styles.leftPanel}>
       <div className={styles.layout}>
+        {/* 날짜 선택 */}
         <div className={styles.left}>
           <div className={styles.selectTitle}>선택 1</div>
           <div className={styles.selectBox}>
             <div className={styles.selectName}>날짜선택</div>
-            <div className={styles.calendar}> 캘린더</div>
+            <div className={styles.calendar}>
+              <Calendar
+                onChange={(date) => setSelectedDate(date as Date)}
+                value={selectedDate}
+                locale='ko-KR'
+                calendarType='gregory'
+              />
+            </div>
           </div>
         </div>
+
+        {/* 회차 선택 - 임시 고정 */}
         <div className={styles.center}>
           <div className={styles.selectTitle}>선택 2</div>
           <div className={styles.selectBox}>
@@ -23,6 +38,8 @@ const ConcertDate = () => {
             </div>
           </div>
         </div>
+
+        {/* 좌석 정보 - 임시 고정 */}
         <div className={styles.right}>
           <div className={styles.selectTitle}>선택 3</div>
           <div className={styles.selectBox}>
@@ -44,6 +61,8 @@ const ConcertDate = () => {
           </div>
         </div>
       </div>
+
+      {/* 안내 문구 */}
       <div className={styles.noticeBox}>
         <p className={styles.noticeTitle}>티켓 예매시 유의사항</p>
         <p className={styles.noticeContent}>
@@ -54,4 +73,4 @@ const ConcertDate = () => {
   );
 };
 
-export default ConcertDate;
+export default SelectDate;
