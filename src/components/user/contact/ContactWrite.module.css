@@ -200,6 +200,18 @@
   border-color: #0069d9;
 }
 
+.fileNameList {
+  margin-top: 8px;
+  padding-left: 16px;
+  font-size: 14px;
+  color: #555;
+}
+
+.fileName {
+  margin-bottom: 4px;
+}
+
+
 /* responsive */
 /* @media (max-width: 768px) {
   .layout {

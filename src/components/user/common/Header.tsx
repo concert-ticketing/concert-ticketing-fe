@@ -1,14 +1,40 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styles from './Header.module.css';
 
 export default function Header() {
   const router = useRouter();
-
   const path = router.asPath;
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = localStorage.getItem('accessToken');
+      setIsLoggedIn(!!token);
+    };
+
+    // 초기 체크
+    checkToken();
+
+    // 라우터 경로 변경 완료 시마다 토큰 체크
+    router.events.on('routeChangeComplete', checkToken);
+
+    // 클린업 함수
+    return () => {
+      router.events.off('routeChangeComplete', checkToken);
+    };
+  }, [router.events]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    setIsLoggedIn(false);
+    router.push('/');
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.topBar}>
@@ -24,18 +50,41 @@ export default function Header() {
           </div>
         </div>
         <nav className={styles.navLinks}>
-          <Link href='/login'>
-            <div className={styles.navItem}>
-              <Image src='/ico_header_login.png' alt='로그인' width={24} height={24} />
-              <span>로그인</span>
+          {!isLoggedIn ? (
+            <>
+              <Link href='/login'>
+                <div className={styles.navItem}>
+                  <Image
+                    src='/ico_header_login.png'
+                    alt='로그인'
+                    width={24}
+                    height={24}
+                  />
+                  <span>로그인</span>
+                </div>
+              </Link>
+              <Link href='/signup'>
+                <div className={styles.navItem}>
+                  <Image
+                    src='/ico_header_signup.png'
+                    alt='회원가입'
+                    width={24}
+                    height={24}
+                  />
+                  <span>회원가입</span>
+                </div>
+              </Link>
+            </>
+          ) : (
+            <div
+              className={styles.navItem}
+              onClick={handleLogout}
+              style={{ cursor: 'pointer' }}
+            >
+              <Image src='/login/logout.png' alt='로그아웃' width={24} height={24} />
+              <span>로그아웃</span>
             </div>
-          </Link>
-          <Link href='/signup'>
-            <div className={styles.navItem}>
-              <Image src='/ico_header_signup.png' alt='회원가입' width={24} height={24} />
-              <span>회원가입</span>
-            </div>
-          </Link>
+          )}
           <Link href='/mypage'>
             <div className={styles.navItem}>
               <Image

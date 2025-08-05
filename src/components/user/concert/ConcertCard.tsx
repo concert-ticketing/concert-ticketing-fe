@@ -13,7 +13,6 @@ type Concert = {
   thumbNailImageUrl: string;
 };
 
-
 interface ConcertCardProps {
   concert: Concert;
   className?: string;
@@ -30,9 +29,9 @@ export default function ConcertCard({ concert, className }: ConcertCardProps) {
     <div onClick={handleClick} className={`${styles.card} ${className ?? ''}`}>
       <div className={styles.image}>image</div>
       <div className={styles.cardTitle}>{concert.title}</div>
-      <div className={styles.cardDate}>
+      {/* <div className={styles.cardDate}>
         {concert.startDate} ~ {concert.endDate}
-      </div>
+      </div> */}
     </div>
   );
 }

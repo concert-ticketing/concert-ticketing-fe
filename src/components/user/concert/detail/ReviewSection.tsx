@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import Image from 'next/image';
 import styles from './Section.module.css';
 
 type Review = {
@@ -40,18 +40,20 @@ export default function ReviewSection() {
     };
 
     setReviews([newReview, ...reviews]);
-    console.log('리뷰 등록됨:', newReview); // ✅ 등록 직후 확인
-    console.log('리뷰 전체 목록:', [newReview, ...reviews]); // ✅ 전체 리스트 확인
     setText('');
     setRating(0);
+  };
+
+  const handleDelete = (id: string) => {
+    setReviews(reviews.filter((review) => review.id !== id));
   };
 
   const stars = ['star1', 'star2', 'star3', 'star4', 'star5'];
 
   return (
     <div className={styles.wrap}>
-      <div>
-        {/* 별점 선택 */}
+      {/* 입력 영역 */}
+      <div className={styles.inputSection}>
         <div className={styles.starArray}>
           {stars.map((id, i) => (
             <span
@@ -65,7 +67,6 @@ export default function ReviewSection() {
           <span>별을 선택해주세요</span>
         </div>
 
-        {/* 후기 작성 */}
         <textarea
           placeholder='후기를 작성해주세요'
           className={styles.text}
@@ -74,18 +75,19 @@ export default function ReviewSection() {
           onChange={handleTextChange}
         />
 
-        {/* 글자 수 & 등록 버튼 */}
         <div className={styles.count}>
           <span>{text.length} / 1000</span>
           <button className={styles.registerBtn} onClick={handleRegister}>
             등록
           </button>
         </div>
+      </div>
 
-        {/* 등록된 리뷰 목록 */}
-        <div className={styles.reviewList}>
-          {reviews.map((review) => (
-            <div key={review.id} className={styles.reviewItem}>
+      {/* 등록된 리뷰 */}
+      <div className={styles.reviewList}>
+        {reviews.map((review) => (
+          <div key={review.id} className={styles.reviewItem}>
+            <div className={styles.reviewHeader}>
               <div className={styles.starArray}>
                 {Array.from({ length: 5 }, (_, i) => (
                   <span
@@ -96,11 +98,25 @@ export default function ReviewSection() {
                   </span>
                 ))}
               </div>
-              <p className={styles.reviewText}>{review.text}</p>
-              <p className={styles.reviewMeta}>작성자 | {review.date}</p>
+              <span className={styles.reviewDate}>{review.date}</span>
             </div>
-          ))}
-        </div>
+            <p className={styles.reviewText}>{review.text}</p>
+            <button
+              type='button'
+              title='삭제'
+              className={styles.deleteBtn}
+              onClick={() => handleDelete(review.id)}
+            >
+              <Image
+                src='/icons/delete.png'
+                alt='삭제'
+                width={20}
+                height={20}
+                className={styles.delteImage}
+              />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

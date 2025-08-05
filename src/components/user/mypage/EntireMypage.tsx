@@ -1,5 +1,4 @@
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
 import styles from './Mypage.module.css';
 import MypageNav from '@/components/user/mypage/MypageNav';
 
@@ -13,7 +12,19 @@ interface Reservation {
   status: string;
 }
 
+interface Inquiry {
+  id: number;
+  title: string;
+  state: string;
+  createdAt: string;
+  date: string;
+}
+
 export default function EntireMypage() {
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const inquiriesPerPage = 5;
+
   const reservationData: Reservation[] = [
     {
       id: 1,
@@ -35,16 +46,53 @@ export default function EntireMypage() {
     },
   ];
 
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(
+          `http://localhost:8080/api/inquiries?page=${currentPage}&size=${inquiriesPerPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: '*/*',
+            },
+          },
+        );
+        if (!response.ok) throw new Error('Failed to fetch inquiries');
+
+        const data = await response.json();
+
+        const sorted = (data.content || [])
+          .sort(
+            (a: Inquiry, b: Inquiry) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )
+          .map((inquiry: any) => ({
+            id: inquiry.id,
+            title: inquiry.title,
+            state: inquiry.state,
+            date: inquiry.createdAt,
+          }));
+
+        setInquiries(sorted.slice(0, 1));
+      } catch (error) {
+        console.error('❌ 문의 조회 실패:', error);
+      }
+    };
+
+    fetchInquiries();
+  }, [currentPage]);
+
   return (
     <div className={styles.all}>
       <div className={styles.margin}>
-        <div>
-          <h1 className={styles.title}>마이페이지</h1>
-        </div>
+        <h1 className={styles.title}>마이페이지</h1>
         <div className={styles.container}>
-          <MypageNav /> {/* nav 분리된 컴포넌트 사용 */}
+          <MypageNav />
           <section className={styles.content}>
-            {/* 공지사항 */}
             <div className={styles.noticeBox}>
               <div className={styles.tabs}>
                 <div className={styles.notice}>NOTICE</div>
@@ -52,7 +100,6 @@ export default function EntireMypage() {
               </div>
             </div>
 
-            {/* 예매 내역 */}
             <div className={styles.historyBox}>
               <div className={styles.sectionHeader}>
                 <div className={styles.border} />
@@ -76,7 +123,7 @@ export default function EntireMypage() {
                       <td colSpan={6}>예매 내역이 없습니다.</td>
                     </tr>
                   ) : (
-                    reservationData.map((item, index) => (
+                    reservationData.map((item) => (
                       <tr key={item.id}>
                         <td>{item.date}</td>
                         <td>{item.number}</td>
@@ -91,20 +138,30 @@ export default function EntireMypage() {
               </table>
             </div>
 
-            {/* 문의 내역 */}
             <div className={styles.inquiryBox}>
               <div className={styles.sectionHeader}>
                 <div className={styles.border} />
                 <h3>1:1 문의 내역</h3>
                 <button className={styles.moreButton}>더보기</button>
               </div>
-              <div className={styles.inquiryTable}>
-                <span className={styles.answerBox}>답변완료</span>
-                <div className={styles.inquiryInfo}>
-                  <span>title</span>
-                  <span>date</span>
+
+              {inquiries.length === 0 ? (
+                <div className={styles.inquiryTable}>
+                  <span>문의 내역이 없습니다.</span>
                 </div>
-              </div>
+              ) : (
+                inquiries.map((inquiry) => (
+                  <div key={inquiry.id} className={styles.inquiryTable}>
+                    <span className={styles.answerBox}>
+                      {inquiry.state === '답변완료' ? '답변완료' : '처리중'}
+                    </span>
+                    <div className={styles.inquiryInfo}>
+                      <span>{inquiry.title}</span>
+                      <span>{new Date(inquiry.date).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </section>
         </div>

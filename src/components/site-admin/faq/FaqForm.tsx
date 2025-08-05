@@ -1,6 +1,5 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { useRouter } from 'next/router';
-import styles from './BannerForm.module.css';
+import styles from './FaqForm.module.css';
 
 type BannerFormProps = {
   mode: 'edit' | 'create';
@@ -14,8 +13,7 @@ type BannerFormProps = {
   onSubmit: (form: any) => void;
 };
 
-export default function BannerForm({ mode, initialData, id, onSubmit }: BannerFormProps) {
-  const router = useRouter();
+export default function FaqForm({ mode, initialData, id, onSubmit }: BannerFormProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [status, setStatus] = useState<'노출' | '비노출'>(initialData?.status || '노출');
@@ -32,48 +30,16 @@ export default function BannerForm({ mode, initialData, id, onSubmit }: BannerFo
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault(); // form 제출 방지
-
-    if (!title.trim() || !description.trim()) {
-      alert('제목과 내용을 모두 입력해주세요.');
-      return;
-    }
-
-    try {
-      const bannerPayload = {
-        title,
-        description,
-        status: status === '노출' ? 'SHOW' : 'HIDE',
-        imageUrl: imagePreview || '', // 서버에서 파일 업로드 처리 안 한다면 URL만
-      };
-
-      console.log('[handleSubmit] 제출 데이터:', bannerPayload);
-
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL}/api/banners`;
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify(bannerPayload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('등록 실패:', errorData);
-        alert(`등록에 실패했습니다: ${errorData.message || '오류 발생'}`);
-        return;
-      }
-
-      alert('배너가 성공적으로 등록되었습니다.');
-      router.push('/site-admin/banner');
-    } catch (error) {
-      console.error('서버 오류:', error);
-      alert('서버 요청 중 오류가 발생했습니다.');
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = {
+      ...(id && { id }), // id가 있으면 포함
+      title,
+      description,
+      status,
+      imageFile,
+    };
+    onSubmit(formData);
   };
 
   return (
@@ -83,7 +49,7 @@ export default function BannerForm({ mode, initialData, id, onSubmit }: BannerFo
         id='title'
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder='배너 제목을 입력하세요'
+        placeholder='faq 제목을 입력하세요'
         required
       />
 
@@ -92,7 +58,7 @@ export default function BannerForm({ mode, initialData, id, onSubmit }: BannerFo
         id='description'
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder='배너 설명을 입력하세요'
+        placeholder='faq 설명을 입력하세요'
         rows={4}
       />
 

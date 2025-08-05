@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -6,22 +6,52 @@ import Pagination from '@/components/user/common/Pagination';
 import MypageNav from '@/components/user/mypage/MypageNav';
 import styles from './Inquiry.module.css';
 
+interface Inquiry {
+  id: number;
+  title: string;
+  state: string;
+  content: string;
+  date: string;
+}
+
 export default function EntireInquiry() {
   const router = useRouter();
   const inquiriesPerPage = 5;
-  const inquiryData = Array.from({ length: 5 }, (_, i) => ({
-    id: i + 1,
-    title: `예약판매 기간 ${i + 1}`,
-    state: `답변완료`,
-    content: `이것은 ${i + 1}번째 1:1문의 입니다.`,
-    date: `2025-05-${String((i % 31) + 1).padStart(2, '0')}`,
-  }));
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const indexOfLast = currentPage * inquiriesPerPage;
-  const indexOfFirst = indexOfLast - inquiriesPerPage;
-  const currentInquiries = inquiryData.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(inquiryData.length / inquiriesPerPage);
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(
+          `http://localhost:8080/api/inquiries?page=${currentPage}&size=${inquiriesPerPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: '*/*',
+            },
+          },
+        );
+        console.log('✅ raw response:', response);
+        if (!response.ok) throw new Error('Failed to fetch inquiries');
+
+        const data = await response.json();
+
+        // API 응답 형식에 맞게 수정 필요
+        setInquiries(data.content || []);
+        setTotalPages(data.totalPages || 1);
+      } catch (error) {
+        console.error('❌ 문의 조회 실패:', error);
+      }
+    };
+
+    fetchInquiries();
+  }, [currentPage]);
 
   return (
     <div className={styles.all}>
@@ -33,7 +63,7 @@ export default function EntireInquiry() {
             <div className={styles.inquiryContent}>
               <div className={styles.inquiryTitle}>1:1 문의내역</div>
               <div className={styles.inquirys}>
-                {currentInquiries.map((inquiry) => (
+                {inquiries.map((inquiry) => (
                   <div
                     key={inquiry.id}
                     className={styles.inquiry}
@@ -47,7 +77,7 @@ export default function EntireInquiry() {
                       <p>{inquiry.date}</p>
                       <Image
                         src='/Group 687rightarrow.png'
-                        alt='이전'
+                        alt='이동'
                         width={12}
                         height={12}
                       />

@@ -10,10 +10,16 @@ interface Zone {
 
 interface Venue {
   id: string;
-  name: string;
+  title: string;
   description: string;
-  capacity: number;
-  svgData?: string;
+  location: string;
+  thumbnailImage: string;
+  capacity: 'default' | 'small' | 'medium' | 'large' | 'xlarge';
+  venueType: 'indoor' | 'outdoor' | 'mixed';
+  floorCount: number;
+  estimatedSeats: number;
+  tags: string[];
+  svgData?: string | null;
   zones: Zone[];
   createdAt: string;
   updatedAt: string;
@@ -65,7 +71,7 @@ export const useVenueStore = create<VenueStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const response = await fetch('/api/admin/venues');
+      const response = await fetch('/admin/concert-halls');
       if (!response.ok) {
         throw new Error('공연장 목록을 불러올 수 없습니다.');
       }
@@ -87,10 +93,14 @@ export const useVenueStore = create<VenueStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const response = await fetch('/api/admin/venues', {
+      const baseUrl = process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL;
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch(`${baseUrl}/admin/concert-halls`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(venueData),
       });

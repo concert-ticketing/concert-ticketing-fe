@@ -6,50 +6,120 @@ import styles from './ContactWrite.module.css';
 
 const CustomerInquiryForm: React.FC = () => {
   const router = useRouter();
-  const [category, setCategory] = useState<string>('예매');
+  const [category, setCategory] = useState<string>('RESERVATION');
   const [title, setTitle] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [files, setFiles] = useState<FileList | null>(null);
-  const [phoneConsent, setPhoneConsent] = useState<boolean>(false);
-  const [smsConsent, setSmsConsent] = useState<boolean>(false);
-  const [notificationEmail, setNotificationEmail] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  // const [phoneConsent, setPhoneConsent] = useState<boolean>(false);
+  // const [smsConsent, setSmsConsent] = useState<boolean>(false);
+  // const [notificationEmail, setNotificationEmail] = useState<string>('');
+  // const [phoneNumber, setPhoneNumber] = useState<string>('');
 
-  const categories = ['예매', '상품', '배송', '취소', '결제/환불', '기타'];
+  const categories = [
+    { code: 'RESERVATION', label: '예매' },
+    { code: 'PRODUCT', label: '상품' },
+    { code: 'DELIVERY', label: '배송' },
+    { code: 'CANCELLATION', label: '취소' },
+    { code: 'USER_MANAGEMENT', label: '결제/환불' },
+    { code: 'ETC', label: '기타' },
+  ];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
   };
 
-  const handleSubmit = () => {
-    console.log('문의 제출:', {
-      category,
-      title,
-      content,
-      files,
-      phoneConsent,
-      smsConsent,
-      notificationEmail: phoneConsent ? notificationEmail : '',
-      phoneNumber: smsConsent ? phoneNumber : '',
-    });
+  const handleSubmit = async () => {
+    console.log('[handleSubmit] 제출 시도');
 
-    // ✅ 등록 후 이동
-    router.push('/mypage/inquiry');
+    // 필수 입력 검증
+    if (!title.trim() || !content.trim()) {
+      alert('제목과 내용을 모두 입력해주세요.');
+      console.warn('[handleSubmit] 제목 또는 내용 미입력');
+      return;
+    }
+
+    // if (!phoneConsent && !smsConsent) {
+    //   alert('답변 받을 수단을 최소 하나 이상 선택해주세요.');
+    //   console.warn('[handleSubmit] 알림 수단 미선택');
+    //   return;
+    // }
+
+    // if (phoneConsent && !notificationEmail.trim()) {
+    //   alert('이메일 알림을 선택하셨다면 이메일 주소를 입력해주세요.');
+    //   console.warn('[handleSubmit] 이메일 수신 동의했지만 이메일 주소 없음');
+    //   return;
+    // }
+
+    // if (smsConsent && !phoneNumber.trim()) {
+    //   alert('SMS 알림을 선택하셨다면 휴대폰 번호를 입력해주세요.');
+    //   console.warn('[handleSubmit] SMS 수신 동의했지만 휴대폰 번호 없음');
+    //   return;
+    // }
+
+    try {
+      const formData = new FormData();
+
+      const inquiry = {
+        title,
+        content,
+        type: category,
+      };
+
+      console.log('[handleSubmit] 문의 데이터:', inquiry);
+      formData.append(
+        'inquiry',
+        new Blob([JSON.stringify(inquiry)], { type: 'application/json' }),
+      );
+
+      if (files) {
+        Array.from(files).forEach((file) => {
+          formData.append('files', file);
+          console.log('[handleSubmit] 첨부파일 추가:', file.name);
+        });
+      }
+
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL}/api/inquiries`;
+      console.log('[handleSubmit] API 요청 URL:', apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      console.log('[handleSubmit] 응답 상태코드:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('[handleSubmit] 등록 실패:', errorData);
+        alert(`등록에 실패했습니다: ${errorData.message || '오류 발생'}`);
+        return;
+      }
+
+      alert('문의가 성공적으로 등록되었습니다.');
+      console.log('[handleSubmit] 문의 등록 성공 - 리디렉션');
+      router.push('/mypage/inquiry');
+    } catch (error) {
+      console.error('[handleSubmit] 서버 오류:', error);
+      alert('서버 요청 중 오류가 발생했습니다.');
+    }
   };
 
   const handleCancel = () => {
     console.log('취소');
   };
 
-  const handlePhoneConsentChange = (checked: boolean) => {
-    setPhoneConsent(checked);
-    if (!checked) setNotificationEmail('');
-  };
+  // const handlePhoneConsentChange = (checked: boolean) => {
+  //   setPhoneConsent(checked);
+  //   if (!checked) setNotificationEmail('');
+  // };
 
-  const handleSmsConsentChange = (checked: boolean) => {
-    setSmsConsent(checked);
-    if (!checked) setPhoneNumber('');
-  };
+  // const handleSmsConsentChange = (checked: boolean) => {
+  //   setSmsConsent(checked);
+  //   if (!checked) setPhoneNumber('');
+  // };
 
   return (
     <div className={styles.container}>
@@ -69,8 +139,8 @@ const CustomerInquiryForm: React.FC = () => {
                   onChange={(e) => setCategory(e.target.value)}
                 >
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.code} value={cat.code}>
+                      {cat.label}
                     </option>
                   ))}
                 </select>
@@ -123,7 +193,7 @@ const CustomerInquiryForm: React.FC = () => {
                   </p>
                 </div>
               </div>
-
+              {/* 
               <div className={styles.formGroup}>
                 <label className={styles.label}>답변알림</label>
                 <div className={styles.checkboxGroup}>
@@ -171,7 +241,7 @@ const CustomerInquiryForm: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className={styles.privacySection}>
                 <h3 className={styles.privacyTitle}>(필수)개인정보 수집 및 이용 동의</h3>
@@ -197,7 +267,7 @@ const CustomerInquiryForm: React.FC = () => {
                 <button
                   className={styles.submitButton}
                   onClick={handleSubmit}
-                  disabled={!phoneConsent && !smsConsent}
+                  // disabled={!phoneConsent && !smsConsent}
                 >
                   등록
                 </button>

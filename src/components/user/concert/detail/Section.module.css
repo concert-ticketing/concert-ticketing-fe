@@ -74,3 +74,96 @@ background-color: #ddd;
 margin-top: 20px;
 padding:20px;
 }
+
+/* Section.module.css */
+.wrap {
+  border-top: 1px solid #999;
+  padding: 16px;
+  font-family: sans-serif;
+}
+
+.inputSection {
+  border: 1px solid #999;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 32px;
+}
+
+.starArray {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.star {
+  cursor: pointer;
+  color: #ccc;
+  margin-right: 4px;
+}
+
+.active {
+  color: #000;
+}
+
+.text {
+  width: 100%;
+  height: 100px;
+  padding: 12px;
+  font-size: 14px;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.count {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.registerBtn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reviewList {
+  border-top: 1px solid #aaa;
+}
+
+.reviewItem {
+  padding: 16px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reviewText {
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.reviewDate {
+  font-size: 12px;
+  color: #888;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.delteImage {
+  filter: grayscale(100%);
+}

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/site-admin/common/Header';
 import Nav from '@/components/site-admin/common/Nav';
+import Pagination from '@/components/user/common/Pagination';
 import styles from './InquiryList.module.css';
 
 interface InquiryItem {
@@ -18,44 +19,74 @@ interface InquiryItem {
   phoneNumber?: string;
 }
 
-const initialInquiries: InquiryItem[] = [
-  {
-    id: 1,
-    category: '예매',
-    title: '예매 취소 문의',
-    content: '예매한 공연을 취소하고 싶습니다. 어떻게 진행하면 되나요?',
-    status: '답변완료',
-    createdAt: '2025-07-15',
-    answer:
-      '안녕하세요. 예매 취소는 마이페이지 > 예매내역에서 직접 취소하실 수 있습니다. 공연 3일 전까지 취소 가능하며, 취소 수수료는 예매 금액의 10%입니다.',
-    answeredAt: '2025-07-16',
-    notificationEmail: 'user@example.com',
-  },
-  {
-    id: 2,
-    category: '배송',
-    title: '상품 배송 지연 문의',
-    content: '주문한 상품이 배송예정일이 지났는데 아직 도착하지 않았습니다.',
-    status: '답변대기',
-    createdAt: '2025-07-17',
-    phoneNumber: '010-1234-5678',
-  },
-  {
-    id: 3,
-    category: '결제/환불',
-    title: '환불 처리 문의',
-    content: '공연 취소로 인한 환불이 언제 처리되나요?',
-    status: '답변대기',
-    createdAt: '2025-07-18',
-    notificationEmail: 'customer@example.com',
-  },
-];
+const mapTypeToCategory = (type: string): string => {
+  switch (type) {
+    case 'RESERVATION':
+      return '예매';
+    case 'DELIVERY':
+      return '배송';
+    case 'REFUND':
+      return '결제/환불';
+    default:
+      return '기타';
+  }
+};
 
 const InquiryListPage: React.FC = () => {
   const router = useRouter();
-  const [inquiries, setInquiries] = useState<InquiryItem[]>(initialInquiries);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 5;
+  const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
   const [selectedInquiry, setSelectedInquiry] = useState<InquiryItem | null>(null);
-  //   const [answerContent, setAnswerContent] = useState('');
+
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(
+          `http://localhost:8080/api/admin/inquiries?page=${currentPage}&size=${pageSize}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/json',
+            },
+          },
+        );
+
+        if (!res.ok) throw new Error('❌ 문의 목록 불러오기 실패');
+
+        const responseJson = await res.json();
+        console.log('📦 서버 응답:', responseJson);
+
+        const data = responseJson.content;
+
+        if (!Array.isArray(data)) {
+          throw new Error('❌ 문의 목록 데이터 형식이 잘못되었습니다.');
+        }
+
+        const mappedData: InquiryItem[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          content: item.content,
+          category: mapTypeToCategory(item.type),
+          status: item.status === 'COMPLETED' ? '답변완료' : '답변대기',
+          createdAt: item.createdAt.split('T')[0],
+          answer: item.replyContent || '',
+          answeredAt: item.repliedAt?.split('T')[0] || '',
+          notificationEmail: item.userEmail || '',
+          phoneNumber: '',
+        }));
+
+        setInquiries(mappedData);
+        setTotalPages(responseJson.totalPages || 1);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchInquiries();
+  }, [currentPage]);
 
   // 문의 상세 보기
   const handleViewInquiry = (inquiry: InquiryItem) => {
@@ -90,9 +121,6 @@ const InquiryListPage: React.FC = () => {
             {inquiries.length === 0 ? (
               <div className={styles.emptyState}>
                 <p>등록된 문의가 없습니다.</p>
-                <button className={styles.emptyWriteButton} onClick={handleWriteInquiry}>
-                  첫 번째 문의 작성하기
-                </button>
               </div>
             ) : (
               inquiries.map((inquiry) => (
@@ -133,7 +161,11 @@ const InquiryListPage: React.FC = () => {
               ))
             )}
           </div>
-
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
           {/* 문의 상세 모달 */}
           {selectedInquiry && (
             <div className={styles.modal}>

@@ -92,12 +92,24 @@ export default function SignupForm() {
 
     if (!validate()) return;
 
+    const payload = {
+      name: form.name,
+      gender: form.gender === 'male' ? 'MAN' : 'WOMAN',
+      email: form.email,
+      nickName: form.nickname,
+      phone: form.phone,
+      birthday: form.birthday,
+    };
+
     try {
-      const res = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL}/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
 
       if (res.ok) {
         alert('회원가입 성공!');

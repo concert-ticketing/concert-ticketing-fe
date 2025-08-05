@@ -1,23 +1,52 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/site-admin/common/Header';
 import Nav from '@/components/site-admin/common/Nav';
 import pageStyles from './NoticeList.module.css';
 import Pagination from '@/components/user/common/Pagination';
 
-const initialNotices = [
-  { id: 1, title: '여름 이벤트', status: '노출', createdAt: '2025-07-10' },
-  { id: 2, title: '가을 할인전', status: '비노출', createdAt: '2025-06-05' },
-  { id: 3, title: '겨울 시즌 안내', status: '노출', createdAt: '2025-05-30' },
-  { id: 4, title: '공지사항 테스트', status: '비노출', createdAt: '2025-05-15' },
-  { id: 5, title: '시스템 점검 안내', status: '노출', createdAt: '2025-04-22' },
-];
-
 const inquiriesPerPage = 5;
 
 const NoticeListPage = () => {
-  const [notices, setNotices] = useState(initialNotices);
+  const [notices, setNotices] = useState<
+    { id: number; title: string; status: string; createdAt: string }[]
+  >([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          alert('로그인이 필요합니다.');
+          return;
+        }
+
+        const res = await fetch('http://localhost:8080/api/notices', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: '*/*',
+          },
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(`공지사항 불러오기 실패: ${errorData.message || '오류 발생'}`);
+          return;
+        }
+
+        const data = await res.json();
+        // data가 배열이라고 가정, 실제 API 구조에 맞게 조정 필요
+        setNotices(data);
+      } catch (error) {
+        console.error('공지사항 조회 중 오류:', error);
+        alert('공지사항을 불러오는 중 오류가 발생했습니다.');
+      }
+    };
+
+    fetchNotices();
+  }, []);
 
   const indexOfLast = currentPage * inquiriesPerPage;
   const indexOfFirst = indexOfLast - inquiriesPerPage;
@@ -54,37 +83,38 @@ const NoticeListPage = () => {
               </tr>
             </thead>
             <tbody>
-              {currentNotices.map((notice) => (
-                <tr key={notice.id}>
-                  <td>{notice.title}</td>
-                  <td>{notice.createdAt}</td>
-                  <td>{notice.status}</td>
+              {currentNotices.length > 0 ? (
+                currentNotices.map((notice) => (
+                  <tr key={notice.id}>
+                    <td>{notice.title}</td>
+                    <td>{notice.createdAt}</td>
+                    <td>{notice.status}</td>
 
-                  <td>
-                    <Link
-                      href={{
-                        pathname: `/site-admin/notice/${notice.id}`,
-                        query: {
-                          title: notice.title,
-                          status: notice.status,
-                        },
-                      }}
-                      className={pageStyles.editBtn}
-                    >
-                      수정
-                    </Link>
-                    <button
-                      className={pageStyles.deleteBtn}
-                      onClick={() => handleDelete(notice.id)}
-                    >
-                      삭제
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {notices.length === 0 && (
+                    <td>
+                      <Link
+                        href={{
+                          pathname: `/site-admin/notice/${notice.id}`,
+                          query: {
+                            title: notice.title,
+                            status: notice.status,
+                          },
+                        }}
+                        className={pageStyles.editBtn}
+                      >
+                        수정
+                      </Link>
+                      <button
+                        className={pageStyles.deleteBtn}
+                        onClick={() => handleDelete(notice.id)}
+                      >
+                        삭제
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={3} style={{ textAlign: 'center' }}>
+                  <td colSpan={4} style={{ textAlign: 'center' }}>
                     등록된 공지사항이 없습니다.
                   </td>
                 </tr>

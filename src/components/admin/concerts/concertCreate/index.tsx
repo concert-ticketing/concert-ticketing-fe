@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
-
+import { useVenueStore } from '@/stores/venue';
 import styles from './concertCreate.module.css';
 import PostcodeModal from './PostcodeModal';
 
@@ -41,6 +41,7 @@ interface FormErrors {
 
 export default function ConcertCreate() {
   const router = useRouter();
+  const createVenue = useVenueStore((state) => state.createVenue);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPostcodeModal, setShowPostcodeModal] = useState(false);
@@ -226,40 +227,30 @@ export default function ConcertCreate() {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
-      const postData = {
+      const newVenue = await createVenue({
         title: formData.title,
-        description: formData.description,
         location: formData.location,
-        location_x: formData.location_x,
-        location_y: formData.location_y,
-        start_date: formData.start_date,
-        end_date: formData.end_date,
-        thumbnail_image: formData.thumbnail_image,
-        svg_content: formData.svg_content,
-        schedules: formData.schedules,
-        created_at: new Date().toISOString(),
-        id: `concert_${Date.now()}`,
-      };
-      console.log('전체 POST 데이터:', postData);
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1500);
+        description: formData.description,
+        thumbnailImage: formData.thumbnailImage ?? '',
+        tags: formData.tags,
+        floorCount: formData.floorCount,
+        estimatedSeats: formData.estimatedSeats,
+        venueType: formData.venueType,
+        capacity: formData.capacity,
+        svgData: '',
+        zones: [],
       });
 
-      console.log('콘서트 생성 완료!');
-
-      // 성공 시 목록 페이지로 이동
-      router.push('/admin/concerts');
+      console.log('✅ 공연장 생성 성공:', newVenue);
+      router.push('/admin/venues');
     } catch (error) {
-      console.error('콘서트 생성 실패:', error);
-      alert('콘서트 생성에 실패했습니다. 다시 시도해주세요.');
+      console.error('❌ 공연장 생성 실패:', error);
+      alert('공연장 생성 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
